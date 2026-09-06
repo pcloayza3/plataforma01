@@ -12,3 +12,4 @@ Thumbs.db
 .venv
 env/
 venv/
+backend/node_modules/

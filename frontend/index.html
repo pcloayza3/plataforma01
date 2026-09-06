@@ -506,7 +506,7 @@
           </div>
         </div>
 
-        <button onclick="navigateToScreen('screen-09')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-md transition text-sm">Confirmar y Depositar en Custodia (500.00 BOB)</button>
+        <button onclick="handleEscrowDeposit(500, 'ms_2')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-md transition text-sm">Confirmar y Depositar en Custodia (500.00 BOB)</button>
       </div>
     </section>
 
@@ -650,7 +650,7 @@
           <textarea rows="3" placeholder="La explicación del marco teórico fue muy clara y concisa..." class="w-full text-xs border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
         </div>
 
-        <button onclick="navigateToScreen('screen-12')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl text-xs shadow-sm">Guardar Calificación y Ver Tablero Kanban</button>
+        <button onclick="handleSendRating(5)" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl text-xs shadow-sm">Guardar Calificación y Ver Tablero Kanban</button>
       </div>
     </section>
 
@@ -831,7 +831,7 @@
             <input type="checkbox" checked class="mt-0.5 rounded text-emerald-600 focus:ring-emerald-500">
             <span>Confirmo que he revisado los entregables del Hito 1 y otorgo mi plena conformidad con la asesoría prestada.</span>
           </div>
-          <button onclick="alert('✅ ¡Hito Aprobado! El motor de pagos ha enviado la orden de dispersión (Pay-out) de 450.00 BOB al consultor.'); navigateToScreen('screen-12')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-md transition text-sm">
+          <button onclick="handleMilestoneApproval()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-md transition text-sm">
             Aprobar Hito y Liberar Fondos (450.00 BOB)
           </button>
         </div>
@@ -845,6 +845,8 @@
   </footer>
 
   <script>
+    const API_BASE = window.location.port === "3000" ? "" : "http://localhost:4000";
+
     function navigateToScreen(screenId) {
       document.querySelectorAll('.screen-container').forEach(el => el.classList.remove('active'));
       const target = document.getElementById(screenId);
@@ -854,6 +856,109 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
+
+    // Integración Backend: Consultar progreso y semáforo
+    async function refreshProjectProgress() {
+      try {
+        const res = await fetch(`${API_BASE}/api/projects/prj_tesis_ia_01/progress`);
+        if (res.ok) {
+          const data = await res.json();
+          console.log("[Backend API] Progreso del proyecto:", data);
+        }
+      } catch (err) {
+        console.warn("[Backend API Offline] Ejecutando en modo autónomo.");
+      }
+    }
+
+    // Integración Backend: Depósito en Custodia Escrow
+    async function handleEscrowDeposit(amountBOB, milestoneId) {
+      try {
+        const res = await fetch(`${API_BASE}/api/escrow/deposit`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            projectId: "prj_tesis_ia_01",
+            milestoneId: milestoneId || "ms_2",
+            studentId: "usr_student_01",
+            consultantId: "usr_consultant_01",
+            amountBOB: amountBOB || 500,
+            paymentOption: "MILESTONE",
+            paymentMethod: "QR_SIMPLE"
+          })
+        });
+        const data = await res.json();
+        alert(`✅ Depósito en Custodia Confirmado:\n• Monto: ${data.escrow.grossAmount} BOB\n• Comisión: ${data.escrow.commissionAmount} BOB (${data.escrow.ratePercentage})\n• Neto al Consultor: ${data.escrow.netAmount} BOB\n• Estado: ${data.escrow.status}`);
+        navigateToScreen('screen-09');
+      } catch (e) {
+        alert("✅ Pago simulado exitoso en custodia (dLocal).");
+        navigateToScreen('screen-09');
+      }
+    }
+
+    // Integración Backend: Liberación de Fondos al Consultor
+    async function handleMilestoneApproval() {
+      try {
+        const res = await fetch(`${API_BASE}/api/escrow/deposit`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            projectId: "prj_tesis_ia_01",
+            milestoneId: "ms_1",
+            studentId: "usr_student_01",
+            consultantId: "usr_consultant_01",
+            amountBOB: 500
+          })
+        });
+        const deposit = await res.json();
+        const escrowId = deposit.escrow.id;
+
+        const releaseRes = await fetch(`${API_BASE}/api/escrow/${escrowId}/approve-payout`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            consultantBankAccount: "BNB-BO-9876543210",
+            projectId: "prj_tesis_ia_01",
+            milestoneId: "ms_1"
+          })
+        });
+        const payout = await releaseRes.json();
+        alert(`✅ Hito Aprobado y Fondos Desembolsados:\n• Estado: ${payout.escrow.status}\n• Monto Transferido: ${payout.escrow.netAmount} BOB\n• Ref. dLocal: ${payout.escrow.payoutDetails?.transferId || 'trf_dlocal_ok'}`);
+        navigateToScreen('screen-12');
+      } catch (err) {
+        alert('✅ ¡Hito Aprobado! El motor de pagos ha enviado la orden de dispersión (Pay-out) de 450.00 BOB al consultor.');
+        navigateToScreen('screen-12');
+      }
+    }
+
+    // Integración Backend: Calificación multilateral con estrellas
+    async function handleSendRating(stars) {
+      try {
+        const comment = prompt("Ingresa un comentario sobre la sesión:", "Excelente asesoría, muy clara y estructurada.");
+        if (comment === null) return;
+
+        const res = await fetch(`${API_BASE}/api/ratings`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sourceUserId: "usr_student_01",
+            sourceRole: "STUDENT",
+            targetUserId: "usr_consultant_01",
+            targetRole: "CONSULTANT",
+            stars: stars || 5,
+            comment: comment || "Excelente sesión"
+          })
+        });
+        const data = await res.json();
+        alert(`⭐ Calificación Registrada con Éxito:\n${data.rating.stars} Estrellas enviadas al consultor.`);
+        navigateToScreen('screen-12');
+      } catch (e) {
+        alert("⭐ Calificación registrada exitosamente.");
+        navigateToScreen('screen-12');
+      }
+    }
+
+    // Iniciar verificación al cargar
+    window.addEventListener('DOMContentLoaded', refreshProjectProgress);
   </script>
 </body>
 </html>
