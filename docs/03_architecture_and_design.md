@@ -195,9 +195,28 @@ classDiagram
         +DateTime createdAt
     }
 
-    class TarjetaKanban {
+    class ProyectoAsesoria {
         +UUID id
         +String titulo
+        +Modalidad modalidad
+        +UUID estudianteId
+        +UUID consultorId
+        +UUID organizacionId
+        +Decimal porcentajeAvanceGlobal
+        +EstadoProyecto estado
+    }
+
+    class TableroKanban {
+        +UUID id
+        +UUID proyectoId
+        +List~String~ columnas
+    }
+
+    class TarjetaKanban {
+        +UUID id
+        +UUID tableroId
+        +String titulo
+        +UUID responsableId
         +EstadoTarea estado
         +Decimal pesoPorcentual
         +SemaforoAvance semaforoEstudiante
@@ -209,7 +228,13 @@ classDiagram
     Usuario "1" -- "0..1" PerfilEstudiante
     Usuario "1" -- "0..1" PerfilOrganizacion
     Usuario "1" -- "many" CalificacionEstrellas : emite
-    TarjetaKanban "many" -- "1" ProyectoAsesoria
+    
+    PerfilEstudiante "1" -- "many" ProyectoAsesoria : solicita
+    CurriculumConsultor "1" -- "many" ProyectoAsesoria : asesora
+    PerfilOrganizacion "0..1" -- "many" ProyectoAsesoria : auspicia
+    
+    ProyectoAsesoria "1" *-- "1" TableroKanban : gestiona
+    TableroKanban "1" *-- "many" TarjetaKanban : organiza
 ```
 
 ---
