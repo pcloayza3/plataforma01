@@ -88,8 +88,8 @@ graph TB
     PROJ --> DB_MG
     CHALL --> DB_MG
     
-    AUTH -.->|Presigned URLs (Avatares/Logos)| R2_STORE
-    PROJ -.->|Presigned URLs (Docs)| R2_STORE
+    AUTH -.->|Presigned URLs - Avatares y Logos| R2_STORE
+    PROJ -.->|Presigned URLs - Documentos| R2_STORE
     PAY -.->|REST API| DL_EXT["💳 dLocal API"]
     MATCH -.->|REST API / Webhooks| WB_EXT["📹 Whereby API"]
 ```
