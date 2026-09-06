@@ -323,6 +323,99 @@ sequenceDiagram
 
 ---
 
+### 3.5 Diagrama de Secuencia End-to-End: Ciclo de Vida Completo de la Asesoría
+Ilustra el flujo integral desde la búsqueda inicial hasta el pago en cada hito completado:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor E as 🎓 Estudiante
+    actor C as 👨‍🏫 Consultor
+    participant PWA as 📱 PWA Frontend
+    participant GW as 🚪 API Gateway
+    participant AUTH as 🔑 User & Profile Service
+    participant MATCH as 📅 Matching & Scheduling
+    participant PAY as 💰 Payment & Escrow Service
+    participant PROJ as 📊 Kanban & Document Service
+    participant DL as 💳 dLocal API
+    participant WB as 📹 Whereby API
+    participant R2 as 🗄️ Cloudflare R2
+
+    %% 1. Búsqueda y Enlace
+    rect rgb(240, 248, 255)
+    Note over E,AUTH: 1. Búsqueda y Enlace
+    E->>PWA: Buscar consultores (Área, Carrera, Calificación)
+    PWA->>GW: GET /api/v1/consultants?area=Ingenieria&minRating=4.5
+    GW->>AUTH: Consultar CVs estructurados (Sin enlaces externos)
+    AUTH-->>PWA: Lista de perfiles con fotos y estrellas
+    E->>PWA: Selecciona consultor y solicita asesoría para TFG
+    PWA->>GW: POST /api/v1/projects/request (estudianteId, consultorId, modalidad)
+    GW->>PROJ: Crear ProyectoAsesoria + TableroKanban inicial
+    PROJ-->>C: Notificar propuesta de asesoría e hitos
+    C->>PWA: Acepta asesoría y confirma hitos acordados
+    end
+
+    %% 2. Pago en Custodia (Escrow Pay-In por Hito)
+    rect rgb(255, 250, 240)
+    Note over E,DL: 2. Pago en Custodia del Hito 1
+    E->>PWA: Pagar Hito 1 (ej. 500 BOB) en moneda local
+    PWA->>GW: POST /api/v1/payments/escrow/init
+    GW->>PAY: Procesar cobro con dLocal for Platforms
+    PAY->>PAY: Aplicar comisión dinámica (10% si >= 300 BOB, 15% si < 300 BOB)
+    PAY->>DL: POST /v1/payments (monto: 500 BOB, método local)
+    DL-->>E: Redirección / Confirmación de cobro exitoso
+    DL-)PAY: Webhook: PAYMENT_CONFIRMED
+    PAY->>PAY: Registrar TransaccionEscrow en estado EN_CUSTODIA
+    PAY-)PROJ: Evento: HitoPagadoEvent (Habilitar agenda y tareas)
+    end
+
+    %% 3. Videollamada y Pizarra Interactiva
+    rect rgb(245, 255, 250)
+    Note over E,WB: 3. Sesión de Videollamada (60 min)
+    E->>PWA: Reservar fecha/hora de sesión según disponibilidad
+    PWA->>GW: POST /api/v1/sessions/book
+    GW->>MATCH: Agendar y normalizar husos horarios a UTC
+    MATCH->>WB: POST /v1/meetings (roomDuration: 60m, aiTranscription: true)
+    WB-->>MATCH: Return roomUrl efímera + embed Miro canvas
+    MATCH-->>PWA: Sala lista para Estudiante y Consultor
+    Note over E,C: Realizan videollamada de 60 min en Whereby con pizarra Miro
+    WB-)MATCH: Webhook: Sesión concluida + Resumen transcripción IA
+    MATCH->>PROJ: Adjuntar acta IA de sesión a la tarjeta del hito
+    E->>PWA: Calificar al Consultor (1..5 ⭐)
+    C->>PWA: Calificar al Estudiante (1..5 ⭐)
+    end
+
+    %% 4. Trabajo, Seguimiento y Entrega en Kanban
+    rect rgb(255, 245, 245)
+    Note over E,R2: 4. Seguimiento de Tarea y Entrega Documental
+    PROJ->>PWA: Mostrar Kanban con Semáforo de Avance (A tiempo / Trabajando)
+    E->>PWA: Solicitar subida de documento (Tesis borrador .docx / .pdf)
+    PWA->>GW: POST /api/v1/documents/presigned-url
+    GW->>PROJ: Validar tipo MIME ofimático y cuota máx 25 MB
+    PROJ->>R2: Generar Presigned PUT URL
+    R2-->>PWA: Presigned URL temporal (15 min)
+    PWA->>R2: PUT binario directo del archivo
+    E->>PWA: Mover tarjeta Kanban a "En Revisión"
+    C->>PWA: Revisa documento, registra feedback y marca "Conforme"
+    end
+
+    %% 5. Aprobación y Dispersión (Pay-Out por Hito)
+    rect rgb(240, 255, 240)
+    Note over E,C: 5. Aprobación del Hito y Pago al Consultor
+    E->>PWA: Clic en "Aprobar Hito 1"
+    PWA->>GW: POST /api/v1/projects/{id}/milestones/1/approve
+    GW->>PROJ: Marcar Tarjeta Kanban como "Completada"
+    PROJ->>PROJ: Recalcular Porcentaje de Avance Global (ej. 25% completado)
+    PROJ->>PAY: Evento: LiberarFondosHitoEvent (montoNeto: 450 BOB)
+    PAY->>DL: POST /v1/payouts (montoNeto: 450 BOB, cuentaConsultor)
+    DL-->>C: Acreditación bancaria en moneda local
+    PAY->>PAY: Actualizar TransaccionEscrow a LIQUIDADO_AL_CONSULTOR
+    PWA-->>E: Hito 1 finalizado con éxito. Habilitar Hito 2.
+    end
+```
+
+---
+
 ## 4. Patrones de Arquitectura y Diseño Aplicados
 
 | Patrón | Capa / Módulo | Justificación Técnica |
