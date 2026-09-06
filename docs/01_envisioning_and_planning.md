@@ -2,9 +2,14 @@
 
 ## 1. Declaración de Visión
 * **Producto:** Plataforma Global de Intermediación Académica y Profesional (`plataforma01`).
-* **Visión General:** Ecosistema digital que conecta a estudiantes universitarios en fase de Trabajo Final de Grado (TFG), consultores expertos para asesorías metodológicas y empresas interesadas en innovación abierta y captación de talento temprano (*pre-hiring*), con foco operativo inicial en Sudamérica y proyección global.
+* **Visión General:** Ecosistema digital integral y multi-disciplinario que conecta a estudiantes y egresados con consultores expertos y empresas, adaptándose a las necesidades cambiantes de la comunidad, la sociedad y el mercado laboral global. La plataforma intermedia:
+  1. **Trabajos Finales de Grado (TFG / Tesis) de Pregrado.**
+  2. **Tesis y Proyectos de Posgrado (Especialidades, Maestrías y Doctorados).**
+  3. **Prácticas Profesionales y Pasantías de Pregrado.**
+  4. **Retos de Innovación Abierta y Captación de Talento Temprano (*Pre-hiring*).**
+* **Alcance Institucional y Disciplinario:** Abierto a **todas las carreras universitarias e institutos técnicos/tecnológicos**, sin restricciones disciplinares ni geográficas.
 * **Declaración del Problema:**
-  > Los estudiantes universitarios carecen de orientación experta accesible y vinculación con el sector productivo real para sus tesis; paralelamente, los consultores en mercados emergentes enfrentan severas barreras de bancarización y recepción de pagos transfronterizos, y las empresas asumen altos costos en captación de talento e investigación sin acceso directo a la producción académica universitaria.
+  > Estudiantes de universidades e institutos (pregrado y posgrado) carecen de orientación metodológica especializada y de conexiones reales con el sector productivo para sus proyectos de titulación y prácticas profesionales; paralelamente, consultores y profesionales en mercados emergentes enfrentan severas barreras de monetización y bancarización transfronteriza, y las empresas asumen elevados costos en captación de talento temprano y resolución de retos operativos sin acceso directo al ecosistema académico.
 
 ---
 
@@ -12,47 +17,46 @@
 
 | Actor | Perfil / Rol | Necesidad Principal | Dolor Actual |
 | :--- | :--- | :--- | :--- |
-| **Estudiante** | Tesista universitario de pregrado o posgrado. | Asesoría metodológica continua, pagos locales protegidos y temas de tesis aplicados al mercado. | Deserción por trabas metodológicas, falta de medios de pago en moneda local y aislamiento laboral. |
-| **Consultor / Experto** | Profesional con experiencia académica o de industria. | Monetizar tiempo en asesorías especializadas con cobros asegurados en su moneda local. | Dificultad para recibir giros internacionales, altas comisiones bancarias e incertidumbre de cobro. |
-| **Empresa** | Startups, PyMEs y corporaciones con retos técnicos. | Resolver problemas reales y evaluar talento antes de contratación. | Procesos de contratación lentos y costosos; poca conexión con universidades. |
-| **Administrador** | Equipo de operaciones y finanzas de la plataforma. | Monitorear transacciones, dispersión de fondos (*payouts*), disputas y comisiones. | Fricción cambiaria, cumplimiento regulatorio y riesgo de desintermediación. |
+| **Estudiante / Practicante (Pregrado)** | Alumnos de universidades e institutos en etapa de titulación o pasantías. | Asesoría metodológica, vinculación para prácticas profesionales y temas aplicados. | Falta de convenios empresariales, desorientación en el TFG y aislamiento laboral. |
+| **Investigador / Egresado (Posgrado)** | Profesionales cursando especialidades, maestrías o doctorados. | Asesoría técnica/científica avanzada, revisión de pares y validación metodológica. | Escasez de mentores hiperespecializados y tiempos de revisión dilatados. |
+| **Consultor / Experto** | Docentes, investigadores y profesionales de la industria de diversas ramas. | Monetizar experiencia ofreciendo mentorías y tutorías con cobros asegurados en moneda local. | Dificultad para recibir pagos transfronterizos, altas comisiones y riesgo de impago. |
+| **Empresa / Institución** | Startups, PyMEs y corporaciones con proyectos y plazas de pasantía. | Publicar retos técnicos, captar practicantes calificados y evaluar talento pre-hiring. | Procesos lentos y costosos de selección temprana; brecha entre la academia y la industria. |
+| **Administrador** | Equipo de operaciones, finanzas y gobernanza de la plataforma. | Monitorear la calidad del servicio, dispersión de fondos (*payouts*), disputas y cumplimiento legal. | Riesgo de desintermediación, fricción cambiaria y cumplimiento normativo. |
 
 ---
 
 ## 3. Propuesta de Valor y Modelo Financiero
 
-* **Propuesta de Valor:**
-  * **Estudiantes:** Asesorías estructuradas por hitos, custodia segura de fondos (*escrow*) y medios de pago locales (tarjetas, transferencias bancarias locales y pagos en efectivo/QR).
-  * **Consultores:** Garantía de cobro en moneda local mediante retención previa del pago y tarifas estructuradas.
-  * **Empresas:** Banco de retos de innovación abierta con acceso prioritario al talento ejecutor de las soluciones.
+* **Propuesta de Valor Multidimensional:**
+  * **Estudiantes (Pregrado y Posgrado):** Asesorías estructuradas por hitos, custodia segura de fondos (*escrow*), acceso a prácticas profesionales y medios de pago en moneda local (tarjetas, transferencias bancarias y códigos QR).
+  * **Consultores:** Garantía de liquidación en moneda local mediante retención previa del pago y tarifas estructuradas según nivel de experticia.
+  * **Empresas:** Canal directo de talento calificado (practicantes y tesistas de pregrado/posgrado) y resolución de desafíos de innovación abierta a bajo costo.
 
 * **Modelo Financiero y Política de Comisiones Dinámicas:**
   * **Micropagos (< 300 BOB):** Comisión de la plataforma del **15%** por transacción.
   * **Transacciones Estándar (≥ 300 BOB):** Comisión de la plataforma del **10%** por transacción.
-  * **Dispersión:** El monto neto restante se transfiere al consultor una vez validado y aprobado el hito por el estudiante.
+  * **Dispersión:** Liquidación al consultor tras la aprobación expresa del entregable/hito por parte del estudiante o la empresa solicitante.
 
 * **Estructura Legal y Blindaje:**
   * **Entidad Operadora:** Empresa constituida bajo el marco legal de Estados Unidos (LLC).
-  * **Contratos:** Cesión de Propiedad Intelectual (PI) entre estudiantes, empresas y consultores.
-  * **Prevención de Desintermediación:** Cláusulas de exclusividad transaccional dentro de la plataforma en Términos y Condiciones.
+  * **Contratos:** Cesión y licenciamiento de Propiedad Intelectual (PI), acuerdos de confidencialidad (NDA) para pasantías y cláusulas anti-desintermediación en Términos y Condiciones.
 
 ---
 
 ## 4. Alcance Técnico y Arquitectura de la Solución
 
-* **Punto de Partida del Repositorio:** Desarrollo directo del núcleo de software (PWA y microservicios prioritarios), permitiendo validar flujos en paralelo.
+* **Diseño Extensible y Agnóstico al Dominio:** La plataforma y sus esquemas de base de datos se modelan con tipificación dinámica (`modality`: `thesis_undergrad`, `thesis_postgrad`, `internship_practice`) y taxonomía abierta de áreas de conocimiento y carreras.
 * **Frontend (Capa de Interfaz):**
   * Progressive Web App (PWA) construida sobre Next.js / React.
-  * Instalable en escritorio y dispositivos móviles sin costos de tiendas de aplicaciones.
-  * Soporte offline básico y notificaciones push web para avisos de sesiones y estados de pago.
+  * Instalable en escritorio y dispositivos móviles, con notificaciones push web y soporte offline básico.
 * **Backend (Arquitectura de Microservicios Desacoplados):**
-  1. `auth-service`: Autenticación centralizada, JWT, gestión de roles (Estudiante, Consultor, Empresa, Admin).
-  2. `matching-scheduling-service`: Disponibilidad horaria, normalización de husos horarios y agenda de sesiones.
-  3. `payment-escrow-service`: Motor de custodia (*escrow*), cálculo dinámico de comisiones (15% < 300 BOB / 10% ≥ 300 BOB) y gestión de dispersión. Integración mediante **dLocal for Platforms** para soportar cobros locales (*pay-ins*) y dispersión de fondos (*pay-outs*) en Sudamérica operando desde la entidad legal estadounidense. Diseñado bajo el patrón **Gateway / Adapter**.
-  4. `challenge-project-service`: Catálogo de retos empresariales y vinculación con entregables de tesis.
+  1. `auth-service`: Autenticación, JWT, roles y perfiles multinivel (Estudiante Pregrado, Posgrado, Consultor, Empresa, Admin).
+  2. `matching-scheduling-service`: Emparejamiento por área de conocimiento, nivel académico, disponibilidad horaria y agenda de sesiones/entrevistas de pasantía.
+  3. `payment-escrow-service`: Motor de custodia (*escrow*), comisiones dinámicas (15% < 300 BOB / 10% ≥ 300 BOB) e integración con **dLocal for Platforms** (*pay-ins* locales y *pay-outs* en Sudamérica).
+  4. `challenge-project-service`: Publicación y postulación a retos de innovación, plazas de prácticas profesionales y vinculación de entregables académicos.
 * **Almacenamiento y Persistencia:**
-  * **Bases de Datos:** PostgreSQL para usuarios, transacciones contables y estados de escrow; MongoDB / Documental para bitácoras y catálogos dinámicos.
-  * **Almacenamiento de Archivos (Tesis y Retos):** Arquitectura compatible con el estándar S3 API, utilizando **Cloudflare R2** en etapa inicial (10 GB gratuitos y $0 en egress/transferencia) con portabilidad garantizada a **Google Cloud Storage** o **AWS S3**.
+  * **Bases de Datos:** PostgreSQL para usuarios, transacciones contables y estados de escrow; MongoDB / Documental para bitácoras, currículums, propuestas y catálogos de retos.
+  * **Almacenamiento de Archivos (Tesis, Informes y Portafolios):** API estándar S3 sobre **Cloudflare R2** (10 GB gratis y $0 egress), con portabilidad a **Google Cloud Storage** o **AWS S3**.
 
 ---
 
