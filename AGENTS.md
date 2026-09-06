@@ -11,7 +11,11 @@ Este archivo establece las reglas universales e inquebrantables para todos los a
   1. **Envisioning & Planning** (*Design Thinking*)
   2. **Análisis de Requisitos** (*IEEE 830 - SRS*)
   3. **Análisis y Diseño** (*C4 Model + ICONIX Process + Patrones*)
-  4. **Desarrollo e Implementación** (*Extreme Programming - XP / TDD*)
+  4. **Desarrollo e Implementación** (*Extreme Programming - XP / TDD*):
+     * **4.1. Definición y Aprobación del Stack Tecnológico:** Selección de tecnologías (Frontend, Backend, Conectores, BD, Storage). Requiere aprobación del usuario.
+     * **4.2. Definición y Maquetación de Pantallas del Flujo Completo:** Creación de todas las vistas/pantallas estáticas sin funcionalidad. Requiere aprobación del usuario.
+     * **4.3. Implementación Backend, Integración y Funcionalidad:** Desarrollo con TDD (Red-Green-Refactor) y Clean Architecture.
+     * **4.4. Contenerización y Ejecución Local:** Configuración con Docker y Docker Compose para despliegue local paso a paso.
   5. **Pruebas y Aseguramiento de Calidad** (*Testing sistemático*)
   6. **Despliegue y Mantenimiento** (*GitFlow & CI/CD*)
 

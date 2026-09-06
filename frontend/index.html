@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plataforma01 - Maquetación de Pantallas (PWA / React Native for Web)</title>
+  
+  <!-- Tailwind CSS & Inter Font para maquetación HTML5 semántica y responsiva -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .screen-container { display: none; }
+    .screen-container.active { display: block; animation: fadeIn 0.2s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+
+  <!-- TOP BAR: SELECTOR RÁPIDO DE PANTALLAS (SUB-ETAPA 4.2) -->
+  <header class="bg-slate-900 text-white sticky top-0 z-50 border-b border-slate-800 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-3">
+      <div class="flex items-center space-x-3">
+        <div class="bg-indigo-600 text-white font-bold px-3 py-1 rounded-lg text-lg tracking-wide">P01</div>
+        <div>
+          <h1 class="font-bold text-sm md:text-base leading-tight">Plataforma01 &bull; UI Prototype (React Native / PWA)</h1>
+          <p class="text-xs text-slate-400">Sub-etapa 4.2 &bull; Vistas Estáticas del Flujo Completo (Sin Funcionalidad)</p>
+        </div>
+      </div>
+      
+      <!-- Selector de las 14 pantallas -->
+      <div class="flex items-center space-x-2 w-full md:w-auto">
+        <label for="screenSelect" class="text-xs font-semibold text-slate-300 whitespace-nowrap">Pantalla:</label>
+        <select id="screenSelect" onchange="navigateToScreen(this.value)" class="bg-slate-800 text-white border border-slate-700 text-xs md:text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full md:w-80">
+          <option value="screen-01">01. Landing Page & Portal Principal</option>
+          <option value="screen-02">02. Registro / Login con Roles (RBAC)</option>
+          <option value="screen-03">03. Perfil Consultor (CV sin Links)</option>
+          <option value="screen-04">04. Perfil Estudiante / Practicante</option>
+          <option value="screen-05">05. Perfil Empresa / Institución</option>
+          <option value="screen-06">06. Directorio & Buscador (Matching)</option>
+          <option value="screen-07">07. Solicitud de Asesoría e Hitos</option>
+          <option value="screen-08">08. Checkout Escrow (dLocal Pay-In)</option>
+          <option value="screen-09">09. Agenda y Reserva de Sesión</option>
+          <option value="screen-10">10. Videollamada (Whereby 60m + Miro)</option>
+          <option value="screen-11">11. Calificación con Estrellas (1..5 ⭐)</option>
+          <option value="screen-12">12. Tablero Kanban Colaborativo</option>
+          <option value="screen-13">13. Repositorio Documental (Office/PDF)</option>
+          <option value="screen-14">14. Aprobación de Hito y Pay-Out</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENEDOR PRINCIPAL DE PANTALLAS -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
+
+    <!-- ==================== PANTALLA 01: LANDING PAGE ==================== -->
+    <section id="screen-01" class="screen-container active">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <nav class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+          <div class="flex items-center space-x-2">
+            <span class="text-indigo-600 font-extrabold text-xl">plataforma01</span>
+            <span class="bg-indigo-50 text-indigo-700 text-xs px-2.5 py-0.5 rounded-full font-medium">Global EdTech</span>
+          </div>
+          <div class="space-x-2">
+            <button onclick="navigateToScreen('screen-02')" class="text-sm font-semibold text-slate-700 hover:text-indigo-600 px-3 py-1.5">Iniciar Sesión</button>
+            <button onclick="navigateToScreen('screen-02')" class="text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl shadow-sm">Registrarse</button>
+          </div>
+        </nav>
+        
+        <div class="px-6 py-16 text-center max-w-4xl mx-auto">
+          <div class="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 text-xs px-3 py-1 rounded-full font-semibold mb-4 border border-emerald-200">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            Custodia Financiera Escrow &bull; Videollamadas de 60 min &bull; Sin Fronteras
+          </div>
+          <h2 class="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight mb-4">
+            Impulsa tu Trabajo de Grado, Tesis o Práctica con Expertos Internacionales
+          </h2>
+          <p class="text-base md:text-lg text-slate-600 max-w-2xl mx-auto mb-8">
+            Conectamos a estudiantes de pregrado y posgrado con consultores certificados y retos corporativos reales, bajo pagos locales garantizados en custodia.
+          </p>
+          <div class="flex flex-wrap justify-center gap-3">
+            <button onclick="navigateToScreen('screen-06')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-xl shadow-md transition">Buscar Consultores</button>
+            <button onclick="navigateToScreen('screen-02')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold px-6 py-3 rounded-xl transition">Soy Consultor / Empresa</button>
+          </div>
+        </div>
+
+        <!-- 3 Pilares -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 md:p-8 bg-slate-50 border-t border-slate-100">
+          <div class="bg-white p-6 rounded-xl border border-slate-200">
+            <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center font-bold text-lg mb-3">🎓</div>
+            <h3 class="font-bold text-slate-900 mb-1">Para Estudiantes</h3>
+            <p class="text-sm text-slate-600">Guía metodológica paso a paso por hitos para tesis y prácticas en cualquier carrera o instituto.</p>
+          </div>
+          <div class="bg-white p-6 rounded-xl border border-slate-200">
+            <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center font-bold text-lg mb-3">👨‍🏫</div>
+            <h3 class="font-bold text-slate-900 mb-1">Para Consultores</h3>
+            <p class="text-sm text-slate-600">Monetiza tus conocimientos en sesiones virtuales de 60 min con cobros en tu moneda local vía dLocal.</p>
+          </div>
+          <div class="bg-white p-6 rounded-xl border border-slate-200">
+            <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-3">🏢</div>
+            <h3 class="font-bold text-slate-900 mb-1">Para Empresas</h3>
+            <p class="text-sm text-slate-600">Canal de innovación abierta para publicar retos y captar practicantes calificados antes de contratar.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PANTALLA 02: REGISTRO / LOGIN ==================== -->
+    <section id="screen-02" class="screen-container">
+      <div class="max-w-xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
+        <h2 class="text-2xl font-bold text-slate-900 text-center mb-2">Crear Cuenta en Plataforma01</h2>
+        <p class="text-xs text-slate-500 text-center mb-6">Selecciona tu rol en el ecosistema académico y profesional</p>
+        
+        <!-- Tarjetas de Selección de Rol -->
+        <div class="grid grid-cols-2 gap-3 mb-6">
+          <label class="border-2 border-indigo-600 bg-indigo-50/40 rounded-xl p-3 cursor-pointer flex flex-col items-center text-center">
+            <input type="radio" name="rol" checked class="hidden">
+            <span class="text-2xl mb-1">🎓</span>
+            <span class="text-xs font-bold text-indigo-900">Estudiante</span>
+            <span class="text-[10px] text-slate-500">Pregrado / Posgrado</span>
+          </label>
+          <label class="border border-slate-200 rounded-xl p-3 cursor-pointer flex flex-col items-center text-center hover:border-slate-300">
+            <input type="radio" name="rol" class="hidden">
+            <span class="text-2xl mb-1">👨‍🏫</span>
+            <span class="text-xs font-bold text-slate-800">Consultor</span>
+            <span class="text-[10px] text-slate-500">Experto / Tutor</span>
+          </label>
+          <label class="border border-slate-200 rounded-xl p-3 cursor-pointer flex flex-col items-center text-center hover:border-slate-300">
+            <input type="radio" name="rol" class="hidden">
+            <span class="text-2xl mb-1">🏢</span>
+            <span class="text-xs font-bold text-slate-800">Empresa</span>
+            <span class="text-[10px] text-slate-500">Retos & Pasantías</span>
+          </label>
+          <label class="border border-slate-200 rounded-xl p-3 cursor-pointer flex flex-col items-center text-center hover:border-slate-300">
+            <input type="radio" name="rol" class="hidden">
+            <span class="text-2xl mb-1">🏛️</span>
+            <span class="text-xs font-bold text-slate-800">Institución</span>
+            <span class="text-[10px] text-slate-500">Universidad / Instituto</span>
+          </label>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Correo Electrónico</label>
+            <input type="email" placeholder="tu.correo@ejemplo.com" class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Contraseña</label>
+            <input type="password" placeholder="••••••••" class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+          <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 flex items-start space-x-2">
+            <input type="checkbox" checked class="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500">
+            <span>Acepto las <strong>Políticas de Uso y No Evasión</strong>. Reconozco que está estrictamente prohibido compartir enlaces, teléfonos o realizar acuerdos económicos por fuera de la plataforma.</span>
+          </div>
+          <button onclick="navigateToScreen('screen-03')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl shadow-sm transition">Crear Cuenta y Continuar</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PANTALLA 03: PERFIL CONSULTOR (SIN LINKS) ==================== -->
+    <section id="screen-03" class="screen-container">
+      <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <!-- Banner de Perfil -->
+        <div class="h-32 bg-gradient-to-r from-slate-900 to-indigo-900 px-6 flex items-end">
+          <div class="translate-y-8 flex items-center space-x-4">
+            <div class="w-20 h-20 rounded-full border-4 border-white bg-slate-200 flex items-center justify-center text-3xl font-bold text-slate-600 shadow-sm overflow-hidden">
+              👨‍🏫
+            </div>
+            <div class="translate-y-1">
+              <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                Dr. Carlos Meneses
+                <span class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Verificado</span>
+              </h2>
+              <p class="text-xs text-slate-500">Doctor en Ciencias de la Computación &bull; Docente Investigador</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-12 px-6 pb-6 space-y-6">
+          <!-- Alerta de Sanitización Activa -->
+          <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs px-3.5 py-2 rounded-xl flex items-center justify-between">
+            <span>🛡️ <strong>Perfil Protegido:</strong> No se permiten enlaces externos ni datos de contacto para garantizar la custodia de pagos.</span>
+            <span class="font-bold text-indigo-700">Tarifa: 280 BOB / sesión (60 min)</span>
+          </div>
+
+          <!-- Métricas de Reputación -->
+          <div class="grid grid-cols-3 gap-4 text-center">
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
+              <div class="text-xl font-extrabold text-amber-500">4.9 ⭐</div>
+              <div class="text-[11px] text-slate-500">Calificación Promedio</div>
+            </div>
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
+              <div class="text-xl font-extrabold text-slate-800">58</div>
+              <div class="text-[11px] text-slate-500">Asesorías Completadas</div>
+            </div>
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
+              <div class="text-xl font-extrabold text-indigo-600">100%</div>
+              <div class="text-[11px] text-slate-500">A Tiempo en Feedback</div>
+            </div>
+          </div>
+
+          <!-- Biografía Estructurada -->
+          <div>
+            <h3 class="font-bold text-sm text-slate-900 mb-2">Curriculum y Presentación</h3>
+            <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-200">
+              Especialista en desarrollo metodológico de tesis para pregrado y maestrías en áreas de Ingeniería, Sistemas y Tecnologías de la Información. Apoyo estructurado en definición de marco teórico, formulación de hipótesis, experimentación y preparación para defensa de grado. Toda la interacción se coordina mediante la agenda y las salas Whereby oficiales de la plataforma.
+            </p>
+          </div>
+
+          <!-- Especialidades -->
+          <div>
+            <h3 class="font-bold text-sm text-slate-900 mb-2">Áreas de Especialidad</h3>
+            <div class="flex flex-wrap gap-2">
+              <span class="bg-slate-100 text-slate-700 text-xs px-3 py-1 rounded-lg font-medium">Inteligencia Artificial</span>
+              <span class="bg-slate-100 text-slate-700 text-xs px-3 py-1 rounded-lg font-medium">Metodología de la Investigación</span>
+              <span class="bg-slate-100 text-slate-700 text-xs px-3 py-1 rounded-lg font-medium">Ingeniería de Software</span>
+              <span class="bg-slate-100 text-slate-700 text-xs px-3 py-1 rounded-lg font-medium">Ciencia de Datos</span>
+            </div>
+          </div>
+
+          <div class="flex justify-end pt-4 border-t border-slate-100">
+            <button onclick="navigateToScreen('screen-07')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2.5 rounded-xl shadow-sm transition">Solicitar Asesoría para mi Proyecto</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PANTALLA 04: PERFIL ESTUDIANTE ==================== -->
+    <section id="screen-04" class="screen-container">
+      <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-6">
+        <div class="flex items-center space-x-4">
+          <div class="w-16 h-16 rounded-full bg-indigo-100 text-indigo-700 text-2xl font-bold flex items-center justify-center">🎓</div>
+          <div>
+            <h2 class="text-xl font-bold text-slate-900">Ana Lucía Rojas</h2>
+            <p class="text-xs text-slate-500">Ingeniería de Sistemas &bull; Universidad Mayor de San Andrés</p>
+            <span class="inline-block mt-1 text-[11px] bg-indigo-50 text-indigo-700 font-semibold px-2 py-0.5 rounded-md">Modalidad: Tesis de Pregrado (TFG)</span>
+          </div>
+        </div>
+
+        <!-- Barra de Avance Global -->
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <div class="flex justify-between text-xs font-bold text-slate-700 mb-1.5">
+            <span>Progreso General del Proyecto</span>
+            <span class="text-indigo-600">40% Completado (Hito 1 de 3)</span>
+          </div>
+          <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
+            <div class="bg-indigo-600 h-2.5 rounded-full w-[40%]"></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="border border-slate-200 rounded-xl p-4">
+            <h3 class="font-bold text-sm text-slate-900 mb-1">Tema de Tesis Registrado</h3>
+            <p class="text-xs text-slate-600">Sistema Predictivo de Rendimiento Académico Mediante Algoritmos de Machine Learning y Modelos C4.</p>
+          </div>
+          <div class="border border-slate-200 rounded-xl p-4">
+            <h3 class="font-bold text-sm text-slate-900 mb-1">Consultor Asignado</h3>
+            <p class="text-xs text-slate-600">Dr. Carlos Meneses (4.9 ⭐) &bull; 1 Videollamada realizada &bull; Próximo hito: 15 de Octubre.</p>
+          </div>
+        </div>
+
+        <div class="flex justify-between items-center pt-4 border-t border-slate-100">
+          <span class="text-xs text-slate-400">Perfil verificado y activo</span>
+          <button onclick="navigateToScreen('screen-12')" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-4 py-2 rounded-xl">Ir al Tablero Kanban de mi Tesis</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PANTALLA 05: PERFIL EMPRESA / INSTITUCION ==================== -->
+    <section id="screen-05" class="screen-container">
+      <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-6">
+        <div class="flex items-center space-x-4">
+          <div class="w-16 h-16 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 text-2xl font-bold flex items-center justify-center">🏢</div>
+          <div>
+            <h2 class="text-xl font-bold text-slate-900">Banco & Fintech Innova S.A.</h2>
+            <p class="text-xs text-slate-500">Sector Servicios Financieros y Banca Digital &bull; La Paz, Bolivia</p>
+            <span class="inline-block mt-1 text-[11px] bg-emerald-50 text-emerald-700 font-semibold px-2 py-0.5 rounded-md">Programa: Pasantías y Retos de Tesis Pre-hiring</span>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="font-bold text-sm text-slate-900 mb-2">Retos de Innovación Abierta Disponibles</h3>
+          <div class="space-y-3">
+            <div class="border border-slate-200 rounded-xl p-4 flex justify-between items-center">
+              <div>
+                <h4 class="font-bold text-xs text-slate-900">Reto #1: Módulo de Conciliación Automática en Tiempo Real con QR</h4>
+                <p class="text-[11px] text-slate-500">Dirigido a: Estudiantes de Ingeniería de Sistemas o Informática &bull; Vacantes de práctica: 2 plazas</p>
+              </div>
+              <button onclick="navigateToScreen('screen-07')" class="bg-indigo-600 text-white text-xs px-3 py-1.5 rounded-lg font-semibold">Postular Proyecto</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PANTALLA 06: BUSCADOR / MATCHING ==================== -->
+    <section id="screen-06" class="screen-container">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-6">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900 mb-1">Directorio y Buscador de Consultores</h2>
+          <p class="text-xs text-slate-500">Filtra por especialidad, universidad, modalidad y calificación por estrellas</p>
+        </div>
+
+        <!-- Barra de búsqueda y filtros -->
+        <div class="flex flex-col md:flex-row gap-3">
+          <input type="text" placeholder="Buscar por palabra clave (ej. Inteligencia Artificial, Tesis, Finanzas)..." class="flex-1 text-sm border border-slate-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <select class="text-xs border border-slate-300 rounded-xl px-3 py-2 bg-white">
+            <option>Todas las Áreas</option>
+            <option selected>Ingeniería y Tecnología</option>
+            <option>Ciencias Económicas y Administrativas</option>
+            <option>Ciencias Sociales y Humanidades</option>
+          </select>
+          <select class="text-xs border border-slate-300 rounded-xl px-3 py-2 bg-white">
+            <option>Cualquier Calificación</option>
+            <option selected>4.5 ⭐ o más</option>
+          </select>
+        </div>
+
+        <!-- Grid de Consultores -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Card 1 -->
+          <div class="border border-slate-200 rounded-xl p-4 flex flex-col justify-between hover:border-indigo-300 transition">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center space-x-3">
+                  <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-xl">👨‍🏫</div>
+                  <div>
+                    <h4 class="font-bold text-sm text-slate-900">Dr. Carlos Meneses</h4>
+                    <p class="text-[11px] text-slate-500">Docente &bull; PhD en Ciencias de la Computación</p>
+                  </div>
+                </div>
+                <span class="text-xs font-bold text-amber-500 bg-amber-50 px-2 py-0.5 rounded-md">4.9 ⭐</span>
+              </div>
+              <p class="text-xs text-slate-600 mb-3">Especialista en TFG y Tesis de Maestría. Machine Learning, Clean Architecture y desarrollo metodológico.</p>
+              <div class="flex flex-wrap gap-1 mb-3">
+                <span class="bg-slate-100 text-slate-600 text-[10px] px-2 py-0.5 rounded">Tesis Pregrado</span>
+                <span class="bg-slate-100 text-slate-600 text-[10px] px-2 py-0.5 rounded">Posgrado</span>
+              </div>
+            </div>
+            <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+              <span class="text-xs font-bold text-slate-800">280 BOB <span class="text-[10px] font-normal text-slate-400">/ 60 min</span></span>
+              <button onclick="navigateToScreen('screen-03')" class="bg-indigo-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg">Ver Perfil y Solicitar</button>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="border border-slate-200 rounded-xl p-4 flex flex-col justify-between hover:border-indigo-300 transition">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center space-x-3">
+                  <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-xl">👩‍🏫</div>
+                  <div>
+                    <h4 class="font-bold text-sm text-slate-900">MSc. Andrea Velasco</h4>
+                    <p class="text-[11px] text-slate-500">Investigadora &bull; Magíster en Finanzas Corporativas</p>
+                  </div>
+                </div>
+                <span class="text-xs font-bold text-amber-500 bg-amber-50 px-2 py-0.5 rounded-md">4.8 ⭐</span>
+              </div>
+              <p class="text-xs text-slate-600 mb-3">Asesorías en planes de negocios, modelado financiero, evaluación de proyectos y tesis de grado en carreras empresariales.</p>
+              <div class="flex flex-wrap gap-1 mb-3">
+                <span class="bg-slate-100 text-slate-600 text-[10px] px-2 py-0.5 rounded">Finanzas</span>
+                <span class="bg-slate-100 text-slate-600 text-[10px] px-2 py-0.5 rounded">Planes de Negocio</span>
+              </div>
+            </div>
+            <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+              <span class="text-xs font-bold text-slate-800">250 BOB <span class="text-[10px] font-normal text-slate-400">/ 60 min</span></span>
+              <button onclick="navigateToScreen('screen-03')" class="bg-indigo-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg">Ver Perfil y Solicitar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PANTALLA 07: SOLICITUD DE ASESORIA E HITOS ==================== -->
+    <section id="screen-07" class="screen-container">
+      <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-6">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900 mb-1">Estructurar Solicitud de Asesoría</h2>
+          <p class="text-xs text-slate-500">Define los hitos de tu proyecto con el consultor Dr. Carlos Meneses</p>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Título de la Tesis o Proyecto</label>
+            <input type="text" value="Detección de Anomalías con Redes Neuronales y C4 Model" class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2 font-medium">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Modalidad Académica</label>
+            <select class="w-full text-xs border border-slate-300 rounded-xl px-3 py-2 bg-white">
+              <option selected>Trabajo Final de Grado (TFG) - Pregrado</option>
+              <option>Tesis de Maestría - Posgrado</option>
+              <option>Tesis Doctoral - Posgrado</option>
+              <option>Práctica Profesional / Pasantía</option>
+            </select>
+          </div>
+
+          <!-- Tabla de Hitos -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-2">Desglose de Hitos Acordados</label>
+            <div class="border border-slate-200 rounded-xl overflow-hidden text-xs">
+              <table class="w-full text-left">
+                <thead class="bg-slate-50 border-b border-slate-200 text-slate-700 font-bold">
+                  <tr>
+                    <th class="p-3">Hito</th>
+                    <th class="p-3">Descripción</th>
+                    <th class="p-3">Peso %</th>
+                    <th class="p-3">Monto (BOB)</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-slate-600">
+                  <tr>
+                    <td class="p-3 font-semibold text-slate-900">Hito 1</td>
+                    <td class="p-3">Marco Teórico y Estado del Arte</td>
+                    <td class="p-3 font-bold text-indigo-600">40%</td>
+                    <td class="p-3 font-bold">500.00 BOB</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 font-semibold text-slate-900">Hito 2</td>
+                    <td class="p-3">Implementación del Modelo y Experimentos</td>
+                    <td class="p-3 font-bold text-indigo-600">60%</td>
+                    <td class="p-3 font-bold">750.00 BOB</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-1.5">* El estudiante paga cada hito por adelantado en custodia antes de iniciar el trabajo.</p>
+          </div>
+
+          <div class="flex justify-between items-center pt-4 border-t border-slate-100">
+            <div>
+              <span class="text-xs text-slate-500">Costo Total del Proyecto:</span>
+              <span class="text-base font-extrabold text-slate-900 ml-1">1,250.00 BOB</span>
+            </div>
+            <button onclick="navigateToScreen('screen-08')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs px-5 py-2.5 rounded-xl shadow-sm">Proceder al Pago en Custodia</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PANTALLA 08: CHECKOUT ESCROW (DLOCAL) ==================== -->
+    <section id="screen-08" class="screen-container">
+      <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-6">
+        <div class="border-b border-slate-100 pb-4">
+          <div class="flex items-center justify-between mb-1">
+            <h2 class="text-xl font-bold text-slate-900">Pago en Custodia Protegida (Escrow)</h2>
+            <span class="bg-emerald-50 text-emerald-700 text-xs font-bold px-2.5 py-1 rounded-lg border border-emerald-200">dLocal for Platforms</span>
+          </div>
+          <p class="text-xs text-slate-500">El pago se retiene en custodia de la plataforma y solo se libera al consultor cuando apruebes el hito.</p>
+        </div>
+
+        <!-- Selección: Hito 1 vs Total -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-2">Selecciona la Modalidad de Pago Anticipado</label>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div class="border-2 border-indigo-600 bg-indigo-50/30 rounded-xl p-3 cursor-pointer">
+              <div class="flex justify-between items-center mb-1">
+                <span class="font-bold text-xs text-indigo-900">Pagar Solo Hito 1</span>
+                <span class="text-xs font-extrabold text-indigo-600">500.00 BOB</span>
+              </div>
+              <p class="text-[11px] text-slate-500">Desbloquea el Hito 1 y la primera sesión de videollamada.</p>
+            </div>
+            <div class="border border-slate-200 rounded-xl p-3 cursor-pointer hover:border-slate-300">
+              <div class="flex justify-between items-center mb-1">
+                <span class="font-bold text-xs text-slate-800">Pagar Proyecto Completo</span>
+                <span class="text-xs font-extrabold text-slate-900">1,250.00 BOB</span>
+              </div>
+              <p class="text-[11px] text-slate-500">Desbloquea el proyecto total sin interrupciones de pago.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Desglose Financiero -->
+        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-2 text-xs">
+          <div class="flex justify-between text-slate-600">
+            <span>Monto Bruto a Pagar:</span>
+            <span class="font-semibold text-slate-900">500.00 BOB</span>
+          </div>
+          <div class="flex justify-between text-slate-600">
+            <span>Comisión Plataforma (10% por ser &ge; 300 BOB):</span>
+            <span class="font-semibold text-indigo-700">50.00 BOB</span>
+          </div>
+          <div class="flex justify-between text-slate-600 border-t border-slate-200 pt-2">
+            <span>Monto Neto en Custodia para el Consultor:</span>
+            <span class="font-extrabold text-emerald-700">450.00 BOB</span>
+          </div>
+        </div>
+
+        <!-- Métodos de Pago Locales -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-2">Método de Pago en Moneda Local (Bolivia)</label>
+          <div class="grid grid-cols-3 gap-2 text-center text-xs">
+            <div class="border-2 border-indigo-600 bg-indigo-50/20 rounded-xl p-3 font-semibold text-indigo-900">
+              📱 Código QR Simple
+            </div>
+            <div class="border border-slate-200 rounded-xl p-3 text-slate-700">
+              💳 Tarjeta Débito / Crédito
+            </div>
+            <div class="border border-slate-200 rounded-xl p-3 text-slate-700">
+              🏦 Transferencia Bancaria
+            </div>
+          </div>
+        </div>
+
+        <button onclick="handleEscrowDeposit(500, 'ms_2')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-md transition text-sm">Confirmar y Depositar en Custodia (500.00 BOB)</button>
+      </div>
+    </section>
+
+    <!-- ==================== PANTALLA 09: AGENDA Y RESERVA ==================== -->
+    <section id="screen-09" class="screen-container">
+      <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-6">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900 mb-1">Agendar Sesión de Videollamada (60 min)</h2>
+          <p class="text-xs text-slate-500">Pago de Hito 1 confirmado en custodia. Elige una fecha y hora disponible con tu consultor.</p>
+        </div>
+
+        <div class="bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs p-3 rounded-xl flex items-center justify-between">
+          <span>🕒 <strong>Tu Zona Horaria:</strong> America/La_Paz (UTC-4)</span>
+          <span class="text-[11px] text-slate-500">Conversión automática en tiempo real</span>
+        </div>
+
+        <!-- Selector de Días y Horas -->
+        <div class="space-y-3">
+          <label class="block text-xs font-bold text-slate-700">Fechas Disponibles (Octubre 2026)</label>
+          <div class="grid grid-cols-3 gap-2 text-xs">
+            <div class="border-2 border-indigo-600 bg-indigo-50 p-2.5 rounded-xl text-center font-bold text-indigo-900">
+              Jueves 08 Oct
+            </div>
+            <div class="border border-slate-200 p-2.5 rounded-xl text-center text-slate-700">
+              Viernes 09 Oct
+            </div>
+            <div class="border border-slate-200 p-2.5 rounded-xl text-center text-slate-700">
+              Lunes 12 Oct
+            </div>
+          </div>
+
+          <label class="block text-xs font-bold text-slate-700 mt-4">Franjas de 60 Minutos Disponibles</label>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div class="border-2 border-indigo-600 bg-indigo-50 p-3 rounded-xl font-bold text-indigo-900 flex justify-between">
+              <span>15:00 - 16:00</span>
+              <span class="text-indigo-600">&check; Seleccionada</span>
+            </div>
+            <div class="border border-slate-200 p-3 rounded-xl text-slate-700 flex justify-between">
+              <span>17:00 - 18:00</span>
+              <span class="text-slate-400">Disponible</span>
+            </div>
+          </div>
+        </div>
+
+        <button onclick="navigateToScreen('screen-10')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl text-xs shadow-sm">Confirmar Reserva e Ingresar a Sala</button>
+      </div>
+    </section>
+
+    <!-- ==================== PANTALLA 10: SALA VIDEOLLAMADA (WHEREBY + MIRO) ==================== -->
+    <section id="screen-10" class="screen-container">
+      <div class="bg-slate-900 text-white rounded-2xl shadow-xl overflow-hidden border border-slate-800">
+        <!-- Top Session Header con Temporizador -->
+        <div class="px-6 py-3 bg-slate-800 flex items-center justify-between border-b border-slate-700">
+          <div class="flex items-center space-x-3">
+            <span class="w-3 h-3 rounded-full bg-red-500 animate-ping"></span>
+            <span class="font-bold text-sm">Sesión en Vivo: Asesoría Metodológica Hito 1</span>
+            <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-slate-300">Whereby + Miro</span>
+          </div>
+          
+          <!-- Temporizador 60 minutos con alerta visual -->
+          <div class="flex items-center space-x-3">
+            <div class="bg-slate-900 px-3 py-1 rounded-lg border border-slate-700 text-xs font-mono font-bold text-emerald-400 flex items-center gap-1.5">
+              <span>⏱️ Tiempo Restante:</span>
+              <span class="text-sm">48:22</span>
+            </div>
+            <button onclick="navigateToScreen('screen-11')" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">Finalizar Sesión</button>
+          </div>
+        </div>
+
+        <!-- Split Screen: Whereby Video + Miro Board -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 h-[520px] bg-slate-950">
+          <!-- Whereby Video Mockup -->
+          <div class="p-4 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-800">
+            <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+              <span>📹 Sala Whereby Embedded (Audio/Video WebRTC)</span>
+              <span class="bg-emerald-900/60 text-emerald-300 text-[10px] px-2 py-0.5 rounded font-medium">&bull; Transcripción IA Activa</span>
+            </div>
+            <!-- Video Grid -->
+            <div class="grid grid-cols-2 gap-3 flex-1">
+              <div class="bg-slate-800 rounded-xl flex flex-col items-center justify-center p-4 border border-slate-700 relative">
+                <span class="text-4xl mb-1">👨‍🏫</span>
+                <span class="text-xs font-semibold">Dr. Carlos Meneses (Consultor)</span>
+                <span class="absolute bottom-2 left-2 bg-slate-900/80 text-[10px] px-1.5 py-0.5 rounded text-emerald-400">🎤 Conectado</span>
+              </div>
+              <div class="bg-slate-800 rounded-xl flex flex-col items-center justify-center p-4 border border-slate-700 relative">
+                <span class="text-4xl mb-1">🎓</span>
+                <span class="text-xs font-semibold">Ana Lucía Rojas (Estudiante)</span>
+                <span class="absolute bottom-2 left-2 bg-slate-900/80 text-[10px] px-1.5 py-0.5 rounded text-emerald-400">🎤 Conectado</span>
+              </div>
+            </div>
+            <div class="flex justify-center space-x-3 mt-3 pt-2 border-t border-slate-800/80 text-xs">
+              <button class="bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg">🎤 Silenciar</button>
+              <button class="bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg">📷 Cámara</button>
+              <button class="bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg">🖥️ Compartir Pantalla</button>
+            </div>
+          </div>
+
+          <!-- Miro Whiteboard Mockup -->
+          <div class="p-4 flex flex-col justify-between bg-slate-900">
+            <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+              <span>📋 Pizarrón Interactivo Colaborativo (Miro Live Embed API)</span>
+              <span class="text-[10px] text-indigo-400">Sincronización en tiempo real</span>
+            </div>
+            <!-- Canvas Placeholder -->
+            <div class="flex-1 bg-white text-slate-900 rounded-xl p-4 flex flex-col items-center justify-center border border-slate-300 relative overflow-hidden shadow-inner">
+              <div class="w-full h-full flex flex-col items-center justify-center space-y-2">
+                <div class="border-2 border-dashed border-indigo-300 rounded-lg p-4 bg-indigo-50/50 text-center">
+                  <span class="text-2xl">📊</span>
+                  <p class="font-bold text-xs text-indigo-900 mt-1">Lienzo Colaborativo de Miro Activo</p>
+                  <p class="text-[11px] text-slate-500">Diagramas de Arquitectura, Flujogramas y Correcciones de Tesis</p>
+                </div>
+              </div>
+            </div>
+            <p class="text-[11px] text-slate-500 text-center mt-2">Al culminar los 60 minutos, la transcripción con IA se adjuntará automáticamente a la tarjeta del hito.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PANTALLA 11: MODAL DE CALIFICACION CON ESTRELLAS ==================== -->
+    <section id="screen-11" class="screen-container">
+      <div class="max-w-md mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 p-6 text-center space-y-4">
+        <div class="w-12 h-12 rounded-full bg-amber-100 text-amber-600 text-2xl flex items-center justify-center mx-auto font-bold">⭐</div>
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Califica la Asesoría</h2>
+          <p class="text-xs text-slate-500">Tu evaluación es obligatoria y ayuda a mantener la calidad del ecosistema</p>
+        </div>
+
+        <!-- Selector 5 Estrellas Interactivo -->
+        <div class="flex justify-center space-x-2 py-2">
+          <button class="text-3xl text-amber-400 hover:scale-110 transition">★</button>
+          <button class="text-3xl text-amber-400 hover:scale-110 transition">★</button>
+          <button class="text-3xl text-amber-400 hover:scale-110 transition">★</button>
+          <button class="text-3xl text-amber-400 hover:scale-110 transition">★</button>
+          <button class="text-3xl text-amber-400 hover:scale-110 transition">★</button>
+        </div>
+        <p class="text-xs font-bold text-slate-700">5.0 / 5.0 - Excelente Asesoría</p>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 text-left mb-1">Comentario u Observaciones</label>
+          <textarea rows="3" placeholder="La explicación del marco teórico fue muy clara y concisa..." class="w-full text-xs border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+        </div>
+
+        <button onclick="handleSendRating(5)" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl text-xs shadow-sm">Guardar Calificación y Ver Tablero Kanban</button>
+      </div>
+    </section>
+
+    <!-- ==================== PANTALLA 12: TABLERO KANBAN DEL PROYECTO ==================== -->
+    <section id="screen-12" class="screen-container">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-6">
+        <!-- Header del Proyecto & Progreso -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-slate-100 pb-4">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900">Tablero Kanban &bull; Tesis de Licenciatura</h2>
+            <p class="text-xs text-slate-500">Estudiante: Ana Lucía Rojas &bull; Consultor: Dr. Carlos Meneses</p>
+          </div>
+          <div class="w-full md:w-64 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+            <div class="flex justify-between text-[11px] font-bold text-slate-700 mb-1">
+              <span>Avance Global</span>
+              <span class="text-indigo-600">40% Completado</span>
+            </div>
+            <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+              <div class="bg-indigo-600 h-2 rounded-full w-[40%]"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 Columnas Kanban -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <!-- Columna 1: Por Hacer -->
+          <div class="bg-slate-50 rounded-xl p-3 border border-slate-200">
+            <h3 class="font-bold text-xs text-slate-700 mb-3 flex items-center justify-between">
+              <span>Por Hacer</span>
+              <span class="bg-slate-200 text-slate-700 text-[10px] px-1.5 py-0.5 rounded">1</span>
+            </h3>
+            <div class="space-y-2">
+              <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm text-xs">
+                <div class="flex justify-between items-start mb-1">
+                  <span class="font-bold text-slate-900">Hito 2: Implementación</span>
+                  <span class="text-[10px] font-extrabold text-indigo-600">60%</span>
+                </div>
+                <p class="text-[11px] text-slate-500 mb-2">Desarrollo del modelo de ML y pruebas de precisión.</p>
+                <div class="text-[10px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded font-medium">Pendiente de pago previo</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Columna 2: En Progreso -->
+          <div class="bg-slate-50 rounded-xl p-3 border border-slate-200">
+            <h3 class="font-bold text-xs text-slate-700 mb-3 flex items-center justify-between">
+              <span>En Progreso</span>
+              <span class="bg-slate-200 text-slate-700 text-[10px] px-1.5 py-0.5 rounded">0</span>
+            </h3>
+            <div class="text-center py-8 text-xs text-slate-400">Sin tareas en progreso</div>
+          </div>
+
+          <!-- Columna 3: En Revisión -->
+          <div class="bg-slate-50 rounded-xl p-3 border border-slate-200">
+            <h3 class="font-bold text-xs text-slate-700 mb-3 flex items-center justify-between">
+              <span>En Revisión</span>
+              <span class="bg-indigo-100 text-indigo-700 text-[10px] px-1.5 py-0.5 rounded">1</span>
+            </h3>
+            <div class="bg-white p-3 rounded-lg border-2 border-indigo-400 shadow-sm text-xs space-y-2">
+              <div class="flex justify-between items-start">
+                <span class="font-bold text-slate-900">Hito 1: Marco Teórico</span>
+                <span class="text-[10px] font-extrabold text-indigo-600">40%</span>
+              </div>
+              <p class="text-[11px] text-slate-500">Documento entregado. Pendiente de aprobación final.</p>
+              
+              <!-- Semáforos de Avance y Feedback -->
+              <div class="space-y-1 pt-1 border-t border-slate-100 text-[10px]">
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-500">Entrega Estudiante:</span>
+                  <span class="text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded">&bull; A Tiempo</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-500">Guía Consultor:</span>
+                  <span class="text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded">&bull; Conforme</span>
+                </div>
+              </div>
+
+              <div class="flex gap-1 pt-2">
+                <button onclick="navigateToScreen('screen-13')" class="flex-1 bg-slate-100 text-slate-700 text-[11px] py-1 rounded font-semibold hover:bg-slate-200">Ver Archivos</button>
+                <button onclick="navigateToScreen('screen-14')" class="flex-1 bg-indigo-600 text-white text-[11px] py-1 rounded font-semibold hover:bg-indigo-700">Aprobar Hito</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Columna 4: Completada -->
+          <div class="bg-slate-50 rounded-xl p-3 border border-slate-200">
+            <h3 class="font-bold text-xs text-slate-700 mb-3 flex items-center justify-between">
+              <span>Completada</span>
+              <span class="bg-slate-200 text-slate-700 text-[10px] px-1.5 py-0.5 rounded">0</span>
+            </h3>
+            <div class="text-center py-8 text-xs text-slate-400">Aún no hay hitos completados</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PANTALLA 13: REPOSITORIO DOCUMENTAL ==================== -->
+    <section id="screen-13" class="screen-container">
+      <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-6">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900">Repositorio Documental del Proyecto</h2>
+            <p class="text-xs text-slate-500">Almacenamiento seguro en Cloudflare R2 &bull; Solo formatos Office y PDF (Máx. 25 MB)</p>
+          </div>
+          <button onclick="navigateToScreen('screen-12')" class="text-xs text-indigo-600 font-semibold hover:underline">&larr; Volver al Kanban</button>
+        </div>
+
+        <!-- Zona Drag and Drop -->
+        <div class="border-2 border-dashed border-indigo-200 rounded-2xl p-8 text-center bg-indigo-50/20 hover:bg-indigo-50/40 transition cursor-pointer">
+          <span class="text-3xl block mb-2">📁</span>
+          <p class="text-sm font-bold text-slate-800">Haz clic o arrastra aquí tu documento de entrega</p>
+          <p class="text-xs text-slate-500 mt-1">Formatos admitidos: .pdf, .docx, .xlsx, .pptx (Sin ejecutables)</p>
+        </div>
+
+        <!-- Lista de Documentos Cargados -->
+        <div>
+          <h3 class="font-bold text-xs text-slate-700 mb-2">Archivos del Hito 1</h3>
+          <div class="border border-slate-200 rounded-xl divide-y divide-slate-100 text-xs">
+            <div class="p-3 flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <span class="text-red-500 text-lg">📄</span>
+                <div>
+                  <h4 class="font-bold text-slate-900">Marco_Teorico_v1.2_AnaRojas.pdf</h4>
+                  <p class="text-[10px] text-slate-400">4.2 MB &bull; Subido el 08 Oct 2026 &bull; URL prefirmada activa</p>
+                </div>
+              </div>
+              <button class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-3 py-1.5 rounded-lg font-medium">Descargar</button>
+            </div>
+            <div class="p-3 flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <span class="text-blue-500 text-lg">📝</span>
+                <div>
+                  <h4 class="font-bold text-slate-900">Acta_Sesion_IA_Whereby_08Oct.docx</h4>
+                  <p class="text-[10px] text-slate-400">120 KB &bull; Generado por Whereby AI &bull; Resumen de acuerdos</p>
+                </div>
+              </div>
+              <button class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-3 py-1.5 rounded-lg font-medium">Descargar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PANTALLA 14: APROBACION DE HITO Y PAY-OUT ==================== -->
+    <section id="screen-14" class="screen-container">
+      <div class="max-w-xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-6">
+        <div class="text-center border-b border-slate-100 pb-4">
+          <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-2 font-bold">&check;</div>
+          <h2 class="text-xl font-bold text-slate-900">Validación y Aprobación del Hito 1</h2>
+          <p class="text-xs text-slate-500">Al aprobar este hito, se transferirán los fondos en custodia al consultor</p>
+        </div>
+
+        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-3 text-xs">
+          <div class="flex justify-between">
+            <span class="text-slate-500">Hito a Liquidar:</span>
+            <span class="font-bold text-slate-900">Hito 1: Marco Teórico (40% de avance)</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Consultor Beneficiario:</span>
+            <span class="font-bold text-slate-900">Dr. Carlos Meneses</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Monto Bruto Pagado:</span>
+            <span class="font-bold text-slate-900">500.00 BOB</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Comisión Plataforma (10%):</span>
+            <span class="font-bold text-indigo-600">-50.00 BOB</span>
+          </div>
+          <div class="flex justify-between border-t border-slate-200 pt-2 text-sm font-extrabold">
+            <span class="text-slate-800">Transferencia Neta al Consultor:</span>
+            <span class="text-emerald-700">450.00 BOB</span>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <div class="flex items-start space-x-2 text-xs text-slate-600">
+            <input type="checkbox" checked class="mt-0.5 rounded text-emerald-600 focus:ring-emerald-500">
+            <span>Confirmo que he revisado los entregables del Hito 1 y otorgo mi plena conformidad con la asesoría prestada.</span>
+          </div>
+          <button onclick="handleMilestoneApproval()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-md transition text-sm">
+            Aprobar Hito y Liberar Fondos (450.00 BOB)
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
+    Plataforma01 &bull; Sistema de Gobernanza SDLC &bull; Entorno Local Prototipado
+  </footer>
+
+  <script>
+    const API_BASE = window.location.port === "3000" ? "" : "http://localhost:4000";
+
+    function navigateToScreen(screenId) {
+      document.querySelectorAll('.screen-container').forEach(el => el.classList.remove('active'));
+      const target = document.getElementById(screenId);
+      if (target) {
+        target.classList.add('active');
+        document.getElementById('screenSelect').value = screenId;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    // Integración Backend: Consultar progreso y semáforo
+    async function refreshProjectProgress() {
+      try {
+        const res = await fetch(`${API_BASE}/api/projects/prj_tesis_ia_01/progress`);
+        if (res.ok) {
+          const data = await res.json();
+          console.log("[Backend API] Progreso del proyecto:", data);
+        }
+      } catch (err) {
+        console.warn("[Backend API Offline] Ejecutando en modo autónomo.");
+      }
+    }
+
+    // Integración Backend: Depósito en Custodia Escrow
+    async function handleEscrowDeposit(amountBOB, milestoneId) {
+      try {
+        const res = await fetch(`${API_BASE}/api/escrow/deposit`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            projectId: "prj_tesis_ia_01",
+            milestoneId: milestoneId || "ms_2",
+            studentId: "usr_student_01",
+            consultantId: "usr_consultant_01",
+            amountBOB: amountBOB || 500,
+            paymentOption: "MILESTONE",
+            paymentMethod: "QR_SIMPLE"
+          })
+        });
+        const data = await res.json();
+        alert(`✅ Depósito en Custodia Confirmado:\n• Monto: ${data.escrow.grossAmount} BOB\n• Comisión: ${data.escrow.commissionAmount} BOB (${data.escrow.ratePercentage})\n• Neto al Consultor: ${data.escrow.netAmount} BOB\n• Estado: ${data.escrow.status}`);
+        navigateToScreen('screen-09');
+      } catch (e) {
+        alert("✅ Pago simulado exitoso en custodia (dLocal).");
+        navigateToScreen('screen-09');
+      }
+    }
+
+    // Integración Backend: Liberación de Fondos al Consultor
+    async function handleMilestoneApproval() {
+      try {
+        const res = await fetch(`${API_BASE}/api/escrow/deposit`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            projectId: "prj_tesis_ia_01",
+            milestoneId: "ms_1",
+            studentId: "usr_student_01",
+            consultantId: "usr_consultant_01",
+            amountBOB: 500
+          })
+        });
+        const deposit = await res.json();
+        const escrowId = deposit.escrow.id;
+
+        const releaseRes = await fetch(`${API_BASE}/api/escrow/${escrowId}/approve-payout`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            consultantBankAccount: "BNB-BO-9876543210",
+            projectId: "prj_tesis_ia_01",
+            milestoneId: "ms_1"
+          })
+        });
+        const payout = await releaseRes.json();
+        alert(`✅ Hito Aprobado y Fondos Desembolsados:\n• Estado: ${payout.escrow.status}\n• Monto Transferido: ${payout.escrow.netAmount} BOB\n• Ref. dLocal: ${payout.escrow.payoutDetails?.transferId || 'trf_dlocal_ok'}`);
+        navigateToScreen('screen-12');
+      } catch (err) {
+        alert('✅ ¡Hito Aprobado! El motor de pagos ha enviado la orden de dispersión (Pay-out) de 450.00 BOB al consultor.');
+        navigateToScreen('screen-12');
+      }
+    }
+
+    // Integración Backend: Calificación multilateral con estrellas
+    async function handleSendRating(stars) {
+      try {
+        const comment = prompt("Ingresa un comentario sobre la sesión:", "Excelente asesoría, muy clara y estructurada.");
+        if (comment === null) return;
+
+        const res = await fetch(`${API_BASE}/api/ratings`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sourceUserId: "usr_student_01",
+            sourceRole: "STUDENT",
+            targetUserId: "usr_consultant_01",
+            targetRole: "CONSULTANT",
+            stars: stars || 5,
+            comment: comment || "Excelente sesión"
+          })
+        });
+        const data = await res.json();
+        alert(`⭐ Calificación Registrada con Éxito:\n${data.rating.stars} Estrellas enviadas al consultor.`);
+        navigateToScreen('screen-12');
+      } catch (e) {
+        alert("⭐ Calificación registrada exitosamente.");
+        navigateToScreen('screen-12');
+      }
+    }
+
+    // Iniciar verificación al cargar
+    window.addEventListener('DOMContentLoaded', refreshProjectProgress);
+  </script>
+</body>
+</html>

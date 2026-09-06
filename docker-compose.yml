@@ -1,0 +1,76 @@
+services:
+  # Backend API REST (Node.js + Express)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: plataforma01-backend
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - NODE_ENV=development
+      - POSTGRES_URL=postgresql://platuser:platpassword@postgres:5432/plataforma01_db
+      - MONGO_URL=mongodb://platuser:platpassword@mongo:27017/plataforma01_logs?authSource=admin
+      - DLOCAL_ENV=sandbox
+      - WHEREBY_API_KEY=mock_whereby_key
+      - R2_BUCKET=plataforma01-storage
+    depends_on:
+      - postgres
+      - mongo
+    networks:
+      - plat-network
+
+  # Frontend Web / PWA (HTML5 / React Native Web via NGINX)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: plataforma01-frontend
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    depends_on:
+      - backend
+    networks:
+      - plat-network
+
+  # Base de Datos Relacional: PostgreSQL 15/16 (Transacciones, Escrow, Usuarios, Hitos)
+  postgres:
+    image: postgres:15-alpine
+    container_name: plataforma01-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: platuser
+      POSTGRES_PASSWORD: platpassword
+      POSTGRES_DB: plataforma01_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - plat-network
+
+  # Base de Datos Documental: MongoDB (Auditoría, Transcripciones IA, Chats y Logs)
+  mongo:
+    image: mongo:7-jammy
+    container_name: plataforma01-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: platuser
+      MONGO_INITDB_ROOT_PASSWORD: platpassword
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - plat-network
+
+networks:
+  plat-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  mongo_data:
