@@ -8,32 +8,55 @@ description: >-
 
 Este skill define el estándar de desarrollo de software riguroso basado en los valores fundamentales de **Extreme Programming (XP)**: Comunicación, Simplicidad, Retroalimentación, Coraje y Respeto.
 
-## Prácticas Fundamentales de XP a Ejecutar
+## Flujo Obligatorio de la Fase de Desarrollo (4 Sub-etapas)
 
-### 1. Test-Driven Development (TDD)
-El código de producción solo se escribe en respuesta a una prueba automatizada que falla:
-1. **Rojo (Red):** Escribir una prueba unitaria que defina el comportamiento esperado del caso de uso o entidad. Ejecutar la prueba y comprobar que falla.
-2. **Verde (Green):** Escribir el código mínimo indispensable para que la prueba pase satisfactoriamente.
-3. **Refactorización (Refactor):** Limpiar el código, eliminar duplicación, mejorar nombres y extraer métodos preservando las pruebas en verde.
+Para garantizar la máxima alineación con el usuario y evitar retrabajos, la fase de desarrollo se ejecuta en el siguiente orden estricto:
 
-### 2. Diseño Simple (Simple Design)
-El código debe cumplir con las 4 reglas del diseño simple de Kent Beck:
-1. Pasa todas las pruebas.
-2. Revela la intención del programador (claridad en nombres y estructura).
-3. No contiene código duplicado (DRY).
-4. Contiene el menor número posible de clases y métodos (sin sobreingeniería ni especulación futura).
+```mermaid
+graph TD
+    S1["4.1. Definición del Stack Tecnológico<br/>(Frontend, Backend, Conectores, BD, Storage)"]
+    G1{"🛑 Compuerta 4.1<br/>¿Stack Aprobado?"}
+    
+    S2["4.2. Definición y Maquetación de Pantallas<br/>(React Native for Web / HTML5 sin funcionalidad)"]
+    G2{"🛑 Compuerta 4.2<br/>¿Pantallas Aprobadas?"}
+    
+    S3["4.3. Implementación Backend, Integración y TDD<br/>(Node.js, dLocal, Whereby, Miro, S3)"]
+    
+    S4["4.4. Contenerización y Ejecución Local<br/>(Docker / Docker Compose paso a paso)"]
+    
+    G_Final{"🛑 Compuerta Final Fase 4<br/>¿Desarrollo Completo Aprobado?"}
 
-### 3. Patrones de Programación y Clean Code
-* Principios SOLID en todas las clases y módulos.
-* Inmutabilidad y manejo explícito de errores (sin silenciar excepciones).
-* Separación estricta de responsabilidades (SRP).
+    S1 --> G1
+    G1 -->|Sí| S2
+    G1 -->|No| S1
+    S2 --> G2
+    G2 -->|Sí| S3
+    G2 -->|No| S2
+    S3 --> S4
+    S4 --> G_Final
+```
 
-### 4. Integración Continua y GitFlow
-* Cada desarrollo se ejecuta en una rama `feature/<nombre-requerimiento>`.
-* Creación de Pull Request hacia la rama `develop`.
-* Ejecución de suite completa de pruebas antes de cualquier commit.
+### Sub-etapa 4.1: Definición del Stack Tecnológico
+* Especificar tecnologías para: Frontend (React Native for Web, JS, HTML5), Backend (Node.js, JS), Conectores (dLocal, Whereby, Miro, Cloudflare R2), Bases de Datos (PostgreSQL, MongoDB) y Contenedores (Docker).
+* Documentar en `docs/04_tech_stack_specification.md`.
+* **COMPUERTA OBLIGATORIA:** No avanzar a maquetar pantallas sin la aprobación expresa del Stack Tecnológico.
 
-## Puerta de Calidad (Quality Gate)
-* Demostrar que el 100% de las pruebas unitarias y de integración pasan satisfactoriamente.
-* Presentar métricas de cobertura y revisión de código al usuario.
-* Solicitar autorización: *"¿Aprueba la implementación de [Módulo/Característica] para proceder a la fase de Pruebas de Sistema y QA?"*.
+### Sub-etapa 4.2: Definición y Maquetación de Pantallas (Sin Funcionalidad)
+* Diseñar y maquetar todas las pantallas del flujo completo (Landing, Búsqueda, CV sin links, Checkout Escrow, Sala Whereby 60m + Miro, Kanban con semáforo, Rating 1-5 estrellas).
+* Maquetación pura en React Native for Web / HTML5 sin lógica de backend ni conectores reales.
+* **COMPUERTA OBLIGATORIA:** No avanzar a la implementación backend sin la aprobación expresa de las pantallas.
+
+### Sub-etapa 4.3: Implementación Backend, Integración y Funcionalidad (XP / TDD)
+* Construcción del código backend y adaptadores bajo TDD (Red-Green-Refactor) y Clean Architecture.
+* Integración de la UI con los servicios y conectores externos.
+
+### Sub-etapa 4.4: Contenerización y Ejecución Local
+* Configuración de `Dockerfile` y `docker-compose.yml`.
+* Elaboración de guía paso a paso para levantar localmente el frontend, backend y bases de datos con un único comando.
+
+---
+
+## Puertas de Calidad (Quality Gates)
+* **Gate 4.1:** Aprobación del Stack Tecnológico.
+* **Gate 4.2:** Aprobación de la Maquetación de Pantallas.
+* **Gate 4.3/4.4:** Aprobación del Software Funcionando y Contenedores Locales.
