@@ -7,14 +7,19 @@ Este documento define de manera formal y no ambigua la Especificación de Requis
 
 ### 1.2 Alcance del Sistema
 La plataforma es un ecosistema digital de intermediación académica y laboral que opera como Progressive Web App (PWA) respaldada por una arquitectura de microservicios desacoplados. Cubre:
-* Intermediación de Trabajos Finales de Grado (TFG) de pregrado.
-* Asesorías de tesis y proyectos de posgrado (maestrías, doctorados).
-* Vinculación para prácticas profesionales y pasantías.
+* Intermediación de Trabajos Finales de Grado (TFG) de pregrado y tesis de posgrado (maestrías, doctorados).
+* Vinculación para prácticas profesionales y pasantías para carreras universitarias e institutos.
 * Retos de innovación corporativa y selección de talento temprano (*pre-hiring*).
-* Custodia financiera (*escrow*) con comisiones dinámicas y pagos locales mediante dLocal for Platforms.
+* Custodia financiera (*escrow*) con comisiones dinámicas (15% < 300 BOB / 10% ≥ 300 BOB) mediante dLocal for Platforms.
+* Salas de videollamadas interactivas de 1 hora mediante **Whereby Embedded API**, pizarra compartida con **Miro** y transcripción automatizada con IA.
+* Seguimiento de asesorías mediante **tableros Kanban colaborativos**.
+* Repositorio documental con cuotas y filtrado estricto a formatos de texto y ofimática (Office/PDF).
+* Marco normativo y políticas estrictas anti-desintermediación para proteger el ecosistema.
 
 ### 1.3 Referencias Normativas y Fuentes Técnicas
 * **IEEE Std 830-1998:** *IEEE Recommended Practice for Software Requirements Specifications*.
+* **Whereby Embedded API Documentation:** *Video Calls, Rooms Management & AI Transcription Webhooks*.
+* **Miro Live Embed API:** *Collaborative Interactive Whiteboards*.
 * **dLocal for Platforms API Documentation:** *Marketplace Split Payments & Escrow Engine*.
 * **W3C Progressive Web App Specification:** *Service Workers & Web App Manifest*.
 * **S3 API Standard Specification:** *Cloudflare R2 Object Storage Compatibility*.
@@ -28,15 +33,15 @@ La plataforma es un ecosistema digital de intermediación académica y laboral q
 `plataforma01` opera como un sistema autónomo distribuido, estructurado en una interfaz unificada (PWA) conectada mediante HTTPS/REST a una suite de microservicios independientes con bases de datos aisladas (Database-per-Service).
 
 ### 2.2 Roles y Perfiles de Usuario (RBAC)
-1. **Estudiante / Practicante (Pregrado):** Solicita asesorías de TFG, aplica a retos o postula a pasantías en empresas.
+1. **Estudiante / Practicante (Pregrado):** Solicita asesorías de TFG, aplica a retos o postula a pasantías, gestiona su Kanban de entrega y asiste a videollamadas.
 2. **Investigador / Tesista (Posgrado):** Solicita asesorías metodológicas avanzadas para maestrías o doctorados.
-3. **Consultor / Experto:** Publica disponibilidad, bandas tarifarias, atiende sesiones y cobra honorarios netos tras aprobación de hitos.
-4. **Empresa / Institución:** Publica retos técnicos, evalúa postulantes y vincula entregables.
-5. **Administrador:** Supervisa transacciones, resuelve disputas de escrow y audita el cumplimiento normativo.
+3. **Consultor / Experto:** Atiende sesiones en salas Whereby, comparte pizarrones Miro, califica hitos en el Kanban y cobra honorarios en custodia.
+4. **Empresa / Institución:** Publica retos técnicos, evalúa practicantes y supervisa avances.
+5. **Administrador:** Modera disputas, supervisa el cumplimiento de políticas de uso y audita transacciones de escrow.
 
 ### 2.3 Restricciones Generales de Diseño
-* **Agnosticismo de Pasarela:** La lógica de retención y comisiones debe estar desacoplada de la implementación del SDK de dLocal mediante el patrón *Gateway/Adapter*.
-* **Cero Costo de Egress Inicial:** El almacenamiento de archivos debe consumir APIs compatibles con S3 operando sobre Cloudflare R2 sin costes por transferencia saliente.
+* **Duración Estricta de Sesión:** Las salas de videollamadas Whereby tienen vigencia acotada a **60 minutos**, con terminación programada y aviso al minuto 55.
+* **Control de Tipos de Archivo (Whitelisting):** Solo se permiten formatos documentales ofimáticos y textuales (`.pdf`, `.docx`, `.xlsx`, `.pptx`, `.txt`, `.md`). Prohibida la subida de ejecutables, scripts o binarios no documentales.
 * **Sesiones Stateless:** Autenticación basada en JSON Web Tokens (JWT) firmados con algoritmo asimétrico (RS256).
 
 ---
@@ -47,15 +52,19 @@ La plataforma es un ecosistema digital de intermediación académica y laboral q
 
 | ID | Requisito Funcional | Descripción y Flujo | Criterio de Aceptación (Verificable) |
 | :--- | :--- | :--- | :--- |
-| **RF-01** | **Autenticación y Gestión de Perfiles** | El sistema debe permitir el registro e inicio de sesión seguro diferenciando los 5 roles mediante JWT, validación de email y gestión de perfiles profesionales/académicos. | El usuario recibe un token JWT con sus claims y rol asignado. Contraseñas protegidas mediante Argon2id o bcrypt. |
-| **RF-02** | **Catálogo de Solicitudes Académicas** | El estudiante debe poder crear solicitudes especificando modalidad (`tesis_pregrado`, `tesis_posgrado`, `practica_profesional`), área de conocimiento, universidad/instituto y descripción del hito. | La solicitud se almacena en estado `borrador` o `publicada`, visible para consultores calificados en el área. |
-| **RF-03** | **Agenda y Matching Multizona** | El consultor define franjas horarias de disponibilidad. El sistema calcula cruces de horario convirtiendo automáticamente a UTC y presentando la hora local a cada participante. | El estudiante puede reservar una sesión; ambos reciben confirmación con enlace y ajuste a sus respectivos husos horarios. |
-| **RF-04** | **Publicación de Retos Empresariales** | Las empresas deben poder publicar convocatorias y desafíos técnicos delimitando requisitos, entregables esperados y plazas disponibles para pasantías o resolución de TFG. | El reto queda indexado en el catálogo corporativo; los estudiantes pueden postular adjuntando su propuesta o currículum. |
-| **RF-05** | **Motor de Custodia (Escrow) y Pasarela dLocal** | Al confirmar una asesoría o contratación, el sistema procesa el cobro local (*pay-in*) mediante dLocal for Platforms, retiene los fondos en custodia (*escrow*) y aplica la regla de comisiones dinámicas:<br>- Monto < 300 BOB: Retención de comisión del **15%**.<br>- Monto ≥ 300 BOB: Retención de comisión del **10%**. | Los fondos quedan congelados en estado `EN_CUSTODIA`. Ningún pago se liquida al consultor hasta la confirmación del hito. |
-| **RF-06** | **Gestión y Aprobación de Hitos / Entregables** | El estudiante y el consultor operan sobre hitos de entrega. El consultor sube el avance/informe; el estudiante dispone de un botón formal de validación y aprobación. | Al marcar `Hito Aprobado`, el motor de pagos dispara automáticamente la orden de dispersión (*pay-out*) a la cuenta del consultor por el monto neto. |
-| **RF-07** | **Almacenamiento Seguro de Documentos (S3/R2)** | La plataforma debe permitir la subida y descarga de archivos de tesis, informes y acuerdos mediante URLs firmadas temporales (*presigned URLs*) hacia Cloudflare R2. | Ningún archivo se transmite a través del backend de aplicación; la subida/descarga es directa al storage con URLs que expiran en máximo 15 minutos. |
-| **RF-08** | **Notificaciones Push y Soporte PWA** | La aplicación debe instalarse en dispositivos del usuario mediante PWA manifest y emitir notificaciones push para recordatorios de citas, confirmación de fondos retenidos y avisos de entrega. | La PWA presenta el prompt de instalación en navegadores modernos y el Service Worker gestiona el badge y alertas push. |
-| **RF-09** | **Gestión de Disputas y Arbitraje** | En caso de inconformidad en un hito, cualquiera de las partes puede abrir un ticket de disputa antes de la liberación de fondos, congelando la dispersión para revisión del Administrador. | El estado de la transacción pasa a `EN_DISPUTA` y se bloquea la liberación automática hasta la resolución administrativa. |
+| **RF-01** | **Autenticación y Gestión de Perfiles** | Registro e inicio de sesión seguro con RBAC (5 roles), JWT, verificación de identidad y validación de perfiles profesionales. | Usuario autenticado recibe JWT con claims y rol. Contraseñas protegidas mediante Argon2id o bcrypt. |
+| **RF-02** | **Catálogo de Solicitudes Académicas** | Publicación de necesidades formativas (`tesis_pregrado`, `tesis_posgrado`, `practica_profesional`) para cualquier carrera o instituto. | La solicitud se indexa en el catálogo y queda accesible para consultores validados del área. |
+| **RF-03** | **Agenda y Matching Multizona** | Emparejamiento por área temática y cálculo de cruces de disponibilidad en UTC proyectado a las horas locales de los participantes. | El estudiante reserva la franja; se generan los eventos sincronizados en el calendario de ambas partes. |
+| **RF-04** | **Publicación de Retos Empresariales** | Empresas publican retos técnicos delimitando entregables, requisitos y vacantes de pasantía / pre-hiring. | Reto activo en catálogo; postulación de estudiantes adjuntando propuesta o CV. |
+| **RF-05** | **Motor de Custodia (Escrow) y Pasarela dLocal** | Pago inicial (*pay-in*) retenido en custodia temporal vía dLocal for Platforms aplicando comisiones:<br>- Monto < 300 BOB: **15%** de comisión.<br>- Monto ≥ 300 BOB: **10%** de comisión. | Fondos en estado `EN_CUSTODIA`. Ningún desembolso ocurre antes de validar el hito. |
+| **RF-06** | **Gestión y Aprobación de Hitos** | Ciclo de entrega por etapas. Al aprobar el estudiante el hito, el motor ejecuta el *pay-out* neto al consultor. | Al confirmar `Aprobar Hito`, se dispara la orden de dispersión a la cuenta de dLocal del consultor. |
+| **RF-07** | **Almacenamiento Documental con Restricción de Tipos** | Subida/descarga mediante URLs firmadas directas a Cloudflare R2 con validación estricta de extensiones y tipos MIME documentales (`.pdf`, `.docx`, `.xlsx`, `.pptx`, `.txt`, `.md`) y límite de 25 MB por archivo. | El sistema rechaza cualquier archivo binario/ejecutable y deniega subidas mayores a la cuota estipulada. |
+| **RF-08** | **Notificaciones Push y PWA** | Instalación como app web y notificaciones push para avisos de inicio de videollamada, fondos retenidos y entregas de tareas. | PWA instalable con Service Worker gestionando alertas push y modo sin conexión básico. |
+| **RF-09** | **Gestión de Disputas y Arbitraje** | Posibilidad de congelar la dispersión de fondos ante inconformidad para resolución por el Administrador. | Estado transaccional pasa a `EN_DISPUTA` bloqueando la liquidación hasta dictamen. |
+| **RF-10** | **Salas de Videollamada Embebidas (Whereby API)** | Integración de salas virtuales de 60 minutos mediante Whereby Embedded API para las sesiones entre consultor y estudiante. | La sala se genera bajo demanda con URL efímera, expira a los 60 minutos y muestra temporizador en pantalla. |
+| **RF-11** | **Pizarrón Interactivo (Miro) y Transcripción IA** | Embeber pizarra colaborativa de Miro dentro de la sala de videollamada y activar la opción de transcripción con IA nativa de Whereby para generar el acta/resumen de la sesión. | Los participantes interactúan en el pizarrón Miro durante la llamada y el resumen transcrito queda asociado a la sesión al finalizar. |
+| **RF-12** | **Tablero Kanban Colaborativo de Seguimiento** | Cada proyecto/asesoría cuenta con un tablero Kanban simple (*Por Hacer*, *En Progreso*, *En Revisión*, *Completado*) editable por estudiante y consultor. | Las tareas del proyecto se mueven de columna reflejando el progreso del TFG o práctica en tiempo real. |
+| **RF-13** | **Políticas de Uso y Prevención de Desintermediación** | Módulo de aceptación obligatoria de Términos y Condiciones, acuerdos de confidencialidad (NDA), deberes éticos y cláusulas de prohibición estricta de pagos y acuerdos fuera de la plataforma con penalización de suspensión y pérdida de fondos. | El usuario debe firmar digitalmente las políticas previo a su primera interacción en la plataforma; se registran logs de auditoría. |
 
 ---
 
@@ -63,12 +72,12 @@ La plataforma es un ecosistema digital de intermediación académica y laboral q
 
 | ID | Categoría | Requisito Técnico | Métrica / Umbral Verificable |
 | :--- | :--- | :--- | :--- |
-| **RNF-01** | **Rendimiento / Latencia** | Las APIs de microservicios deben responder con alta eficiencia bajo carga típica. | Tiempo de respuesta p95 < 200 ms en endpoints REST (excluyendo llamadas a pasarelas externas). |
-| **RNF-02** | **Rendimiento Web (CWV)** | La PWA debe cumplir con los estándares de Core Web Vitals de Google. | LCP (Largest Contentful Paint) < 2.5 s; INP < 200 ms; CLS < 0.1. |
-| **RNF-03** | **Seguridad en Tránsito y Reposo** | Toda comunicación cliente-servidor e inter-servicio debe estar encriptada; datos sensibles protegidos. | TLS 1.3 forzado en toda la red; datos contables y bancarios cifrados con AES-256 en base de datos. |
-| **RNF-04** | **Escalabilidad y Desacoplamiento** | Cada microservicio debe ser desplegable en contenedor de forma independiente. | Contenedores Docker ligeros (< 250 MB); arranque en frío < 5 s para entornos serverless (Cloud Run/Koyeb). |
-| **RNF-05** | **Portabilidad de Almacenamiento** | La capa de acceso a objetos debe utilizar clientes estándar compatibles con AWS S3 SDK. | Cambio de proveedor (R2 -> Google Cloud Storage / AWS S3) viable modificando únicamente variables de entorno (`ENDPOINT`, `ACCESS_KEY`, `SECRET_KEY`). |
-| **RNF-06** | **Disponibilidad** | Tolerancia a fallos en servicios no críticos sin interrupción de la navegación básica. | SLA objetivo del 99.9% de uptime mensual. Si la pasarela de pagos está en mantenimiento, la navegación y agendamiento permanecen operativos. |
+| **RNF-01** | **Rendimiento / Latencia** | Rendimiento óptimo en backend REST. | Tiempo de respuesta p95 < 200 ms en APIs propias (excluyendo llamadas a dLocal/Whereby). |
+| **RNF-02** | **Rendimiento Web (CWV)** | Optimización PWA según métricas Google. | LCP < 2.5 s; INP < 200 ms; CLS < 0.1. |
+| **RNF-03** | **Seguridad en Tránsito y Reposo** | Cifrado integral y protección documental. | TLS 1.3 forzado en toda la red; datos contables y bancarios cifrados con AES-256; URLs firmadas con vigencia ≤ 15 min. |
+| **RNF-04** | **Calidad de Transmisión WebRTC** | Estabilidad de videollamadas embebidas. | Conexiones Whereby con latencia de audio/video < 150 ms bajo conexiones estándar de banda ancha (≥ 5 Mbps). |
+| **RNF-05** | **Integridad Documental y Almacenamiento** | Prevención de código malicioso en repositorios. | Validación de Magic Bytes en la subida para impedir spoofing de extensiones en archivos Office y PDF. |
+| **RNF-06** | **Disponibilidad** | Tolerancia a fallos por desacoplamiento. | Disponibilidad 99.9%. Fallas temporales en Whereby o dLocal no interrumpen el acceso a documentos ni al Kanban. |
 
 ---
 
@@ -76,8 +85,9 @@ La plataforma es un ecosistema digital de intermediación académica y laboral q
 
 | Objetivo Estratégico (Envisioning) | Requisitos Funcionales Asociados | Requisitos No Funcionales |
 | :--- | :--- | :--- |
-| Asesorías protegidas para pregrado y posgrado | RF-01, RF-02, RF-03, RF-06 | RNF-01, RNF-06 |
-| Vinculación con prácticas y retos de empresas | RF-01, RF-04, RF-06 | RNF-01, RNF-04 |
-| Monetización garantizada y pagos locales | RF-05, RF-06, RF-09 | RNF-03, RNF-06 |
-| Accesibilidad universal sin costo de tiendas de apps | RF-08 | RNF-02, RNF-04 |
-| Gestión documental segura de tesis y acuerdos | RF-07 | RNF-03, RNF-05 |
+| Asesorías protegidas y seguimiento de tesis/prácticas | RF-01, RF-02, RF-03, RF-06, RF-10, RF-11, RF-12 | RNF-01, RNF-04, RNF-06 |
+| Vinculación con retos corporativos y pre-hiring | RF-01, RF-04, RF-06, RF-12 | RNF-01, RNF-06 |
+| Monetización garantizada y pagos locales | RF-05, RF-06, RF-09, RF-13 | RNF-03, RNF-06 |
+| Prevención de desintermediación y marco normativo | RF-13 | RNF-03, RNF-06 |
+| Gestión documental acotada y segura | RF-07, RF-12 | RNF-03, RNF-05 |
+| Accesibilidad universal sin costo de tiendas de apps | RF-08, RF-10 | RNF-02, RNF-04 |
