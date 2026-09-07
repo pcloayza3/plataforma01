@@ -104,3 +104,45 @@ CREATE INDEX IF NOT EXISTS idx_projects_consultant ON projects(consultant_id);
 CREATE INDEX IF NOT EXISTS idx_milestones_project ON milestones(project_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_project ON kanban_tasks(project_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_due_date ON kanban_tasks(due_date);
+
+-- ==========================================
+-- PASO 3: GESTIÓN FINANCIERA Y CUSTODIA INTERNA DE LA PLATAFORMA
+-- ==========================================
+
+CREATE TABLE IF NOT EXISTS platform_custody_transactions (
+    id VARCHAR(100) PRIMARY KEY,
+    project_id VARCHAR(100) NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    milestone_id VARCHAR(100) REFERENCES milestones(id) ON DELETE SET NULL,
+    student_id VARCHAR(100) NOT NULL REFERENCES users(id),
+    consultant_id VARCHAR(100) NOT NULL REFERENCES users(id),
+    payment_method VARCHAR(50) NOT NULL DEFAULT 'QR_SIMPLE', -- QR_SIMPLE, TARJETA, TRANSFERENCIA
+    payment_option VARCHAR(50) NOT NULL DEFAULT 'MILESTONE', -- MILESTONE, PROYECTO_COMPLETO
+    gross_amount NUMERIC(12, 2) NOT NULL,
+    currency VARCHAR(10) NOT NULL DEFAULT 'BOB',
+    commission_rate NUMERIC(5, 2) NOT NULL, -- 15.00 o 10.00
+    commission_amount NUMERIC(12, 2) NOT NULL,
+    net_consultant_amount NUMERIC(12, 2) NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'PENDIENTE_PAGO', -- PENDIENTE_PAGO, EN_CUSTODIA_PLATAFORMA, LIQUIDADO_AL_CONSULTOR, REEMBOLSADO
+    funded_at TIMESTAMP WITH TIME ZONE,
+    released_at TIMESTAMP WITH TIME ZONE,
+    metadata JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS platform_payouts (
+    id VARCHAR(100) PRIMARY KEY,
+    transaction_id VARCHAR(100) NOT NULL REFERENCES platform_custody_transactions(id) ON DELETE CASCADE,
+    consultant_id VARCHAR(100) NOT NULL REFERENCES users(id),
+    amount NUMERIC(12, 2) NOT NULL,
+    currency VARCHAR(10) NOT NULL DEFAULT 'BOB',
+    consultant_account VARCHAR(100) NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'COMPLETADO', -- PROCESANDO, COMPLETADO, FALLIDO
+    processed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_custody_project ON platform_custody_transactions(project_id);
+CREATE INDEX IF NOT EXISTS idx_custody_student ON platform_custody_transactions(student_id);
+CREATE INDEX IF NOT EXISTS idx_custody_consultant ON platform_custody_transactions(consultant_id);
+CREATE INDEX IF NOT EXISTS idx_custody_status ON platform_custody_transactions(status);
+
