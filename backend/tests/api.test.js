@@ -28,7 +28,7 @@ test("API: GET /health retorna status ok", async () => {
   assert.equal(res.status, 200);
   const data = await res.json();
   assert.equal(data.status, "ok");
-  assert.equal(data.service, "plataforma01-backend");
+  assert.equal(data.service, "thesisbridge-backend");
 });
 
 test("API: POST /api/auth/register valida política anti-desintermediación", async () => {

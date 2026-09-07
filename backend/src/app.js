@@ -3,6 +3,7 @@ import cors from "cors";
 import { authRouter } from "./routes/authRoutes.js";
 import { projectRouter } from "./routes/projectRoutes.js";
 import { escrowRouter } from "./routes/escrowRoutes.js";
+import { paymentRouter } from "./routes/paymentRoutes.js";
 import { sessionRouter } from "./routes/sessionRoutes.js";
 import { ratingRouter } from "./routes/ratingRoutes.js";
 import { storageRouter } from "./routes/storageRoutes.js";
@@ -16,7 +17,7 @@ app.use(express.json());
 app.get("/health", (req, res) => {
   res.json({
     status: "ok",
-    service: "plataforma01-backend",
+    service: "thesisbridge-backend",
     uptime: process.uptime(),
     timestamp: new Date().toISOString()
   });
@@ -25,6 +26,7 @@ app.get("/health", (req, res) => {
 // Rutas de API
 app.use("/api/auth", authRouter);
 app.use("/api/projects", projectRouter);
+app.use("/api/payments", paymentRouter);
 app.use("/api/escrow", escrowRouter);
 app.use("/api/sessions", sessionRouter);
 app.use("/api/ratings", ratingRouter);

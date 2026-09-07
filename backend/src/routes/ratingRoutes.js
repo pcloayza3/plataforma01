@@ -1,46 +1,27 @@
 import express from "express";
-import { RatingManager } from "../domain/ratingManager.js";
+import { RatingService } from "../services/ratingService.js";
 
 export const ratingRouter = express.Router();
-export const ratingManager = new RatingManager();
 
-// Seed de algunas calificaciones iniciales
-ratingManager.addRating({
-  sourceUserId: "usr_student_01",
-  sourceRole: "STUDENT",
-  targetUserId: "usr_consultant_01",
-  targetRole: "CONSULTANT",
-  type: "SESION_VIDEOLLAMADA",
-  stars: 5,
-  comment: "Excelente asesoría, me aclaró toda la metodología para la redacción de la tesis."
-});
-
-ratingManager.addRating({
-  sourceUserId: "usr_consultant_01",
-  sourceRole: "CONSULTANT",
-  targetUserId: "usr_student_01",
-  targetRole: "STUDENT",
-  type: "SESION_VIDEOLLAMADA",
-  stars: 5,
-  comment: "Estudiante muy dedicada y puntual con sus entregas previas."
-});
-
-// Registrar calificación
-ratingRouter.post("/", (req, res) => {
+/**
+ * POST /api/ratings
+ * Registrar calificación multilateral de 1 a 5 estrellas
+ */
+ratingRouter.post("/", async (req, res) => {
   try {
-    const { sourceUserId, sourceRole, targetUserId, targetRole, type, referenceId, stars, comment } = req.body;
-    const rating = ratingManager.addRating({
+    const { sourceUserId, sourceRole, targetUserId, targetRole, projectId, milestoneId, stars, comment } = req.body;
+    const rating = await RatingService.recordRating({
       sourceUserId,
       sourceRole,
       targetUserId,
       targetRole,
-      type,
-      referenceId,
+      projectId,
+      milestoneId,
       stars,
       comment
     });
     return res.status(201).json({
-      message: "Calificación registrada con éxito.",
+      message: "Calificación registrada con éxito en PostgreSQL.",
       rating
     });
   } catch (err) {
@@ -48,8 +29,15 @@ ratingRouter.post("/", (req, res) => {
   }
 });
 
-// Obtener resumen de calificaciones de un usuario
-ratingRouter.get("/user/:userId", (req, res) => {
-  const summary = ratingManager.getUserRatingSummary(req.params.userId);
-  return res.json(summary);
+/**
+ * GET /api/ratings/user/:userId
+ * Obtener resumen de reputación y promedios de estrellas
+ */
+ratingRouter.get("/user/:userId", async (req, res) => {
+  try {
+    const summary = await RatingService.getSummary(req.params.userId);
+    return res.json(summary);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
 });
