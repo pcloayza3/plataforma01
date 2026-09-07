@@ -1,7 +1,7 @@
 {
-  "name": "plataforma01-backend",
+  "name": "thesisbridge-backend",
   "version": "1.0.0",
-  "description": "Backend API de plataforma01 - Intermediación Académica y Profesional con Escrow, Whereby y Miro",
+  "description": "Backend API de ThesisBridge - Plataforma Integral de Intermediación Académica y Profesional",
   "main": "src/server.js",
   "type": "module",
   "scripts": {
