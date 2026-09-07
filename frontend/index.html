@@ -611,7 +611,7 @@
           </div>
         </div>
 
-        <button onclick="navigateToScreen('screen-10')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl text-xs shadow-sm">Confirmar Reserva e Ingresar a Sala</button>
+        <button onclick="startWherebyMiroSession()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl text-xs shadow-sm">Confirmar Reserva e Iniciar Sala Whereby (60 min)</button>
       </div>
     </section>
 
@@ -622,17 +622,17 @@
         <div class="px-6 py-3 bg-slate-800 flex items-center justify-between border-b border-slate-700">
           <div class="flex items-center space-x-3">
             <span class="w-3 h-3 rounded-full bg-red-500 animate-ping"></span>
-            <span class="font-bold text-sm">Sesión en Vivo: Asesoría Metodológica Hito 1</span>
-            <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-slate-300">Whereby + Miro</span>
+            <span id="sessionHeaderTitle" class="font-bold text-sm">Sesión en Vivo: Asesoría Metodológica Hito 1</span>
+            <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-slate-300">Whereby 60m + Miro</span>
           </div>
           
           <!-- Temporizador 60 minutos con alerta visual -->
           <div class="flex items-center space-x-3">
             <div class="bg-slate-900 px-3 py-1 rounded-lg border border-slate-700 text-xs font-mono font-bold text-emerald-400 flex items-center gap-1.5">
               <span>⏱️ Tiempo Restante:</span>
-              <span class="text-sm">48:22</span>
+              <span id="sessionCountdownTimer" class="text-sm">59:59</span>
             </div>
-            <button onclick="navigateToScreen('screen-11')" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">Finalizar Sesión</button>
+            <button onclick="endWherebySession()" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">Finalizar Sesión</button>
           </div>
         </div>
 
@@ -1294,6 +1294,79 @@
         alert("⭐ Calificación registrada exitosamente.");
         navigateToScreen('screen-12');
       }
+    }
+
+    // ==================== INTEGRACIÓN DE SESIONES (WHEREBY 60M + MIRO + MONGODB) ====================
+    let activeSession = null;
+    let sessionTimerInterval = null;
+    let sessionRemainingSeconds = 60 * 60; // 60 minutos estrictos
+
+    async function startWherebyMiroSession() {
+      try {
+        const res = await fetch(`${API_BASE}/api/sessions`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            projectId: "prj_tesis_ia_01",
+            milestoneId: "ms_1",
+            studentId: "usr_student_01",
+            consultantId: "usr_consultant_01",
+            durationMinutes: 60
+          })
+        });
+
+        if (!res.ok) throw new Error("No se pudo iniciar la sala");
+        activeSession = await res.json();
+
+        // Iniciar temporizador regresivo de 60 minutos
+        sessionRemainingSeconds = 60 * 60;
+        if (sessionTimerInterval) clearInterval(sessionTimerInterval);
+        
+        sessionTimerInterval = setInterval(() => {
+          sessionRemainingSeconds--;
+          if (sessionRemainingSeconds <= 0) {
+            clearInterval(sessionTimerInterval);
+            alert("⏰ Tiempo de 60 minutos completado. La videollamada ha finalizado automáticamente.");
+            endWherebySession();
+            return;
+          }
+          const m = Math.floor(sessionRemainingSeconds / 60).toString().padStart(2, '0');
+          const s = (sessionRemainingSeconds % 60).toString().padStart(2, '0');
+          const tEl = document.getElementById('sessionCountdownTimer');
+          if (tEl) tEl.textContent = `${m}:${s}`;
+        }, 1000);
+
+        navigateToScreen('screen-10');
+      } catch (err) {
+        alert(`Iniciando sala local: ${err.message}`);
+        navigateToScreen('screen-10');
+      }
+    }
+
+    async function endWherebySession() {
+      if (sessionTimerInterval) clearInterval(sessionTimerInterval);
+
+      if (activeSession && activeSession.id) {
+        try {
+          const res = await fetch(`${API_BASE}/api/sessions/${activeSession.id}/end`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              summary: "Sesión de 60 minutos completada satisfactoriamente con acuerdos técnicos registrados.",
+              agreements: [
+                "Revisión de arquitectura y pipeline de datos completada",
+                "Acuerdo de entrega de borradores de tesis para el próximo hito"
+              ]
+            })
+          });
+          const data = await res.json();
+          alert(`✅ Videollamada finalizada.\n• Acta y Transcripción IA resguardadas en MongoDB:\n"${data.transcript.summary}"`);
+        } catch (e) {
+          console.warn("[Session] Error al finalizar en backend:", e);
+        }
+      }
+
+      navigateToScreen('screen-11');
     }
 
     // Iniciar verificación al cargar
