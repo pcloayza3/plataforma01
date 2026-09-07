@@ -17,7 +17,7 @@ app.use(express.json());
 app.get("/health", (req, res) => {
   res.json({
     status: "ok",
-    service: "plataforma01-backend",
+    service: "thesisbridge-backend",
     uptime: process.uptime(),
     timestamp: new Date().toISOString()
   });
