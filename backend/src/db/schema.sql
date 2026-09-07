@@ -146,3 +146,39 @@ CREATE INDEX IF NOT EXISTS idx_custody_student ON platform_custody_transactions(
 CREATE INDEX IF NOT EXISTS idx_custody_consultant ON platform_custody_transactions(consultant_id);
 CREATE INDEX IF NOT EXISTS idx_custody_status ON platform_custody_transactions(status);
 
+-- ==========================================
+-- PASO 5: CALIFICACIÓN MULTILATERAL (1..5 ESTRELLAS) Y ENTREGABLES R2
+-- ==========================================
+
+CREATE TABLE IF NOT EXISTS ratings (
+    id VARCHAR(100) PRIMARY KEY,
+    source_user_id VARCHAR(100) NOT NULL REFERENCES users(id),
+    source_role VARCHAR(50) NOT NULL, -- STUDENT, CONSULTANT, COMPANY, INSTITUTION
+    target_user_id VARCHAR(100) NOT NULL REFERENCES users(id),
+    target_role VARCHAR(50) NOT NULL, -- STUDENT, CONSULTANT, COMPANY, INSTITUTION
+    project_id VARCHAR(100) REFERENCES projects(id) ON DELETE SET NULL,
+    milestone_id VARCHAR(100) REFERENCES milestones(id) ON DELETE SET NULL,
+    stars INTEGER NOT NULL CHECK (stars >= 1 AND stars <= 5),
+    comment TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS project_documents (
+    id VARCHAR(100) PRIMARY KEY,
+    project_id VARCHAR(100) NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    milestone_id VARCHAR(100) REFERENCES milestones(id) ON DELETE SET NULL,
+    uploaded_by VARCHAR(100) NOT NULL REFERENCES users(id),
+    file_name VARCHAR(255) NOT NULL,
+    file_size_bytes BIGINT NOT NULL,
+    file_extension VARCHAR(20) NOT NULL,
+    storage_key VARCHAR(500) NOT NULL,
+    public_url VARCHAR(1000) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_ratings_target ON ratings(target_user_id);
+CREATE INDEX IF NOT EXISTS idx_ratings_source ON ratings(source_user_id);
+CREATE INDEX IF NOT EXISTS idx_docs_project ON project_documents(project_id);
+CREATE INDEX IF NOT EXISTS idx_docs_milestone ON project_documents(milestone_id);
+
+
