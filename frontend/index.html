@@ -112,51 +112,111 @@
     <!-- ==================== PANTALLA 02: REGISTRO / LOGIN ==================== -->
     <section id="screen-02" class="screen-container">
       <div class="max-w-xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
-        <h2 class="text-2xl font-bold text-slate-900 text-center mb-2">Crear Cuenta en Plataforma01</h2>
-        <p class="text-xs text-slate-500 text-center mb-6">Selecciona tu rol en el ecosistema académico y profesional</p>
-        
-        <!-- Tarjetas de Selección de Rol -->
-        <div class="grid grid-cols-2 gap-3 mb-6">
-          <label class="border-2 border-indigo-600 bg-indigo-50/40 rounded-xl p-3 cursor-pointer flex flex-col items-center text-center">
-            <input type="radio" name="rol" checked class="hidden">
-            <span class="text-2xl mb-1">🎓</span>
-            <span class="text-xs font-bold text-indigo-900">Estudiante</span>
-            <span class="text-[10px] text-slate-500">Pregrado / Posgrado</span>
-          </label>
-          <label class="border border-slate-200 rounded-xl p-3 cursor-pointer flex flex-col items-center text-center hover:border-slate-300">
-            <input type="radio" name="rol" class="hidden">
-            <span class="text-2xl mb-1">👨‍🏫</span>
-            <span class="text-xs font-bold text-slate-800">Consultor</span>
-            <span class="text-[10px] text-slate-500">Experto / Tutor</span>
-          </label>
-          <label class="border border-slate-200 rounded-xl p-3 cursor-pointer flex flex-col items-center text-center hover:border-slate-300">
-            <input type="radio" name="rol" class="hidden">
-            <span class="text-2xl mb-1">🏢</span>
-            <span class="text-xs font-bold text-slate-800">Empresa</span>
-            <span class="text-[10px] text-slate-500">Retos & Pasantías</span>
-          </label>
-          <label class="border border-slate-200 rounded-xl p-3 cursor-pointer flex flex-col items-center text-center hover:border-slate-300">
-            <input type="radio" name="rol" class="hidden">
-            <span class="text-2xl mb-1">🏛️</span>
-            <span class="text-xs font-bold text-slate-800">Institución</span>
-            <span class="text-[10px] text-slate-500">Universidad / Instituto</span>
-          </label>
+        <!-- Selector de Modo (Registro / Login) -->
+        <div class="flex border-b border-slate-200 mb-6">
+          <button id="tabRegisterBtn" onclick="switchAuthTab('register')" class="flex-1 pb-3 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 transition">
+            Crear Cuenta
+          </button>
+          <button id="tabLoginBtn" onclick="switchAuthTab('login')" class="flex-1 pb-3 text-sm font-semibold text-slate-500 hover:text-slate-800 transition">
+            Iniciar Sesión
+          </button>
         </div>
 
-        <div class="space-y-4">
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Correo Electrónico</label>
-            <input type="email" placeholder="tu.correo@ejemplo.com" class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        <!-- FORMULARIO 1: REGISTRO -->
+        <div id="authRegisterView" class="space-y-4">
+          <p class="text-xs text-slate-500 text-center mb-2">Selecciona tu rol en el ecosistema académico y profesional</p>
+          
+          <!-- Selector de Rol -->
+          <div class="grid grid-cols-2 gap-3 mb-4">
+            <button type="button" onclick="selectRole('STUDENT')" id="roleBtn_STUDENT" class="role-card border-2 border-indigo-600 bg-indigo-50/40 rounded-xl p-3 flex flex-col items-center text-center transition">
+              <span class="text-2xl mb-1">🎓</span>
+              <span class="text-xs font-bold text-indigo-900">Estudiante</span>
+              <span class="text-[10px] text-slate-500">Pregrado / Posgrado</span>
+            </button>
+            <button type="button" onclick="selectRole('CONSULTANT')" id="roleBtn_CONSULTANT" class="role-card border border-slate-200 rounded-xl p-3 flex flex-col items-center text-center hover:border-slate-300 transition">
+              <span class="text-2xl mb-1">👨‍🏫</span>
+              <span class="text-xs font-bold text-slate-800">Consultor</span>
+              <span class="text-[10px] text-slate-500">Experto / Tutor</span>
+            </button>
+            <button type="button" onclick="selectRole('COMPANY')" id="roleBtn_COMPANY" class="role-card border border-slate-200 rounded-xl p-3 flex flex-col items-center text-center hover:border-slate-300 transition">
+              <span class="text-2xl mb-1">🏢</span>
+              <span class="text-xs font-bold text-slate-800">Empresa</span>
+              <span class="text-[10px] text-slate-500">Retos & Pasantías</span>
+            </button>
+            <button type="button" onclick="selectRole('INSTITUTION')" id="roleBtn_INSTITUTION" class="role-card border border-slate-200 rounded-xl p-3 flex flex-col items-center text-center hover:border-slate-300 transition">
+              <span class="text-2xl mb-1">🏛️</span>
+              <span class="text-xs font-bold text-slate-800">Institución</span>
+              <span class="text-[10px] text-slate-500">Universidad / Instituto</span>
+            </button>
           </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Nombre Completo o Razón Social</label>
+            <input id="regFullName" type="text" placeholder="Ej: Dra. María Paredes" class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Correo Electrónico Institucional o Personal</label>
+            <input id="regEmail" type="email" placeholder="maria.paredes@universidad.bo" class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Contraseña</label>
-            <input type="password" placeholder="••••••••" class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            <input id="regPassword" type="password" placeholder="Mínimo 8 caracteres" class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
           </div>
+
+          <!-- Bio / CV con Sanitización en Vivo -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label class="text-xs font-semibold text-slate-700">Presentación / Curriculum (Sin Enlaces)</label>
+              <span class="text-[10px] text-slate-400">🛡️ Anti-desintermediación activa</span>
+            </div>
+            <textarea id="regBio" oninput="checkAntiLinksLive(this.value)" rows="3" placeholder="Describe tu experiencia académica o profesional. No incluyas URLs, emails o teléfonos..." class="w-full text-xs border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+            <div id="antiLinkWarning" class="hidden text-[11px] text-rose-600 bg-rose-50 border border-rose-200 rounded-lg p-2 mt-1 font-semibold">
+              ⚠️ Infracción detectada: No está permitido compartir enlaces externos, correos ni teléfonos de contacto.
+            </div>
+          </div>
+
           <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 flex items-start space-x-2">
-            <input type="checkbox" checked class="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500">
-            <span>Acepto las <strong>Políticas de Uso y No Evasión</strong>. Reconozco que está estrictamente prohibido compartir enlaces, teléfonos o realizar acuerdos económicos por fuera de la plataforma.</span>
+            <input id="regAcceptTerms" type="checkbox" checked class="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500">
+            <span>Acepto las <strong>Políticas de Uso y No Evasión</strong> de plataforma01. Todo pago y sesión se canaliza bajo custodia de la plataforma.</span>
           </div>
-          <button onclick="navigateToScreen('screen-03')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl shadow-sm transition">Crear Cuenta y Continuar</button>
+
+          <button onclick="handleRegisterSubmit()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl shadow-sm transition">
+            Crear Cuenta y Guardar en PostgreSQL
+          </button>
+        </div>
+
+        <!-- FORMULARIO 2: LOGIN -->
+        <div id="authLoginView" class="hidden space-y-4">
+          <p class="text-xs text-slate-500 text-center mb-4">Ingresa con tus credenciales seguras (PostgreSQL + JWT)</p>
+          
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Correo Electrónico</label>
+            <input id="loginEmail" type="email" value="cmendoza@universidad.edu.bo" placeholder="tu.correo@ejemplo.com" class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Contraseña</label>
+            <input id="loginPassword" type="password" value="Password123!" placeholder="••••••••" class="w-full text-sm border border-slate-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+
+          <button onclick="handleLoginSubmit()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl shadow-sm transition">
+            Iniciar Sesión con JWT
+          </button>
+
+          <!-- Acceso Rápido de Prueba -->
+          <div class="border-t border-slate-100 pt-4">
+            <p class="text-[11px] font-bold text-slate-500 text-center mb-2">Accesos Rápidos de Prueba:</p>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <button onclick="quickLogin('cmendoza@universidad.edu.bo', 'Password123!')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg font-medium transition text-center">
+                👨‍🏫 Dr. Mendoza (Consultor)
+              </button>
+              <button onclick="quickLogin('ana.flores@estudiante.edu.bo', 'Password123!')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg font-medium transition text-center">
+                🎓 Ana Flores (Estudiante)
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -855,6 +915,144 @@
         document.getElementById('screenSelect').value = screenId;
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
+    }
+
+    let activeRole = 'STUDENT';
+    let currentAuthToken = localStorage.getItem('p01_jwt') || null;
+    let currentUserData = null;
+
+    function switchAuthTab(tab) {
+      const regTab = document.getElementById('tabRegisterBtn');
+      const logTab = document.getElementById('tabLoginBtn');
+      const regView = document.getElementById('authRegisterView');
+      const logView = document.getElementById('authLoginView');
+
+      if (tab === 'register') {
+        regTab.className = "flex-1 pb-3 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 transition";
+        logTab.className = "flex-1 pb-3 text-sm font-semibold text-slate-500 hover:text-slate-800 transition";
+        regView.classList.remove('hidden');
+        logView.classList.add('hidden');
+      } else {
+        logTab.className = "flex-1 pb-3 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 transition";
+        regTab.className = "flex-1 pb-3 text-sm font-semibold text-slate-500 hover:text-slate-800 transition";
+        logView.classList.remove('hidden');
+        regView.classList.add('hidden');
+      }
+    }
+
+    function selectRole(role) {
+      activeRole = role;
+      const roles = ['STUDENT', 'CONSULTANT', 'COMPANY', 'INSTITUTION'];
+      roles.forEach(r => {
+        const btn = document.getElementById(`roleBtn_${r}`);
+        if (btn) {
+          if (r === role) {
+            btn.className = "role-card border-2 border-indigo-600 bg-indigo-50/40 rounded-xl p-3 flex flex-col items-center text-center transition";
+          } else {
+            btn.className = "role-card border border-slate-200 rounded-xl p-3 flex flex-col items-center text-center hover:border-slate-300 transition";
+          }
+        }
+      });
+    }
+
+    function checkAntiLinksLive(text) {
+      const warning = document.getElementById('antiLinkWarning');
+      const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+|\b[a-zA-Z0-9.-]+\.(?:com|bo|org|net|edu|io|co|me|dev)\b)/i;
+      const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/i;
+      const phoneRegex = /(\+?\d{1,3}[\s-]?)?\(?\d{2,3}\)?[\s-]?\d{4,5}[\s-]?\d{3,5}|\b\d{7,10}\b/;
+
+      if (urlRegex.test(text) || emailRegex.test(text) || phoneRegex.test(text)) {
+        warning.classList.remove('hidden');
+      } else {
+        warning.classList.add('hidden');
+      }
+    }
+
+    async function handleRegisterSubmit() {
+      const fullName = document.getElementById('regFullName').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const password = document.getElementById('regPassword').value;
+      const bio = document.getElementById('regBio').value.trim();
+
+      if (!fullName || !email || !password) {
+        alert("Por favor completa nombre, email y contraseña.");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fullName,
+            email,
+            password,
+            role: activeRole,
+            bio,
+            cvSummary: bio,
+            hourlyRateBOB: activeRole === 'CONSULTANT' ? 120 : 0
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          alert(`❌ Error en el registro: ${data.error}`);
+          return;
+        }
+
+        localStorage.setItem('p01_jwt', data.token);
+        currentAuthToken = data.token;
+        currentUserData = data.user;
+        alert(`✅ ¡Registro Exitoso en PostgreSQL!\nBienvenido/a ${data.user.fullName}.\nToken JWT generado.`);
+
+        // Redirigir según rol
+        if (activeRole === 'CONSULTANT') navigateToScreen('screen-03');
+        else if (activeRole === 'STUDENT') navigateToScreen('screen-04');
+        else navigateToScreen('screen-05');
+      } catch (err) {
+        alert(`Error conectando con el backend: ${err.message}`);
+      }
+    }
+
+    async function handleLoginSubmit() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+
+      if (!email || !password) {
+        alert("Por favor ingresa email y contraseña.");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          alert(`❌ Error en autenticación: ${data.error}`);
+          return;
+        }
+
+        localStorage.setItem('p01_jwt', data.token);
+        currentAuthToken = data.token;
+        currentUserData = data.user;
+        alert(`✅ Sesión Iniciada con Éxito.\nAutenticado como: ${data.user.fullName} (${data.user.role})`);
+
+        if (data.user.role === 'CONSULTANT') navigateToScreen('screen-03');
+        else if (data.user.role === 'STUDENT') navigateToScreen('screen-04');
+        else navigateToScreen('screen-05');
+      } catch (err) {
+        alert(`Error al iniciar sesión: ${err.message}`);
+      }
+    }
+
+    async function quickLogin(email, password) {
+      document.getElementById('loginEmail').value = email;
+      document.getElementById('loginPassword').value = password;
+      await handleLoginSubmit();
     }
 
     // Integración Backend: Consultar progreso y semáforo
