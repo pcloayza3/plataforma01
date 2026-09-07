@@ -717,91 +717,82 @@
     <!-- ==================== PANTALLA 12: TABLERO KANBAN DEL PROYECTO ==================== -->
     <section id="screen-12" class="screen-container">
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-6">
-        <!-- Header del Proyecto & Progreso -->
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-slate-100 pb-4">
+        <!-- Header del Proyecto, Semáforo & Progreso -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-100 pb-5">
           <div>
-            <h2 class="text-xl font-bold text-slate-900">Tablero Kanban &bull; Tesis de Licenciatura</h2>
-            <p class="text-xs text-slate-500">Estudiante: Ana Lucía Rojas &bull; Consultor: Dr. Carlos Meneses</p>
+            <div class="flex items-center gap-2 mb-1">
+              <h2 id="kanbanProjectTitle" class="text-xl font-extrabold text-slate-900">Sistema Predictivo de Diagnóstico Médico Asistido por IA</h2>
+              <span id="kanbanHealthBadge" class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                A TIEMPO
+              </span>
+            </div>
+            <p id="kanbanProjectSubtitle" class="text-xs text-slate-500">Estudiante: Ana Flores &bull; Consultor: Dr. Carlos Mendoza &bull; PostgreSQL Activo</p>
           </div>
-          <div class="w-full md:w-64 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-            <div class="flex justify-between text-[11px] font-bold text-slate-700 mb-1">
-              <span>Avance Global</span>
-              <span class="text-indigo-600">40% Completado</span>
+
+          <div class="flex items-center gap-3 w-full md:w-auto">
+            <!-- Barra de Avance Global -->
+            <div class="w-full md:w-56 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+              <div class="flex justify-between text-[11px] font-bold text-slate-700 mb-1">
+                <span>Avance Global</span>
+                <span id="kanbanProgressText" class="text-indigo-600">33% Tareas / 25% Hitos</span>
+              </div>
+              <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                <div id="kanbanProgressBar" class="bg-indigo-600 h-2 rounded-full transition-all duration-500" style="width: 33%;"></div>
+              </div>
             </div>
-            <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-              <div class="bg-indigo-600 h-2 rounded-full w-[40%]"></div>
-            </div>
+
+            <!-- Botón de Nueva Tarea -->
+            <button onclick="handleCreateTaskPrompt()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3.5 py-2.5 rounded-xl shadow-sm transition whitespace-nowrap">
+              + Nueva Tarea
+            </button>
           </div>
         </div>
 
-        <!-- 4 Columnas Kanban -->
+        <!-- 4 Columnas Kanban Dinámicas -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <!-- Columna 1: Por Hacer -->
-          <div class="bg-slate-50 rounded-xl p-3 border border-slate-200">
+          <!-- Columna 1: Por Hacer (TODO) -->
+          <div class="bg-slate-50 rounded-xl p-3 border border-slate-200 flex flex-col">
             <h3 class="font-bold text-xs text-slate-700 mb-3 flex items-center justify-between">
-              <span>Por Hacer</span>
-              <span class="bg-slate-200 text-slate-700 text-[10px] px-1.5 py-0.5 rounded">1</span>
+              <span>📋 Por Hacer</span>
+              <span id="badgeCount_TODO" class="bg-slate-200 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded-full">2</span>
             </h3>
-            <div class="space-y-2">
-              <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm text-xs">
-                <div class="flex justify-between items-start mb-1">
-                  <span class="font-bold text-slate-900">Hito 2: Implementación</span>
-                  <span class="text-[10px] font-extrabold text-indigo-600">60%</span>
-                </div>
-                <p class="text-[11px] text-slate-500 mb-2">Desarrollo del modelo de ML y pruebas de precisión.</p>
-                <div class="text-[10px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded font-medium">Pendiente de pago previo</div>
-              </div>
+            <div id="kanbanCol_TODO" class="space-y-2 flex-1">
+              <!-- Tarjetas dinámicas -->
             </div>
           </div>
 
-          <!-- Columna 2: En Progreso -->
-          <div class="bg-slate-50 rounded-xl p-3 border border-slate-200">
+          <!-- Columna 2: En Progreso (IN_PROGRESS) -->
+          <div class="bg-slate-50 rounded-xl p-3 border border-slate-200 flex flex-col">
             <h3 class="font-bold text-xs text-slate-700 mb-3 flex items-center justify-between">
-              <span>En Progreso</span>
-              <span class="bg-slate-200 text-slate-700 text-[10px] px-1.5 py-0.5 rounded">0</span>
+              <span>🚀 En Progreso</span>
+              <span id="badgeCount_IN_PROGRESS" class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded-full">0</span>
             </h3>
-            <div class="text-center py-8 text-xs text-slate-400">Sin tareas en progreso</div>
-          </div>
-
-          <!-- Columna 3: En Revisión -->
-          <div class="bg-slate-50 rounded-xl p-3 border border-slate-200">
-            <h3 class="font-bold text-xs text-slate-700 mb-3 flex items-center justify-between">
-              <span>En Revisión</span>
-              <span class="bg-indigo-100 text-indigo-700 text-[10px] px-1.5 py-0.5 rounded">1</span>
-            </h3>
-            <div class="bg-white p-3 rounded-lg border-2 border-indigo-400 shadow-sm text-xs space-y-2">
-              <div class="flex justify-between items-start">
-                <span class="font-bold text-slate-900">Hito 1: Marco Teórico</span>
-                <span class="text-[10px] font-extrabold text-indigo-600">40%</span>
-              </div>
-              <p class="text-[11px] text-slate-500">Documento entregado. Pendiente de aprobación final.</p>
-              
-              <!-- Semáforos de Avance y Feedback -->
-              <div class="space-y-1 pt-1 border-t border-slate-100 text-[10px]">
-                <div class="flex items-center justify-between">
-                  <span class="text-slate-500">Entrega Estudiante:</span>
-                  <span class="text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded">&bull; A Tiempo</span>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span class="text-slate-500">Guía Consultor:</span>
-                  <span class="text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded">&bull; Conforme</span>
-                </div>
-              </div>
-
-              <div class="flex gap-1 pt-2">
-                <button onclick="navigateToScreen('screen-13')" class="flex-1 bg-slate-100 text-slate-700 text-[11px] py-1 rounded font-semibold hover:bg-slate-200">Ver Archivos</button>
-                <button onclick="navigateToScreen('screen-14')" class="flex-1 bg-indigo-600 text-white text-[11px] py-1 rounded font-semibold hover:bg-indigo-700">Aprobar Hito</button>
-              </div>
+            <div id="kanbanCol_IN_PROGRESS" class="space-y-2 flex-1">
+              <!-- Tarjetas dinámicas -->
             </div>
           </div>
 
-          <!-- Columna 4: Completada -->
-          <div class="bg-slate-50 rounded-xl p-3 border border-slate-200">
+          <!-- Columna 3: En Revisión (IN_REVIEW) -->
+          <div class="bg-slate-50 rounded-xl p-3 border border-slate-200 flex flex-col">
             <h3 class="font-bold text-xs text-slate-700 mb-3 flex items-center justify-between">
-              <span>Completada</span>
-              <span class="bg-slate-200 text-slate-700 text-[10px] px-1.5 py-0.5 rounded">0</span>
+              <span>🔍 En Revisión</span>
+              <span id="badgeCount_IN_REVIEW" class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">0</span>
             </h3>
-            <div class="text-center py-8 text-xs text-slate-400">Aún no hay hitos completados</div>
+            <div id="kanbanCol_IN_REVIEW" class="space-y-2 flex-1">
+              <!-- Tarjetas dinámicas -->
+            </div>
+          </div>
+
+          <!-- Columna 4: Completada (DONE) -->
+          <div class="bg-slate-50 rounded-xl p-3 border border-slate-200 flex flex-col">
+            <h3 class="font-bold text-xs text-slate-700 mb-3 flex items-center justify-between">
+              <span>✅ Completadas</span>
+              <span id="badgeCount_DONE" class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">1</span>
+            </h3>
+            <div id="kanbanCol_DONE" class="space-y-2 flex-1">
+              <!-- Tarjetas dinámicas -->
+            </div>
           </div>
         </div>
       </div>
@@ -914,6 +905,9 @@
         target.classList.add('active');
         document.getElementById('screenSelect').value = screenId;
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (screenId === 'screen-12') {
+          loadKanbanBoard();
+        }
       }
     }
 
@@ -1055,16 +1049,158 @@
       await handleLoginSubmit();
     }
 
-    // Integración Backend: Consultar progreso y semáforo
-    async function refreshProjectProgress() {
+    // ==================== INTEGRACIÓN KANBAN Y PROYECTO (POSTGRESQL) ====================
+    let currentProjectData = null;
+
+    async function loadKanbanBoard(projectId = 'prj_tesis_ia_01') {
       try {
-        const res = await fetch(`${API_BASE}/api/projects/prj_tesis_ia_01/progress`);
+        const res = await fetch(`${API_BASE}/api/projects/${projectId}`);
+        if (!res.ok) throw new Error("No se pudo cargar el proyecto");
+        const data = await res.json();
+        currentProjectData = data;
+
+        // 1. Actualizar títulos
+        document.getElementById('kanbanProjectTitle').textContent = data.project.title;
+        document.getElementById('kanbanProjectSubtitle').innerHTML = 
+          `Estudiante: <strong>${data.project.student_name || 'Ana Flores'}</strong> &bull; Consultor: <strong>${data.project.consultant_name || 'Dr. Carlos Mendoza'}</strong> &bull; PostgreSQL Activo`;
+
+        // 2. Renderizar Columnas Kanban
+        const cols = {
+          'TODO': document.getElementById('kanbanCol_TODO'),
+          'IN_PROGRESS': document.getElementById('kanbanCol_IN_PROGRESS'),
+          'IN_REVIEW': document.getElementById('kanbanCol_IN_REVIEW'),
+          'DONE': document.getElementById('kanbanCol_DONE')
+        };
+
+        const counts = { 'TODO': 0, 'IN_PROGRESS': 0, 'IN_REVIEW': 0, 'DONE': 0 };
+
+        // Limpiar columnas
+        Object.values(cols).forEach(c => { if(c) c.innerHTML = ''; });
+
+        data.tasks.forEach(task => {
+          counts[task.status] = (counts[task.status] || 0) + 1;
+          const container = cols[task.status];
+          if (!container) return;
+
+          const card = document.createElement('div');
+          card.className = "bg-white p-3 rounded-xl border border-slate-200 shadow-sm hover:shadow transition space-y-2";
+          
+          let nextBtn = '';
+          if (task.status === 'TODO') {
+            nextBtn = `<button onclick="handleMoveTask('${task.id}', 'IN_PROGRESS')" class="text-[10px] bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-2 py-1 rounded">Iniciar &rarr;</button>`;
+          } else if (task.status === 'IN_PROGRESS') {
+            nextBtn = `<button onclick="handleMoveTask('${task.id}', 'IN_REVIEW')" class="text-[10px] bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold px-2 py-1 rounded">Revisar &rarr;</button>`;
+          } else if (task.status === 'IN_REVIEW') {
+            nextBtn = `<button onclick="handleMoveTask('${task.id}', 'DONE')" class="text-[10px] bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold px-2 py-1 rounded">Aprobar &check;</button>`;
+          } else {
+            nextBtn = `<span class="text-[10px] text-emerald-600 font-bold">Completada</span>`;
+          }
+
+          const dueDateText = task.due_date ? new Date(task.due_date).toLocaleDateString('es-ES') : 'Sin fecha';
+
+          card.innerHTML = `
+            <div class="flex justify-between items-start gap-1">
+              <h4 class="font-bold text-xs text-slate-900">${task.title}</h4>
+              <span class="text-[9px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-mono">${task.id.substring(0, 10)}</span>
+            </div>
+            <p class="text-[11px] text-slate-500 line-clamp-2">${task.description || 'Sin descripción adicional'}</p>
+            <div class="flex justify-between items-center pt-2 border-t border-slate-100 text-[10px] text-slate-400">
+              <span>📅 ${dueDateText}</span>
+              ${nextBtn}
+            </div>
+          `;
+          container.appendChild(card);
+        });
+
+        // Actualizar contadores de badge
+        ['TODO', 'IN_PROGRESS', 'IN_REVIEW', 'DONE'].forEach(st => {
+          const badge = document.getElementById(`badgeCount_${st}`);
+          if (badge) badge.textContent = counts[st] || 0;
+        });
+
+        // 3. Consultar y actualizar semáforos y avance
+        await refreshProjectProgress(projectId);
+
+      } catch (err) {
+        console.warn("[Kanban] Error al cargar tablero:", err);
+      }
+    }
+
+    // Integración Backend: Consultar progreso y semáforo
+    async function refreshProjectProgress(projectId = 'prj_tesis_ia_01') {
+      try {
+        const res = await fetch(`${API_BASE}/api/projects/${projectId}/progress`);
         if (res.ok) {
           const data = await res.json();
           console.log("[Backend API] Progreso del proyecto:", data);
+
+          const taskPct = data.taskProgressPercent !== undefined ? data.taskProgressPercent : (data.progress?.taskProgressPercentage || 0);
+          const msPct = data.milestoneProgressPercent !== undefined ? data.milestoneProgressPercent : (data.progress?.milestoneProgressPercentage || 0);
+          const health = data.healthStatus || data.progress?.health || 'A_TIEMPO';
+
+          // Actualizar texto y barra de avance
+          const pText = document.getElementById('kanbanProgressText');
+          const pBar = document.getElementById('kanbanProgressBar');
+          if (pText) pText.textContent = `${taskPct}% Tareas / ${msPct}% Hitos`;
+          if (pBar) pBar.style.width = `${taskPct}%`;
+
+          // Actualizar semáforo temporal
+          const badge = document.getElementById('kanbanHealthBadge');
+          if (badge) {
+            if (health === 'A_TIEMPO') {
+              badge.className = "bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1";
+              badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> A TIEMPO`;
+            } else if (health === 'RETRASADO') {
+              badge.className = "bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1";
+              badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> RETRASADO`;
+            } else {
+              badge.className = "bg-red-100 text-red-800 text-xs font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1";
+              badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> CRÍTICO`;
+            }
+          }
         }
       } catch (err) {
         console.warn("[Backend API Offline] Ejecutando en modo autónomo.");
+      }
+    }
+
+    // Integración Backend: Mover Tarea de Columna Kanban
+    async function handleMoveTask(taskId, newStatus, projectId = 'prj_tesis_ia_01') {
+      try {
+        const res = await fetch(`${API_BASE}/api/projects/${projectId}/tasks/${taskId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: newStatus })
+        });
+        if (!res.ok) throw new Error("No se pudo actualizar el estado");
+        await loadKanbanBoard(projectId);
+      } catch (err) {
+        alert(`Error al mover tarea: ${err.message}`);
+      }
+    }
+
+    // Integración Backend: Crear Nueva Tarea en PostgreSQL
+    async function handleCreateTaskPrompt(projectId = 'prj_tesis_ia_01') {
+      const title = prompt("Título de la nueva tarea:", "Redacción preliminar de conclusiones");
+      if (!title) return;
+      const description = prompt("Descripción de la tarea:", "Elaborar resumen con métricas del modelo");
+      
+      try {
+        const res = await fetch(`${API_BASE}/api/projects/${projectId}/tasks`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title,
+            description: description || "",
+            assignedTo: "usr_student_01",
+            dueDate: new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString()
+          })
+        });
+        if (!res.ok) throw new Error("Error al guardar tarea");
+        alert("✅ Tarea creada exitosamente y registrada en PostgreSQL.");
+        await loadKanbanBoard(projectId);
+      } catch (err) {
+        alert(`Error al registrar tarea: ${err.message}`);
       }
     }
 

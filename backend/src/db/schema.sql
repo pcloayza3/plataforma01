@@ -55,3 +55,52 @@ CREATE TABLE IF NOT EXISTS institution_profiles (
 -- Índices para búsquedas de alto rendimiento
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
+
+-- 6. Tabla de Proyectos (Tesis de Pregrado/Posgrado, Prácticas o Retos)
+CREATE TABLE IF NOT EXISTS projects (
+    id VARCHAR(64) PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    category VARCHAR(128) NOT NULL,
+    student_id VARCHAR(64) REFERENCES users(id) ON DELETE RESTRICT,
+    consultant_id VARCHAR(64) REFERENCES users(id) ON DELETE RESTRICT,
+    status VARCHAR(32) DEFAULT 'ACTIVE',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 7. Tabla de Hitos del Proyecto
+CREATE TABLE IF NOT EXISTS milestones (
+    id VARCHAR(64) PRIMARY KEY,
+    project_id VARCHAR(64) REFERENCES projects(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    amount_bob NUMERIC(10, 2) NOT NULL,
+    duration_days INTEGER DEFAULT 14,
+    status VARCHAR(32) DEFAULT 'PENDIENTE_PAGO',
+    student_conformity BOOLEAN DEFAULT FALSE,
+    consultant_conformity BOOLEAN DEFAULT FALSE,
+    student_observations TEXT,
+    consultant_observations TEXT,
+    completed_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 8. Tabla de Tareas Kanban Colaborativas con Semáforo Temporal
+CREATE TABLE IF NOT EXISTS kanban_tasks (
+    id VARCHAR(64) PRIMARY KEY,
+    project_id VARCHAR(64) REFERENCES projects(id) ON DELETE CASCADE,
+    milestone_id VARCHAR(64) REFERENCES milestones(id) ON DELETE SET NULL,
+    title VARCHAR(255) NOT NULL,
+    assigned_to VARCHAR(64) REFERENCES users(id) ON DELETE SET NULL,
+    status VARCHAR(32) DEFAULT 'TODO' CHECK (status IN ('BACKLOG', 'TODO', 'IN_PROGRESS', 'IN_REVIEW', 'DONE')),
+    due_date TIMESTAMP WITH TIME ZONE NOT NULL,
+    estimated_hours INTEGER DEFAULT 8,
+    consultant_feedback JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_projects_student ON projects(student_id);
+CREATE INDEX IF NOT EXISTS idx_projects_consultant ON projects(consultant_id);
+CREATE INDEX IF NOT EXISTS idx_milestones_project ON milestones(project_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_project ON kanban_tasks(project_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_due_date ON kanban_tasks(due_date);

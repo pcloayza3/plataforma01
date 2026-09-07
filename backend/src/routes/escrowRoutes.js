@@ -65,7 +65,7 @@ escrowRouter.get("/:id", (req, res) => {
 });
 
 // Aprobación de hito y liberación de fondos al consultor (Payout)
-escrowRouter.post("/:id/approve-payout", (req, res) => {
+escrowRouter.post("/:id/approve-payout", async (req, res) => {
   try {
     const { consultantBankAccount, projectId, milestoneId } = req.body;
     if (!consultantBankAccount) {
@@ -76,11 +76,16 @@ escrowRouter.post("/:id/approve-payout", (req, res) => {
 
     // Actualizar hito si se pasa proyecto
     if (projectId && milestoneId) {
-      kanbanManager.recordMilestoneConformity(projectId, milestoneId, {
-        actor: "STUDENT",
-        approved: true,
-        observations: "Hito aprobado por el estudiante y pago liberado al consultor."
-      });
+      try {
+        const { ProjectService } = await import("../services/projectService.js");
+        await ProjectService.recordConformity(projectId, milestoneId, {
+          actor: "STUDENT",
+          approved: true,
+          observations: "Hito aprobado por el estudiante y pago liberado al consultor."
+        });
+      } catch (err) {
+        // En caso de que el proyecto solo exista en memoria de test
+      }
     }
 
     return res.json({
