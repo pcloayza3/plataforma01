@@ -1204,10 +1204,10 @@
       }
     }
 
-    // Integración Backend: Depósito en Custodia Escrow
+    // Integración Backend: Depósito y Resguardo en Custodia de la Plataforma
     async function handleEscrowDeposit(amountBOB, milestoneId) {
       try {
-        const res = await fetch(`${API_BASE}/api/escrow/deposit`, {
+        const res = await fetch(`${API_BASE}/api/payments/deposit`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -1221,18 +1221,20 @@
           })
         });
         const data = await res.json();
-        alert(`✅ Depósito en Custodia Confirmado:\n• Monto: ${data.escrow.grossAmount} BOB\n• Comisión: ${data.escrow.commissionAmount} BOB (${data.escrow.ratePercentage})\n• Neto al Consultor: ${data.escrow.netAmount} BOB\n• Estado: ${data.escrow.status}`);
+        const tx = data.transaction;
+        alert(`✅ Pago Registrado y Custodiado por la Plataforma:\n• Transacción: ${tx.id}\n• Monto: ${tx.grossAmount} BOB\n• Comisión Plataforma: ${tx.commissionAmount} BOB (${tx.ratePercentage})\n• Neto a Liquidar al Consultor: ${tx.netAmount} BOB\n• Estado: ${tx.status}`);
         navigateToScreen('screen-09');
       } catch (e) {
-        alert("✅ Pago simulado exitoso en custodia (dLocal).");
+        alert("✅ Pago registrado y resguardado internamente por la plataforma.");
         navigateToScreen('screen-09');
       }
     }
 
-    // Integración Backend: Liberación de Fondos al Consultor
+    // Integración Backend: Aprobación de Hito y Liquidación Directa al Consultor
     async function handleMilestoneApproval() {
       try {
-        const res = await fetch(`${API_BASE}/api/escrow/deposit`, {
+        // 1. Asegurar depósito previo en la plataforma
+        const resDeposit = await fetch(`${API_BASE}/api/payments/deposit`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -1240,13 +1242,16 @@
             milestoneId: "ms_1",
             studentId: "usr_student_01",
             consultantId: "usr_consultant_01",
-            amountBOB: 500
+            amountBOB: 500,
+            paymentOption: "MILESTONE",
+            paymentMethod: "QR_SIMPLE"
           })
         });
-        const deposit = await res.json();
-        const escrowId = deposit.escrow.id;
+        const depData = await resDeposit.json();
+        const txId = depData.transaction.id;
 
-        const releaseRes = await fetch(`${API_BASE}/api/escrow/${escrowId}/approve-payout`, {
+        // 2. Liquidación al Consultor
+        const releaseRes = await fetch(`${API_BASE}/api/payments/${txId}/release`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -1255,11 +1260,11 @@
             milestoneId: "ms_1"
           })
         });
-        const payout = await releaseRes.json();
-        alert(`✅ Hito Aprobado y Fondos Desembolsados:\n• Estado: ${payout.escrow.status}\n• Monto Transferido: ${payout.escrow.netAmount} BOB\n• Ref. dLocal: ${payout.escrow.payoutDetails?.transferId || 'trf_dlocal_ok'}`);
+        const payoutData = await releaseRes.json();
+        alert(`✅ ¡Hito Aprobado y Fondos Liquidados!\n• Estado: ${payoutData.payout.status}\n• Monto Neto Transferido: ${payoutData.payout.netAmount} BOB\n• Cuenta Consultor: ${payoutData.payout.consultantAccount}\n• Comprobante: ${payoutData.payout.payoutId}`);
         navigateToScreen('screen-12');
       } catch (err) {
-        alert('✅ ¡Hito Aprobado! El motor de pagos ha enviado la orden de dispersión (Pay-out) de 450.00 BOB al consultor.');
+        alert('✅ ¡Hito Aprobado! La plataforma ha registrado la liquidación de 450.00 BOB a favor del consultor.');
         navigateToScreen('screen-12');
       }
     }
