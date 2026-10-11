@@ -4,7 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ClinikLocal - Gestión Clínica y Dental Local-First</title>
+  <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#0f766e">
   <link rel="stylesheet" href="styles.css">
+  <!-- Tesseract.js para OCR de recetarios físicos (Offline/CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body data-theme="teal">
 
@@ -28,7 +33,7 @@
     <!-- NAVEGACIÓN EN EL DRAWER -->
     <nav class="drawer-nav">
       <button class="drawer-nav-item active" data-tab="tab-pacientes">
-        <span class="nav-icon">👤</span> Pacientes
+        <span class="nav-icon">👤</span> Pacientes & Contactos
       </button>
       <button class="drawer-nav-item" data-tab="tab-historia" id="menu-item-historia">
         <span class="nav-icon">📋</span> Historia Clínica
@@ -37,14 +42,17 @@
         <span class="nav-icon">📅</span> Agenda & Citas
       </button>
       <button class="drawer-nav-item" data-tab="tab-recetas" id="menu-item-recetas">
-        <span class="nav-icon">💊</span> Recetas PDF
+        <span class="nav-icon">💊</span> Recetas & OCR
       </button>
       <button class="drawer-nav-item" data-tab="tab-respaldo">
         <span class="nav-icon">🛡️</span> Respaldo & Nube
       </button>
       <button class="drawer-nav-item" data-tab="tab-configuracion">
-        <span class="nav-icon">⚙️</span> Configuración
+        <span class="nav-icon">⚙️</span> Configuración & Servicios
       </button>
+      <a href="./landing.html" class="drawer-nav-item" style="color: var(--color-primary); font-weight: 700; text-decoration: none; border-top: 1px dashed var(--border-color); margin-top: 0.5rem; padding-top: 0.75rem;">
+        <span class="nav-icon">🌐</span> Web Comercial & Descargas
+      </a>
     </nav>
 
     <!-- FOOTER DEL DRAWER -->
@@ -59,7 +67,7 @@
     </div>
   </aside>
 
-  <!-- BARRA SUPERIOR MINIMALISTA -->
+  <!-- BARRA SUPERIOR MINIMALISTA (DESPEJADA Y OPTIMIZADA PARA CELULARES) -->
   <header class="app-header">
     <div class="header-left">
       <!-- BOTÓN HAMBURGUESA -->
@@ -74,19 +82,14 @@
         <div>
           <h1 class="brand-title" id="header-clinic-title">ClinikLocal</h1>
           <p class="brand-subtitle" id="header-clinic-subtitle">
-            <span id="header-doc-label">Dr. Alejandro Fernández</span> &bull; 
-            <span class="badge-local">100% Local</span>
+            <span id="header-doc-label">Dr. Alejandro Fernández</span>
           </p>
         </div>
       </div>
     </div>
 
-    <!-- ESTADO DE SINCRONIZACIÓN EN VIVO (CADA 1 MINUTO) -->
-    <div class="header-sync-status">
-      <div class="sync-indicator-pill" id="sync-pill" title="Sincronización en la nube cada minuto">
-        <span class="sync-indicator-dot" id="sync-dot"></span>
-        <span class="sync-indicator-label" id="sync-label">Modo Local Autónomo</span>
-      </div>
+    <!-- BOTÓN DISCRETO DE SINCRONIZACIÓN -->
+    <div class="header-right-actions">
       <button class="btn-icon-refresh" id="btn-sync-now" title="Sincronizar ahora con la nube">🔄</button>
     </div>
   </header>
@@ -94,14 +97,17 @@
   <!-- CONTENEDOR PRINCIPAL DE PANTALLAS -->
   <main class="app-content">
 
-    <!-- ==================== PANTALLA 1: PACIENTES ==================== -->
+    <!-- ==================== PANTALLA 1: PACIENTES Y CONTACTOS ==================== -->
     <section id="tab-pacientes" class="view-section active">
       <div class="section-header">
         <div>
-          <h2 class="section-title">Directorio de Pacientes</h2>
-          <p class="section-desc">Gestiona fichas, datos de contacto y accesos directos de comunicación.</p>
+          <h2 class="section-title">Pacientes & Contactos</h2>
+          <p class="section-desc">Gestiona fichas clínicas y transforma contactos preliminares a pacientes en un clic.</p>
         </div>
-        <button class="btn btn-primary" id="btn-nuevo-paciente">+ Nuevo Paciente</button>
+        <div class="header-actions">
+          <button class="btn btn-subtle" id="btn-nuevo-contacto-rapido">⚡ + Contacto Rápido</button>
+          <button class="btn btn-primary" id="btn-nuevo-paciente">+ Nuevo Paciente</button>
+        </div>
       </div>
 
       <!-- BARRA DE FILTRO Y ORDENACIÓN AVANZADA -->
@@ -113,7 +119,7 @@
 
         <!-- SELECTOR DE ORDENACIÓN -->
         <div class="sort-selector-box">
-          <label for="select-orden-pacientes">Ordenar por:</label>
+          <label for="select-orden-pacientes">Ordenar:</label>
           <select id="select-orden-pacientes" class="select-sort">
             <option value="recientes" selected>🕒 Más recientes atendidos (Por defecto)</option>
             <option value="atencion_hoy">📅 Atendidos hoy / Con cita hoy</option>
@@ -127,7 +133,7 @@
         <span class="badge-count" id="lbl-total-pacientes">0 registrados</span>
       </div>
 
-      <!-- LISTA DE TARJETAS DE PACIENTES -->
+      <!-- LISTA DE TARJETAS DE PACIENTES Y CONTACTOS -->
       <div class="patient-grid" id="lista-pacientes">
         <!-- Renderizado dinámico -->
       </div>
@@ -138,7 +144,7 @@
       <div class="section-header">
         <div>
           <h2 class="section-title">Historia Clínica & Evolución</h2>
-          <p class="section-desc">Consultas, diagnósticos, soporte multimedia (fotos, video, PDF) y odontograma.</p>
+          <p class="section-desc">Consultas con dictado por voz, servicios realizados y multimedia con cámara directa.</p>
         </div>
         <div class="header-actions">
           <select id="select-paciente-historia" class="select-patient">
@@ -154,20 +160,21 @@
           ⚠️ <strong>Alerta Médica:</strong> <span id="txt-alergias-paciente">Ninguna reportada</span>
         </div>
 
-        <!-- SELECTOR DE ESPECIALIDAD / MODO -->
+        <!-- SELECTOR DE ESPECIALIDAD (SE OCULTA SI EL ODONTOGRAMA ESTÁ DESACTIVADO) -->
         <div class="specialty-toggle" id="toggle-odontograma-wrapper">
-          <button class="toggle-btn active" id="btn-modo-medico">🩺 Consulta Médica y Evolución</button>
+          <button class="toggle-btn active" id="btn-modo-medico">🩺 Consulta y Evolución</button>
           <button class="toggle-btn" id="btn-modo-dental">🦷 Odontograma Dental (FDI)</button>
         </div>
 
-        <!-- MODO ODONTOGRAMA DENTAL (ACTIVABLE/DESACTIVABLE EN CONFIG) -->
+        <!-- MODO ODONTOGRAMA DENTAL (100% RESPONSIVO) -->
         <div id="seccion-odontograma" class="odontograma-box hidden">
           <div class="odontograma-header">
             <div>
               <h3>Odontograma Interactivo (Sistema FDI)</h3>
-              <p class="odontograma-guide">Haz clic en cada pieza dental para cambiar su estado (Sano, Caries, Restaurado, Endodoncia, Ausente).</p>
+              <p class="odontograma-guide">Haz clic en cada pieza dental para alternar su estado clínico.</p>
             </div>
-            <div class="odontograma-legend">
+            <!-- LEYENDA RESPONSIVA -->
+            <div class="odontograma-legend-responsive">
               <span class="legend-item"><span class="dot dot-sano"></span> Sano</span>
               <span class="legend-item"><span class="dot dot-caries"></span> Caries</span>
               <span class="legend-item"><span class="dot dot-tratado"></span> Restaurado</span>
@@ -185,7 +192,7 @@
           <div class="teeth-row" id="arcada-inferior"></div>
         </div>
 
-        <!-- TIMELINE DE CONSULTAS CON SOPORTE MULTIMEDIA -->
+        <!-- TIMELINE DE CONSULTAS -->
         <div class="timeline-box">
           <div class="timeline-box-header">
             <h3 class="box-title">Evolución Cronológica de Consultas</h3>
@@ -197,7 +204,7 @@
             </div>
           </div>
           <div id="timeline-consultas" class="timeline-list">
-            <!-- Renderizado dinámico con fotos, video, PDF y texto -->
+            <!-- Renderizado dinámico -->
           </div>
         </div>
       </div>
@@ -207,8 +214,8 @@
     <section id="tab-agenda" class="view-section">
       <div class="section-header">
         <div>
-          <h2 class="section-title">Agenda de Turnos & Recordatorios</h2>
-          <p class="section-desc">Programa citas y confirma la asistencia enviando mensajes directos por WhatsApp.</p>
+          <h2 class="section-title">Agenda de Turnos & Servicios</h2>
+          <p class="section-desc">Programa citas con servicios múltiples y confirma por WhatsApp o Correo.</p>
         </div>
         <button class="btn btn-primary" id="btn-nueva-cita">+ Agendar Cita</button>
       </div>
@@ -219,7 +226,7 @@
           <button class="btn btn-subtle" id="btn-dia-hoy">Hoy</button>
           <input type="date" id="input-fecha-agenda" class="input-date">
         </div>
-        <span class="agenda-info-text">💡 Presiona <strong>"Recordar WhatsApp"</strong> para abrir el mensaje de confirmación sin costo.</span>
+        <span class="agenda-info-text">💡 Confirma citas por WhatsApp o Email sin intermediarios.</span>
       </div>
 
       <!-- LISTA DE TURNOS -->
@@ -228,23 +235,36 @@
       </div>
     </section>
 
-    <!-- ==================== PANTALLA 4: RECETAS MÉDICAS ==================== -->
+    <!-- ==================== PANTALLA 4: RECETAS MÉDICAS & OCR ==================== -->
     <section id="tab-recetas" class="view-section">
       <div class="section-header">
         <div>
-          <h2 class="section-title">Emisor de Recetas & Prescripciones</h2>
-          <p class="section-desc">Redacta recetas claras, imprímelas en PDF o envíalas directamente por WhatsApp.</p>
+          <h2 class="section-title">Emisor de Recetas & OCR Inteligente</h2>
+          <p class="section-desc">Escribe o escanea tu recetario manuscrito para digitalizar la receta automáticamente.</p>
         </div>
         <div class="header-actions">
           <button class="btn btn-subtle" id="btn-imprimir-receta">🖨️ Imprimir / Guardar PDF</button>
-          <button class="btn btn-whatsapp" id="btn-wa-receta">💬 Enviar Receta a WhatsApp</button>
+          <button class="btn btn-whatsapp" id="btn-wa-receta">💬 WhatsApp</button>
+          <button class="btn btn-subtle" id="btn-email-receta">✉️ Enviar por Email</button>
         </div>
       </div>
 
       <div class="prescription-workspace">
-        <!-- FORMULARIO DE PRESCRIPCIÓN -->
+        <!-- FORMULARIO DE PRESCRIPCIÓN CON OCR Y DICTADO POR VOZ -->
         <div class="prescription-form-card">
-          <h3 class="box-title">Datos de la Prescripción</h3>
+          <div class="box-title-row">
+            <h3 class="box-title">Datos de la Prescripción</h3>
+            <!-- BOTÓN OCR DE RECETARIO FÍSICO -->
+            <label class="btn btn-subtle btn-ocr-label" title="Digitaliza tu recetario en papel con la cámara">
+              📷 Escanear Recetario en Papel (OCR)
+              <input type="file" id="input-receta-ocr" accept="image/*" capture="environment" style="display:none;">
+            </label>
+          </div>
+
+          <div id="ocr-loading-status" class="ocr-status-box hidden">
+            <div class="ocr-spinner"></div>
+            <span id="ocr-status-text">Procesando texto con OCR...</span>
+          </div>
 
           <div class="form-group">
             <label>Paciente Destinatario:</label>
@@ -252,8 +272,11 @@
           </div>
 
           <div class="form-group">
-            <label>Diagnóstico / Indicación Médica:</label>
-            <input type="text" id="receta-diagnostico" class="input-field" placeholder="Ej. Faringitis bacteriana aguda / Tratamiento conducto">
+            <div class="label-with-action">
+              <label>Diagnóstico / Indicación Médica:</label>
+              <button type="button" class="btn-voice-mini" id="btn-voice-receta-dx" title="Dictar por voz">🎙️ Dictar</button>
+            </div>
+            <input type="text" id="receta-diagnostico" class="input-field" placeholder="Ej. Infección odontogénica / Faringitis aguda">
           </div>
 
           <!-- LISTA DINÁMICA DE MEDICAMENTOS -->
@@ -268,8 +291,11 @@
           </div>
 
           <div class="form-group">
-            <label>Indicaciones Generales y Cuidados:</label>
-            <textarea id="receta-indicaciones" class="input-field" rows="3" placeholder="Ej. Tomar con abundante agua después de los alimentos. Reposo por 48 horas."></textarea>
+            <div class="label-with-action">
+              <label>Indicaciones Generales y Cuidados:</label>
+              <button type="button" class="btn-voice-mini" id="btn-voice-receta-ind" title="Dictar por voz">🎙️ Dictar</button>
+            </div>
+            <textarea id="receta-indicaciones" class="input-field" rows="3" placeholder="Ej. Tomar con abundante agua después de las comidas."></textarea>
           </div>
         </div>
 
@@ -278,7 +304,7 @@
           <div class="rx-header">
             <div class="rx-doctor-name" id="rx-header-doctor">Dr(a). Especialista Clínico</div>
             <div class="rx-doctor-subtitle" id="rx-header-clinic">Centro Médico / Consultorio Particular</div>
-            <div class="rx-doctor-contact" id="rx-header-contact">Teléfono &bull; Dirección</div>
+            <div class="rx-doctor-contact" id="rx-header-contact">Teléfono &bull; Dirección &bull; Email</div>
           </div>
 
           <div class="rx-divider"></div>
@@ -360,7 +386,7 @@
           <p class="microcopy">Guarda tu archivo .clinik en una memoria USB o disco externo para copias manuales.</p>
         </div>
 
-        <!-- TARJETA 2: RESPALDO CLOUD (ADD-ON FREEMIUM / PAGO PREVIO) -->
+        <!-- TARJETA 2: RESPALDO CLOUD (PAGO PREVIO) -->
         <div class="backup-card cloud-card">
           <div class="backup-badge-cloud" id="badge-cloud-plan">Servicio Comercial (Add-on)</div>
           <h3 class="backup-title">Sincronización Continua cada Minuto</h3>
@@ -398,21 +424,21 @@
       </div>
     </section>
 
-    <!-- ==================== PANTALLA 6: CONFIGURACIÓN ==================== -->
+    <!-- ==================== PANTALLA 6: CONFIGURACIÓN & CATÁLOGO DE SERVICIOS ==================== -->
     <section id="tab-configuracion" class="view-section">
       <div class="section-header">
         <div>
-          <h2 class="section-title">Configuración del Consultorio y Preferencias</h2>
-          <p class="section-desc">Personaliza identidad, temas visuales, módulos activos, datos de contacto y pagos.</p>
+          <h2 class="section-title">Configuración, Servicios & Preferencias</h2>
+          <p class="section-desc">Personaliza identidad, catálogo de servicios/análisis, temas y canales de comunicación.</p>
         </div>
         <button class="btn btn-primary" id="btn-guardar-config">💾 Guardar Configuración</button>
       </div>
 
       <div class="config-grid">
-        <!-- BLOQUE 1: IDENTIDAD DEL CONSULTORIO -->
+        <!-- BLOQUE 1: IDENTIDAD DEL CONSULTORIO Y EMAIL -->
         <div class="config-card">
-          <h3 class="config-card-title">🏥 Identidad del Consultorio y Profesional</h3>
-          <p class="config-card-sub">Estos datos aparecerán en los encabezados, recetas PDF y mensajes de WhatsApp.</p>
+          <h3 class="config-card-title">🏥 Identidad del Consultorio y Contacto</h3>
+          <p class="config-card-sub">Estos datos se reflejan en recetas PDF, correos electrónicos y mensajes de WhatsApp.</p>
 
           <div class="form-group">
             <label>Nombre del Consultorio / Clínica:</label>
@@ -449,32 +475,50 @@
             </div>
           </div>
 
+          <div class="form-row">
+            <div class="form-group">
+              <label>Teléfono Oficial (con WhatsApp):</label>
+              <input type="tel" id="cfg-clinic-phone" class="input-field" placeholder="+591 71234567">
+            </div>
+            <div class="form-group">
+              <label>Correo Electrónico Oficial (Opcional):</label>
+              <input type="email" id="cfg-clinic-email" class="input-field" placeholder="contacto@consultorio.com">
+            </div>
+          </div>
+
           <div class="form-group">
             <label>Dirección Física del Consultorio:</label>
             <input type="text" id="cfg-clinic-address" class="input-field" placeholder="Ej. Av. Heroínas #450, Edif. Los Cedros, Piso 3, Consultorio 302">
           </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label>Enlace de Ubicación (Google Maps):</label>
-              <input type="url" id="cfg-clinic-maps" class="input-field" placeholder="https://maps.app.goo.gl/ejemplo">
-            </div>
-            <div class="form-group">
-              <label>Teléfono Oficial (con WhatsApp):</label>
-              <input type="tel" id="cfg-clinic-phone" class="input-field" placeholder="+591 71234567">
-            </div>
+          <div class="form-group">
+            <label>Enlace de Ubicación (Google Maps):</label>
+            <input type="url" id="cfg-clinic-maps" class="input-field" placeholder="https://maps.app.goo.gl/ejemplo">
           </div>
 
           <button type="button" class="btn btn-whatsapp w-100" id="btn-probar-compartir-contacto">
-            📍 Compartir Ubicación y Contacto con Pacientes por WhatsApp
+            📍 Compartir Ubicación y Contacto por WhatsApp
           </button>
         </div>
 
-        <!-- BLOQUE 2: PLANTILLA DE COLORES & MÓDULOS -->
+        <!-- BLOQUE 2: CATÁLOGO DE SERVICIOS Y ANÁLISIS MÉDICOS -->
         <div class="config-card">
-          <h3 class="config-card-title">🎨 Plantilla de Colores (Tema Visual)</h3>
-          <p class="config-card-sub">Selecciona el esquema visual que mejor represente a tu especialidad.</p>
+          <h3 class="config-card-title">🔬 Catálogo de Servicios, Tratamientos y Análisis</h3>
+          <p class="config-card-sub">Agrega y quita los servicios que ofrece tu consultorio (se elegirán en citas e historia).</p>
 
+          <div class="services-manage-box">
+            <div class="form-row">
+              <input type="text" id="cfg-nuevo-servicio-input" class="input-field" placeholder="Nuevo servicio (ej. Limpieza, Ecografía, Hemograma)...">
+              <button type="button" class="btn btn-primary" id="btn-agregar-servicio">+ Aumentar</button>
+            </div>
+            <div class="services-list-container" id="cfg-servicios-badges-list">
+              <!-- Badges de servicios -->
+            </div>
+          </div>
+
+          <hr class="config-divider">
+
+          <h3 class="config-card-title">🎨 Plantilla de Colores (Tema Visual)</h3>
           <div class="theme-options-grid">
             <label class="theme-option">
               <input type="radio" name="cfg-theme" value="teal" checked>
@@ -500,14 +544,14 @@
 
           <hr class="config-divider">
 
-          <h3 class="config-card-title">🧩 Activación / Desactivación de Módulos</h3>
-          <p class="config-card-sub">Adapta la interfaz desactivando las opciones que no utilices.</p>
+          <h3 class="config-card-title">🧩 Activación / Desactivación de Opciones</h3>
+          <p class="config-card-sub">Si no necesitas el odontograma, desactívalo y desaparecerá totalmente de la app.</p>
 
           <div class="module-switches-list">
             <div class="switch-row">
               <div>
                 <strong>Odontograma Dental FDI</strong>
-                <p class="microcopy">Actívalo si eres odontólogo; desactívalo si eres médico especialista.</p>
+                <p class="microcopy">Si está desactivado, NO se muestra en ninguna pantalla.</p>
               </div>
               <label class="switch-control">
                 <input type="checkbox" id="cfg-module-odontograma" checked>
@@ -517,8 +561,8 @@
 
             <div class="switch-row">
               <div>
-                <strong>Módulo de Recetas en PDF</strong>
-                <p class="microcopy">Emisión de prescripciones y envío por WhatsApp.</p>
+                <strong>Módulo de Recetas en PDF & OCR</strong>
+                <p class="microcopy">Emisión de prescripciones y lectura de recetarios físicos.</p>
               </div>
               <label class="switch-control">
                 <input type="checkbox" id="cfg-module-recetas" checked>
@@ -529,7 +573,7 @@
             <div class="switch-row">
               <div>
                 <strong>Agenda de Citas y Turnos</strong>
-                <p class="microcopy">Control de turnos y recordatorios automáticos.</p>
+                <p class="microcopy">Control de turnos con selección de servicios.</p>
               </div>
               <label class="switch-control">
                 <input type="checkbox" id="cfg-module-agenda" checked>
@@ -552,12 +596,12 @@
           <div class="payment-action-box">
             <div class="payment-intro">
               <p>
-                Para activar la sincronización automática cada 60 segundos y habilitar el inicio de sesión en varios dispositivos, se requiere un <strong>pago previo</strong>.
-                Para desactivar o cambiar de plan, puedes gestionar tu cuenta con PayPal o pago QR.
+                Para activar la sincronización automática continua y habilitar el ingreso simultáneo en varios dispositivos, se requiere un <strong>pago previo</strong>.
+                Para activar o desactivar la suscripción puedes usar PayPal o QR bancario.
               </p>
               <div class="payment-methods-badges">
-                <span class="pay-badge">💳 PayPal</span>
-                <span class="pay-badge">📱 Código QR (Transferencia Bancaria)</span>
+                <span class="pay-badge">💳 PayPal ($15 USD)</span>
+                <span class="pay-badge">📱 Simple QR (Bs. 100)</span>
               </div>
             </div>
 
@@ -593,53 +637,88 @@
 
   <!-- ==================== MODALES ==================== -->
 
-  <!-- MODAL: REGISTRAR / EDITAR PACIENTE -->
+  <!-- MODAL: REGISTRAR / EDITAR PACIENTE O CONTACTO RÁPIDO -->
   <div id="modal-paciente" class="modal-backdrop hidden">
     <div class="modal-box">
       <div class="modal-header">
-        <h3 id="modal-paciente-titulo">Registrar Nuevo Paciente</h3>
+        <h3 id="modal-paciente-titulo">Registrar Paciente / Contacto</h3>
         <button class="modal-close" id="btn-cerrar-modal-paciente">&times;</button>
       </div>
+
+      <!-- PESTAÑA RÁPIDA: CONTACTO PRELIMINAR vs PACIENTE COMPLETO -->
+      <div class="contact-mode-toggle">
+        <label class="radio-label">
+          <input type="radio" name="modal-tipo-registro" value="paciente" checked>
+          <span>👤 Ficha de Paciente Completa</span>
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="modal-tipo-registro" value="contacto">
+          <span>⚡ Contacto Rápido Preliminar</span>
+        </label>
+      </div>
+
+      <!-- ACCESO A AGENDA DEL DISPOSITIVO -->
+      <div class="import-contact-helper-box" style="margin-bottom: 1rem; padding: 0.65rem 0.85rem; background: var(--color-primary-light); border: 1px dashed var(--color-primary-border); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;">
+        <div>
+          <strong style="font-size: 0.82rem; color: var(--color-primary); display: block;">📲 ¿Tienes este contacto en tu teléfono?</strong>
+          <span style="font-size: 0.75rem; color: var(--text-secondary);">Importa nombre y WhatsApp de tu agenda con 1 toque.</span>
+        </div>
+        <button type="button" id="btn-importar-contacto-dispositivo" class="btn btn-subtle" style="font-size: 0.78rem; font-weight: 600; padding: 0.4rem 0.75rem; white-space: nowrap; border-color: var(--color-primary); color: var(--color-primary);">
+          📲 Importar de Agenda
+        </button>
+      </div>
+
       <form id="form-paciente">
         <input type="hidden" id="paciente-id">
         <div class="form-group">
           <label>Nombre y Apellidos completos *</label>
           <input type="text" id="paciente-nombre" class="input-field" required placeholder="Ej. Carlos Mendoza">
         </div>
+
         <div class="form-row">
           <div class="form-group">
             <label>Teléfono con WhatsApp *</label>
             <input type="tel" id="paciente-telefono" class="input-field" required placeholder="Ej. +591 71234567 o 71234567">
-            <span class="microcopy">Incluye código de país para enlace directo.</span>
+            <span class="microcopy">Código de país para WhatsApp.</span>
           </div>
           <div class="form-group">
-            <label>Cédula de Identidad / DNI</label>
-            <input type="text" id="paciente-ci" class="input-field" placeholder="Ej. 6543210 LP">
+            <label>Correo Electrónico (Opcional):</label>
+            <input type="email" id="paciente-email" class="input-field" placeholder="paciente@correo.com">
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Fecha de Nacimiento</label>
-            <input type="date" id="paciente-nacimiento" class="input-field">
+
+        <!-- CAMPOS EXCLUSIVOS DE PACIENTE COMPLETO (SE OCULTAN EN MODO CONTACTO RÁPIDO) -->
+        <div id="bloque-datos-clinicos-paciente">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Cédula de Identidad / DNI</label>
+              <input type="text" id="paciente-ci" class="input-field" placeholder="Ej. 6543210 LP">
+            </div>
+            <div class="form-group">
+              <label>Fecha de Nacimiento</label>
+              <input type="date" id="paciente-nacimiento" class="input-field">
+            </div>
           </div>
           <div class="form-group">
             <label>Alergias Conocidas</label>
             <input type="text" id="paciente-alergias" class="input-field" placeholder="Ej. Penicilina, AINEs (o 'Ninguna')">
           </div>
         </div>
+
         <div class="form-group">
-          <label>Notas Clínicas Generales o Antecedentes</label>
-          <textarea id="paciente-notas" class="input-field" rows="2" placeholder="Hipertensión controlada, diabético tipo 2, etc."></textarea>
+          <label id="lbl-notas-paciente">Notas Iniciales o Motivo de Consulta:</label>
+          <textarea id="paciente-notas" class="input-field" rows="2" placeholder="Persona que cotizó por WhatsApp o consulta previa..."></textarea>
         </div>
+
         <div class="modal-footer">
           <button type="button" class="btn btn-subtle" id="btn-cancelar-modal-paciente">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Guardar Paciente</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-paciente">Guardar</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- MODAL: AGENDAR CITA -->
+  <!-- MODAL: AGENDAR CITA CON SELECCIÓN DE SERVICIOS -->
   <div id="modal-cita" class="modal-backdrop hidden">
     <div class="modal-box">
       <div class="modal-header">
@@ -648,7 +727,7 @@
       </div>
       <form id="form-cita">
         <div class="form-group">
-          <label>Paciente *</label>
+          <label>Paciente o Contacto *</label>
           <select id="cita-paciente-select" class="input-field" required></select>
         </div>
         <div class="form-row">
@@ -661,10 +740,20 @@
             <input type="time" id="cita-hora" class="input-field" required value="10:00">
           </div>
         </div>
+
+        <!-- SELECCIÓN DE UNO O VARIOS SERVICIOS DEL CATÁLOGO -->
         <div class="form-group">
-          <label>Motivo de la Cita</label>
-          <input type="text" id="cita-motivo" class="input-field" placeholder="Ej. Limpieza dental / Control de ortodoncia / Revisión de análisis">
+          <label>Servicio(s) por los que asistirá (Seleccionar uno o varios) *:</label>
+          <div class="services-checkbox-grid" id="cita-servicios-checkboxes">
+            <!-- Checkboxes generados dinámicamente -->
+          </div>
         </div>
+
+        <div class="form-group">
+          <label>Motivo Adicional o Nota de la Cita:</label>
+          <input type="text" id="cita-motivo" class="input-field" placeholder="Ej. Traerá radiografía previa / Primera consulta">
+        </div>
+
         <div class="modal-footer">
           <button type="button" class="btn btn-subtle" id="btn-cancelar-modal-cita">Cancelar</button>
           <button type="submit" class="btn btn-primary">Guardar Cita</button>
@@ -673,7 +762,7 @@
     </div>
   </div>
 
-  <!-- MODAL: REGISTRAR CONSULTA CLÍNICA CON SOPORTE MULTIMEDIA -->
+  <!-- MODAL: REGISTRAR CONSULTA CLÍNICA CON DICTADO POR VOZ, SERVICIOS Y CÁMARA DIRECTA -->
   <div id="modal-consulta" class="modal-backdrop hidden">
     <div class="modal-box modal-large">
       <div class="modal-header">
@@ -686,46 +775,99 @@
             <label>Fecha de Consulta</label>
             <input type="date" id="consulta-fecha" class="input-field" required>
           </div>
+          <!-- SERVICIO / ANÁLISIS REALIZADO -->
           <div class="form-group">
-            <label>Especialidad / Tipo</label>
-            <select id="consulta-tipo" class="input-field">
-              <option value="Médica General">Médica General / Especialidad</option>
-              <option value="Odontológica">Odontológica</option>
+            <label>Servicio / Análisis Prestado *</label>
+            <select id="consulta-servicio-select" class="input-field" required>
+              <!-- Opciones del catálogo -->
             </select>
           </div>
         </div>
+
+        <!-- MOTIVO CON BOTÓN DE DICTADO POR VOZ -->
         <div class="form-group">
-          <label>Motivo de la Consulta y Síntomas</label>
+          <div class="label-with-action">
+            <label>Motivo de la Consulta y Síntomas:</label>
+            <button type="button" class="btn-voice-mini" id="btn-voice-motivo" title="Dictar motivo por voz">🎙️ Dictar</button>
+          </div>
           <input type="text" id="consulta-motivo" class="input-field" placeholder="Ej. Dolor agudo en molar superior derecho tras masticar">
         </div>
+
+        <!-- DIAGNÓSTICO CON BOTÓN DE DICTADO POR VOZ -->
         <div class="form-group">
-          <label>Diagnóstico</label>
+          <div class="label-with-action">
+            <label>Diagnóstico:</label>
+            <button type="button" class="btn-voice-mini" id="btn-voice-diagnostico" title="Dictar diagnóstico por voz">🎙️ Dictar</button>
+          </div>
           <input type="text" id="consulta-diagnostico" class="input-field" placeholder="Ej. Pulpitis reversible en pieza 16 / Faringoamigdalitis">
         </div>
+
+        <!-- TRATAMIENTO CON BOTÓN DE DICTADO POR VOZ -->
         <div class="form-group">
-          <label>Tratamiento Realizado y Observaciones (Texto)</label>
-          <textarea id="consulta-tratamiento" class="input-field" rows="3" placeholder="Ej. Apertura cameral, limpieza con hipoclorito, colocación de curación provisoria. Próximo control en 7 días."></textarea>
+          <div class="label-with-action">
+            <label>Tratamiento Realizado y Observaciones (Texto):</label>
+            <button type="button" class="btn-voice-mini" id="btn-voice-tratamiento" title="Dictar tratamiento por voz">🎙️ Dictar</button>
+          </div>
+          <textarea id="consulta-tratamiento" class="input-field" rows="3" placeholder="Ej. Apertura cameral, limpieza con hipoclorito, curación provisional..."></textarea>
         </div>
 
-        <!-- ADJUNTOS MULTIMEDIA (FOTOS, VIDEOS, PDF) -->
+        <!-- ADJUNTOS MULTIMEDIA CON CÁMARA DIRECTA Y DESCRIPCIÓN OPICIONAL -->
         <div class="multimedia-upload-section">
-          <label class="multimedia-section-label">📎 Adjuntos Multimedia (Fotos, Video, PDF):</label>
+          <label class="multimedia-section-label">📎 Adjuntar Estudios (Cámara directa, Video, PDF):</label>
           <div class="multimedia-inputs-row">
-            <!-- Subir Foto / Radiografía -->
-            <label class="btn btn-subtle file-btn">
-              📷 Adjuntar Foto / Radiografía
-              <input type="file" id="input-adjunto-foto" accept="image/*" style="display:none;">
+            <!-- CÁMARA DIRECTA PARA FOTOS / RADIOGRAFÍAS -->
+            <label class="btn btn-subtle file-btn" title="Tomar foto con la cámara del dispositivo">
+              📸 Tomar Foto
+              <input type="file" id="input-camara-foto" accept="image/*" capture="environment" style="display:none;">
             </label>
-            <!-- Subir PDF de Laboratorio -->
-            <label class="btn btn-subtle file-btn">
-              📄 Adjuntar PDF (Laboratorio/Estudios)
+            <!-- SUBIR ARCHIVO DE IMAGEN O VIDEO EXISTENTE -->
+            <label class="btn btn-subtle file-btn" title="Subir foto o video guardado en el dispositivo">
+              🖼️🎥 Subir Imagen / Video
+              <input type="file" id="input-adjunto-foto" accept="image/*,video/*" style="display:none;">
+            </label>
+            <!-- CÁMARA DIRECTA PARA GRABAR VIDEO -->
+            <label class="btn btn-subtle file-btn" title="Grabar video con la cámara del dispositivo">
+              🎬 Grabar Video
+              <input type="file" id="input-camara-video" accept="video/*" capture="environment" style="display:none;">
+            </label>
+            <!-- SUBIR PDF DE ESTUDIOS O LABORATORIO -->
+            <label class="btn btn-subtle file-btn" title="Adjuntar documento o estudio en PDF">
+              📄 Adjuntar PDF
               <input type="file" id="input-adjunto-pdf" accept="application/pdf" style="display:none;">
             </label>
           </div>
 
-          <div class="form-group" style="margin-top: 0.5rem;">
-            <label style="font-size: 0.8rem;">Enlace a Video Clínico (Opcional):</label>
-            <input type="url" id="input-adjunto-video" class="input-field" placeholder="Ej. https://miservidor.com/video-caso.mp4 o enlace YouTube">
+          <!-- CAMPO PARA DESCRIPCIÓN OPCIONAL DEL ADJUNTO -->
+          <div class="form-group" style="margin-top: 0.75rem;">
+            <label style="font-size: 0.8rem;">Nota o descripción para el archivo capturado / subido (Opcional):</label>
+            <input type="text" id="input-adjunto-desc" class="input-field" placeholder="Ej. Radiografía periapical post-curación / Análisis de sangre">
+          </div>
+
+          <!-- SECCIÓN: ADJUNTAR ENLACE WEB O NUBE (DOCUMENTO, PDF, IMAGEN O VIDEO) -->
+          <div class="enlace-web-box" style="margin-top: 0.75rem; padding: 0.75rem; background: var(--bg-page); border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+            <label style="font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 0.4rem;">
+              🌐 O Agregar Enlace Web / Nube (Documento, PDF, Imagen o Video):
+            </label>
+            <div class="form-row" style="align-items: flex-end; gap: 0.5rem;">
+              <div class="form-group" style="flex: 1.2; margin-bottom: 0;">
+                <input type="url" id="input-enlace-web-url" class="input-field" placeholder="https://drive.google.com/... o https://...">
+              </div>
+              <div class="form-group" style="flex: 0.9; margin-bottom: 0;">
+                <input type="text" id="input-enlace-web-titulo" class="input-field" placeholder="Título (Ej. Tomografía en Drive)">
+              </div>
+              <div class="form-group" style="flex: 0.7; margin-bottom: 0;">
+                <select id="select-enlace-web-tipo" class="input-field">
+                  <option value="auto">⚡ Auto-detectar</option>
+                  <option value="documento">📄 Documento / Drive</option>
+                  <option value="pdf">📑 PDF Web</option>
+                  <option value="foto">🖼️ Imagen Web</option>
+                  <option value="video">🎥 Video Web</option>
+                </select>
+              </div>
+              <button type="button" class="btn btn-subtle" id="btn-agregar-enlace-web" style="white-space: nowrap; height: 38px;">
+                + Agregar Enlace
+              </button>
+            </div>
           </div>
 
           <!-- Previsualización de adjuntos en cola -->
@@ -747,7 +889,7 @@
         <h3 id="modal-pago-titulo">Activar Copia en la Nube y Multi-Dispositivo</h3>
         <button class="modal-close" id="btn-cerrar-modal-pago">&times;</button>
       </div>
-      <div id="contenido-pago-paso1">
+      <div>
         <p class="modal-pago-desc">
           Disfruta de sincronización bidireccional automática cada 1 minuto y respaldo seguro en la nube.
         </p>
@@ -843,5 +985,12 @@
   <div id="toast" class="toast hidden"></div>
 
   <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+  </script>
 </body>
 </html>

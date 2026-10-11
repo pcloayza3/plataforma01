@@ -1,0 +1,41 @@
+{
+  "name": "ClinikLocal - Gestión Clínica y Odontológica",
+  "short_name": "ClinikLocal",
+  "description": "MicroApp autónoma, privada y local-first para odontólogos y médicos especialistas.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f8fafc",
+  "theme_color": "#0f766e",
+  "icons": [
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": [
+    "medical",
+    "business",
+    "productivity"
+  ],
+  "shortcuts": [
+    {
+      "name": "Nuevo Paciente",
+      "url": "./index.html#nuevo-paciente",
+      "description": "Registrar un nuevo paciente o contacto"
+    },
+    {
+      "name": "Nueva Consulta",
+      "url": "./index.html#nueva-consulta",
+      "description": "Registrar consulta en historia clínica"
+    },
+    {
+      "name": "Agenda de Hoy",
+      "url": "./index.html#agenda",
+      "description": "Ver citas programadas para hoy"
+    }
+  ]
+}

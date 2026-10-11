@@ -3,10 +3,10 @@
     "active": true,
     "plan": "mensual",
     "payment_method": "QR",
-    "reference": "PAY-1791731456",
+    "reference": "PAY-1791755756",
     "multi_device_enabled": true,
-    "activated_at": "2026-10-11 11:10:56",
-    "expires_at": "2026-11-10 11:10:56"
+    "activated_at": "2026-10-11 17:55:56",
+    "expires_at": "2026-11-10 17:55:56"
   },
   "snapshots": {
     "current": {
@@ -64,7 +64,79 @@
       "action": "CREAR",
       "device": "MacBook Pro M2",
       "summary": "Alta de Carlos López"
+    },
+    {
+      "id": "log-1791751026984",
+      "timestamp": "2026-10-11 16:37:06",
+      "entity": "Finanzas",
+      "entity_id": "PAY-1791751026",
+      "action": "PAGO_CONFIRMADO",
+      "device": "Pasarela QR",
+      "summary": "Pago confirmado vía QR para Dra. Sofía Mendoza. Respaldo Cloud y Multi-Dispositivo ACTIVADO."
+    },
+    {
+      "id": "log-1791751026985-6",
+      "timestamp": "2026-10-11 16:37:06",
+      "entity": "Paciente",
+      "entity_id": "p-1",
+      "action": "CREAR",
+      "device": "MacBook Pro M2",
+      "summary": "Alta de Carlos López"
+    },
+    {
+      "id": "log-1791752410362",
+      "timestamp": "2026-10-11 17:00:10",
+      "entity": "Finanzas",
+      "entity_id": "PAY-1791752410",
+      "action": "PAGO_CONFIRMADO",
+      "device": "Pasarela QR",
+      "summary": "Pago confirmado vía QR para Dra. Sofía Mendoza. Respaldo Cloud y Multi-Dispositivo ACTIVADO."
+    },
+    {
+      "id": "log-1791752410362-8",
+      "timestamp": "2026-10-11 17:00:10",
+      "entity": "Paciente",
+      "entity_id": "p-1",
+      "action": "CREAR",
+      "device": "MacBook Pro M2",
+      "summary": "Alta de Carlos López"
+    },
+    {
+      "id": "log-1791753756639",
+      "timestamp": "2026-10-11 17:22:36",
+      "entity": "Finanzas",
+      "entity_id": "PAY-1791753756",
+      "action": "PAGO_CONFIRMADO",
+      "device": "Pasarela QR",
+      "summary": "Pago confirmado vía QR para Dra. Sofía Mendoza. Respaldo Cloud y Multi-Dispositivo ACTIVADO."
+    },
+    {
+      "id": "log-1791753756640-10",
+      "timestamp": "2026-10-11 17:22:36",
+      "entity": "Paciente",
+      "entity_id": "p-1",
+      "action": "CREAR",
+      "device": "MacBook Pro M2",
+      "summary": "Alta de Carlos López"
+    },
+    {
+      "id": "log-1791755756524",
+      "timestamp": "2026-10-11 17:55:56",
+      "entity": "Finanzas",
+      "entity_id": "PAY-1791755756",
+      "action": "PAGO_CONFIRMADO",
+      "device": "Pasarela QR",
+      "summary": "Pago confirmado vía QR para Dra. Sofía Mendoza. Respaldo Cloud y Multi-Dispositivo ACTIVADO."
+    },
+    {
+      "id": "log-1791755756525-12",
+      "timestamp": "2026-10-11 17:55:56",
+      "entity": "Paciente",
+      "entity_id": "p-1",
+      "action": "CREAR",
+      "device": "MacBook Pro M2",
+      "summary": "Alta de Carlos López"
     }
   ],
-  "last_synced_at": "2026-10-11 11:10:56"
+  "last_synced_at": "2026-10-11 17:55:56"
 }

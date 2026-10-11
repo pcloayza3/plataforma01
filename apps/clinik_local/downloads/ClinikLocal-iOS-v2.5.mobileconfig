@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>PayloadContent</key>
+    <array>
+        <dict>
+            <key>FullScreen</key>
+            <true/>
+            <key>IsRemovable</key>
+            <true/>
+            <key>Label</key>
+            <string>ClinikLocal</string>
+            <key>PayloadDescription</key>
+            <string>Configura el acceso directo como App en pantalla de inicio</string>
+            <key>PayloadDisplayName</key>
+            <string>ClinikLocal WebClip</string>
+            <key>PayloadIdentifier</key>
+            <string>com.cliniklocal.webclip</string>
+            <key>PayloadType</key>
+            <string>com.apple.webClip.managed</string>
+            <key>PayloadUUID</key>
+            <string>a7c1b821-2e38-4e89-a35b-d4e5f6a7b8c9</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>Precomposed</key>
+            <true/>
+            <key>URL</key>
+            <string>http://localhost:4042/index.html</string>
+        </dict>
+    </array>
+    <key>PayloadDescription</key>
+    <string>Instala ClinikLocal en la pantalla de inicio de tu iPhone o iPad sin necesidad de App Store.</string>
+    <key>PayloadDisplayName</key>
+    <string>ClinikLocal iOS App</string>
+    <key>PayloadIdentifier</key>
+    <string>com.cliniklocal.profile</string>
+    <key>PayloadOrganization</key>
+    <string>ClinikLocal Medical Systems</string>
+    <key>PayloadType</key>
+    <string>Configuration</string>
+    <key>PayloadUUID</key>
+    <string>b8d2c932-3f49-5f90-b46c-e5f6a7b8c9d0</string>
+    <key>PayloadVersion</key>
+    <integer>1</integer>
+</dict>
+</plist>
