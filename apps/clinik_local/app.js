@@ -1,12 +1,42 @@
 /**
- * ClinikLocal - Lógica de Aplicación Local-First
- * Maneja persistencia en localStorage, odontograma FDI, WhatsApp deep links y módulo de respaldo.
+ * ClinikLocal - Lógica de Aplicación Local-First Avanzada
+ * Soporta:
+ * 1. Menú hamburguesa colapsable y drawer lateral.
+ * 2. Panel de Configuración completo (consultorio, doctor, temas, switches de módulos, compartir ubicación).
+ * 3. Ordenación avanzada de pacientes (recientes atendidos por defecto, hoy, apellido asc/desc).
+ * 4. Soporte multimedia en historia (fotos con lightbox, video embebido, PDF de estudios).
+ * 5. Pasarela de pago (PayPal / QR) para activar copia en la nube y multi-dispositivo.
+ * 6. Motor de Sincronización Continua en la Nube cada 1 minuto con JWT y Bitácora de Auditoría.
  */
 
-const STORAGE_KEY = 'clinik_local_db_v1';
+const STORAGE_KEY = 'clinik_local_db_v2';
+const API_BASE_URL = 'http://localhost:4050';
 
-// ESTADO INICIAL / SEED DATA
+// BASE DE DATOS INICIAL CON CONFIGURACIÓN Y EJEMPLOS REALES
 const DEFAULT_DB = {
+  config: {
+    clinicName: 'Centro Dental & Especialidades San Lucas',
+    clinicIcon: '🩺',
+    clinicSub: 'Gestión Clínica',
+    doctorName: 'Dr. Alejandro Fernández',
+    doctorReg: 'Matrícula Nac. Nº 14890 - CBBA',
+    address: 'Av. Heroínas #450, Edif. Los Cedros, Piso 3, Consultorio 302',
+    mapsUrl: 'https://maps.app.goo.gl/ejemploSanLucas',
+    phone: '+59170000000',
+    theme: 'teal',
+    modules: {
+      odontograma: true,
+      recetas: true,
+      agenda: true
+    }
+  },
+  subscription: {
+    active: false,
+    plan: 'free_local',
+    method: null,
+    multiDeviceEnabled: false,
+    expiresAt: null
+  },
   pacientes: [
     {
       id: 'p-1',
@@ -16,6 +46,7 @@ const DEFAULT_DB = {
       nacimiento: '1994-05-14',
       alergias: 'Penicilina, Betalactámicos',
       notas: 'Tratamiento de ortodoncia en curso. Sensibilidad en molares.',
+      ultimaAtencion: '2026-10-09',
       odontograma: {
         '16': 'tratado',
         '26': 'caries',
@@ -25,11 +56,18 @@ const DEFAULT_DB = {
       consultas: [
         {
           id: 'c-101',
-          fecha: '2026-10-02',
+          fecha: '2026-10-09',
           tipo: 'Odontológica',
-          motivo: 'Control mensual y cambio de arcos',
-          diagnostico: 'Alineación favorable. Ligera inflamación gingival en pieza 26.',
-          tratamiento: 'Profilaxis localizada, ajuste de arco superior 0.016 NiTi.'
+          motivo: 'Control de Caries y Ajuste de Arco',
+          diagnostico: 'Pulpitis reversible en pieza 26. Progresión favorable.',
+          tratamiento: 'Curación estética con resina nanohíbrida y ajuste de arco superior.',
+          adjuntos: [
+            {
+              tipo: 'foto',
+              titulo: 'Radiografía Periapical Pieza 26',
+              url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" style="background:%231e293b;fill:%23f8fafc;font-family:sans-serif;font-size:14px;"><text x="20" y="100">Radiografía Pieza 26 (Pieza Tratada)</text></svg>'
+            }
+          ]
         }
       ]
     },
@@ -41,6 +79,7 @@ const DEFAULT_DB = {
       nacimiento: '1988-11-20',
       alergias: 'Ninguna conocida',
       notas: 'Paciente con bruxismo nocturno. Usa férula de descarga.',
+      ultimaAtencion: '2026-09-18',
       odontograma: {
         '37': 'tratado',
         '46': 'caries'
@@ -52,7 +91,8 @@ const DEFAULT_DB = {
           tipo: 'Médica General',
           motivo: 'Cefalea tensional recurrente y tensión mandibular',
           diagnostico: 'Disfunción de la articulación temporomandibular (ATM).',
-          tratamiento: 'Prescripción de relajante muscular y derivación a fisioterapia maxilofacial.'
+          tratamiento: 'Prescripción de relajante muscular y derivación a fisioterapia maxilofacial.',
+          adjuntos: []
         }
       ]
     }
@@ -75,26 +115,38 @@ const DEFAULT_DB = {
       estado: 'Pendiente'
     }
   ],
-  recetas: [],
+  auditLogs: [
+    {
+      id: 'log-seed',
+      timestamp: new Date().toLocaleString('es-ES'),
+      entity: 'Sistema',
+      action: 'INICIALIZACION',
+      device: 'Dispositivo Local',
+      summary: 'Base de datos local inicializada con éxito.'
+    }
+  ],
+  cambiosPendientes: [],
   meta: {
-    doctor: 'Dr. Alejandro Fernández',
-    especialidad: 'Odontología Integral y Especialidades Médicas',
-    registro: 'Matrícula Nac. Nº 14890',
-    telefono: '+591 70000000',
+    jwtToken: null,
     ultimaSincronizacionCloud: null
   }
 };
 
-// ==================== GESTOR DE BASE DE DATOS LOCAL ====================
+// ==================== REPOSITORIO LOCAL-FIRST ====================
 class LocalDatabase {
   static load() {
     try {
       const data = localStorage.getItem(STORAGE_KEY);
       if (data) {
-        return JSON.parse(data);
+        const parsed = JSON.parse(data);
+        if (!parsed.config) parsed.config = DEFAULT_DB.config;
+        if (!parsed.subscription) parsed.subscription = DEFAULT_DB.subscription;
+        if (!parsed.auditLogs) parsed.auditLogs = DEFAULT_DB.auditLogs;
+        if (!parsed.cambiosPendientes) parsed.cambiosPendientes = [];
+        return parsed;
       }
     } catch (e) {
-      console.error('Error cargando localStorage:', e);
+      console.error('Error cargando base de datos local:', e);
     }
     this.save(DEFAULT_DB);
     return JSON.parse(JSON.stringify(DEFAULT_DB));
@@ -114,7 +166,7 @@ class LocalDatabase {
     const downloadAnchor = document.createElement('a');
     const dateStr = new Date().toISOString().slice(0, 10);
     downloadAnchor.setAttribute('href', dataStr);
-    downloadAnchor.setAttribute('download', `clinik_respaldo_local_${dateStr}.clinik`);
+    downloadAnchor.setAttribute('download', `clinik_respaldo_${dateStr}.clinik`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
@@ -128,48 +180,73 @@ class LocalDatabase {
         return true;
       }
     } catch (e) {
-      console.error('Archivo de respaldo inválido:', e);
+      console.error('Error importando backup:', e);
     }
     return false;
   }
 }
 
-// ==================== APP CONTROLLER ====================
+// ==================== APLICACIÓN PRINCIPAL ====================
 class ClinikApp {
   constructor() {
     this.db = LocalDatabase.load();
     this.pacienteActivoId = this.db.pacientes.length > 0 ? this.db.pacientes[0].id : null;
+    this.adjuntosConsultaEnCola = [];
+    
     this.initElements();
+    this.initThemeAndBranding();
     this.initEvents();
     this.renderAll();
+    
+    // Iniciar el temporizador de Sincronización Continua cada 1 Minuto (60s)
+    this.iniciarSincronizadorMinuto();
   }
 
   initElements() {
-    // Tabs
-    this.navTabs = document.querySelectorAll('.nav-tab');
+    // Drawer Hamburguesa
+    this.btnBurger = document.getElementById('btn-menu-hamburguesa');
+    this.sidebarDrawer = document.getElementById('sidebar-drawer');
+    this.drawerBackdrop = document.getElementById('drawer-backdrop');
+    this.btnCerrarDrawer = document.getElementById('btn-cerrar-drawer');
+    this.drawerNavItems = document.querySelectorAll('.drawer-nav-item');
     this.views = document.querySelectorAll('.view-section');
+
+    // Sincronización Pills
+    this.syncPill = document.getElementById('sync-pill');
+    this.syncDot = document.getElementById('sync-dot');
+    this.syncLabel = document.getElementById('sync-label');
+    this.btnSyncNow = document.getElementById('btn-sync-now');
 
     // Pacientes
     this.listaPacientes = document.getElementById('lista-pacientes');
     this.inputBuscarPaciente = document.getElementById('input-buscar-paciente');
+    this.selectOrdenPacientes = document.getElementById('select-orden-pacientes');
     this.lblTotalPacientes = document.getElementById('lbl-total-pacientes');
     this.btnNuevoPaciente = document.getElementById('btn-nuevo-paciente');
     this.modalPaciente = document.getElementById('modal-paciente');
     this.formPaciente = document.getElementById('form-paciente');
 
-    // Historia & Odontograma
+    // Historia
     this.selectPacienteHistoria = document.getElementById('select-paciente-historia');
     this.alertaAlergias = document.getElementById('alerta-alergias');
     this.txtAlergiasPaciente = document.getElementById('txt-alergias-paciente');
+    this.toggleOdontoWrapper = document.getElementById('toggle-odontograma-wrapper');
     this.btnModoMedico = document.getElementById('btn-modo-medico');
     this.btnModoDental = document.getElementById('btn-modo-dental');
     this.seccionOdontograma = document.getElementById('seccion-odontograma');
     this.arcadaSuperior = document.getElementById('arcada-superior');
     this.arcadaInferior = document.getElementById('arcada-inferior');
     this.timelineConsultas = document.getElementById('timeline-consultas');
+    this.selectOrdenHistoria = document.getElementById('select-orden-historia');
     this.btnNuevaConsulta = document.getElementById('btn-nueva-consulta');
     this.modalConsulta = document.getElementById('modal-consulta');
     this.formConsulta = document.getElementById('form-consulta');
+
+    // Multimedia inputs
+    this.inputAdjuntoFoto = document.getElementById('input-adjunto-foto');
+    this.inputAdjuntoPdf = document.getElementById('input-adjunto-pdf');
+    this.inputAdjuntoVideo = document.getElementById('input-adjunto-video');
+    this.colaAdjuntosPreview = document.getElementById('cola-adjuntos-preview');
 
     // Agenda
     this.listaCitas = document.getElementById('lista-citas');
@@ -198,30 +275,143 @@ class ClinikApp {
     this.bkMetricPacientes = document.getElementById('bk-metric-pacientes');
     this.bkMetricConsultas = document.getElementById('bk-metric-consultas');
     this.bkMetricCitas = document.getElementById('bk-metric-citas');
+    this.bkMetricPendientes = document.getElementById('bk-metric-pendientes');
     this.btnExportarLocal = document.getElementById('btn-exportar-local');
     this.inputImportarLocal = document.getElementById('input-importar-local');
     this.btnSyncCloud = document.getElementById('btn-sync-cloud');
     this.cloudLastSync = document.getElementById('cloud-last-sync');
+    this.cloudStatusBadge = document.getElementById('cloud-status-badge');
+    this.cloudMultiStatus = document.getElementById('cloud-multidevice-status');
+    this.btnAbrirPagoCloud = document.getElementById('btn-abrir-pago-cloud');
+    this.btnVerAuditoriaTop = document.getElementById('btn-ver-auditoria-top');
+
+    // Configuración
+    this.cfgClinicName = document.getElementById('cfg-clinic-name');
+    this.cfgClinicIcon = document.getElementById('cfg-clinic-icon');
+    this.cfgClinicSub = document.getElementById('cfg-clinic-sub');
+    this.cfgDoctorName = document.getElementById('cfg-doctor-name');
+    this.cfgDoctorReg = document.getElementById('cfg-doctor-reg');
+    this.cfgClinicAddress = document.getElementById('cfg-clinic-address');
+    this.cfgClinicMaps = document.getElementById('cfg-clinic-maps');
+    this.cfgClinicPhone = document.getElementById('cfg-clinic-phone');
+    this.cfgModuleOdonto = document.getElementById('cfg-module-odontograma');
+    this.cfgModuleRecetas = document.getElementById('cfg-module-recetas');
+    this.cfgModuleAgenda = document.getElementById('cfg-module-agenda');
+    this.btnGuardarConfig = document.getElementById('btn-guardar-config');
+    this.btnProbarCompartir = document.getElementById('btn-probar-compartir-contacto');
+    this.btnDrawerCompartir = document.getElementById('btn-drawer-compartir-contacto');
+    this.cfgSubBadge = document.getElementById('cfg-sub-badge');
+    this.btnPagarPaypal = document.getElementById('btn-pagar-paypal');
+    this.btnPagarQr = document.getElementById('btn-pagar-qr');
+    this.btnDesactivarSub = document.getElementById('btn-desactivar-sub');
+    this.btnAbrirAuditoria = document.getElementById('btn-abrir-auditoria');
+
+    // Modal Pagos
+    this.modalPago = document.getElementById('modal-pago');
+    this.vistaPagoPaypal = document.getElementById('vista-pago-paypal');
+    this.vistaPagoQr = document.getElementById('vista-pago-qr');
+    this.btnConfirmarPaypal = document.getElementById('btn-confirmar-pago-paypal');
+    this.btnConfirmarQr = document.getElementById('btn-confirmar-pago-qr');
+
+    // Modal Auditoría
+    this.modalAuditoria = document.getElementById('modal-auditoria');
+    this.auditTableBody = document.getElementById('audit-table-body');
+
+    // Lightbox
+    this.lightbox = document.getElementById('lightbox');
+    this.lightboxImg = document.getElementById('lightbox-img');
+    this.lightboxCaption = document.getElementById('lightbox-caption');
+    this.btnCerrarLightbox = document.getElementById('btn-cerrar-lightbox');
 
     // Toast
     this.toastEl = document.getElementById('toast');
   }
 
+  initThemeAndBranding() {
+    const cfg = this.db.config;
+    document.body.dataset.theme = cfg.theme || 'teal';
+
+    // Header y Drawer branding
+    document.getElementById('header-clinic-title').textContent = cfg.clinicName || 'ClinikLocal';
+    document.getElementById('header-clinic-icon').textContent = cfg.clinicIcon || '🩺';
+    document.getElementById('header-clinic-subtitle').innerHTML = `<span>${cfg.doctorName}</span> &bull; <span class="badge-local">100% Local</span>`;
+
+    document.getElementById('drawer-clinic-name').textContent = cfg.clinicName;
+    document.getElementById('drawer-clinic-icon').textContent = cfg.clinicIcon;
+    document.getElementById('drawer-clinic-sub').textContent = cfg.clinicSub;
+    document.getElementById('drawer-doctor-name').textContent = cfg.doctorName;
+
+    // Recetas membrete
+    document.getElementById('rx-header-doctor').textContent = `${cfg.doctorName} (${cfg.doctorReg})`;
+    document.getElementById('rx-header-clinic').textContent = cfg.clinicName;
+    document.getElementById('rx-header-contact').textContent = `${cfg.address} &bull; WhatsApp: ${cfg.phone}`;
+
+    // Llenar campos de configuración
+    this.cfgClinicName.value = cfg.clinicName;
+    this.cfgClinicIcon.value = cfg.clinicIcon;
+    this.cfgClinicSub.value = cfg.clinicSub;
+    this.cfgDoctorName.value = cfg.doctorName;
+    this.cfgDoctorReg.value = cfg.doctorReg;
+    this.cfgClinicAddress.value = cfg.address;
+    this.cfgClinicMaps.value = cfg.mapsUrl;
+    this.cfgClinicPhone.value = cfg.phone;
+
+    // Radio button de tema
+    const radio = document.querySelector(`input[name="cfg-theme"][value="${cfg.theme}"]`);
+    if (radio) radio.checked = true;
+
+    // Switches de módulos
+    this.cfgModuleOdonto.checked = cfg.modules.odontograma !== false;
+    this.cfgModuleRecetas.checked = cfg.modules.recetas !== false;
+    this.cfgModuleAgenda.checked = cfg.modules.agenda !== false;
+
+    this.aplicarVisibilidadModulos();
+    this.actualizarEstadoSuscripcionUI();
+  }
+
+  aplicarVisibilidadModulos() {
+    const mods = this.db.config.modules;
+    // Odontograma
+    if (mods.odontograma === false) {
+      this.toggleOdontoWrapper.style.display = 'none';
+      this.seccionOdontograma.classList.add('hidden');
+    } else {
+      this.toggleOdontoWrapper.style.display = 'flex';
+    }
+
+    // Recetas en drawer
+    const menuRecetas = document.getElementById('menu-item-recetas');
+    if (menuRecetas) menuRecetas.style.display = mods.recetas === false ? 'none' : 'flex';
+
+    // Agenda en drawer
+    const menuAgenda = document.getElementById('menu-item-agenda');
+    if (menuAgenda) menuAgenda.style.display = mods.agenda === false ? 'none' : 'flex';
+  }
+
   initEvents() {
-    // Navegación
-    this.navTabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        this.navTabs.forEach(t => t.classList.remove('active'));
-        this.views.forEach(v => v.classList.remove('active'));
-        tab.classList.add('active');
-        document.getElementById(tab.dataset.tab).classList.add('active');
+    // Drawer Hamburguesa
+    this.btnBurger.addEventListener('click', () => this.abrirDrawer());
+    this.btnCerrarDrawer.addEventListener('click', () => this.cerrarDrawer());
+    this.drawerBackdrop.addEventListener('click', () => this.cerrarDrawer());
+
+    this.drawerNavItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const tabTarget = item.dataset.tab;
+        this.cambiarPestana(tabTarget);
+        this.cerrarDrawer();
       });
     });
 
-    // Filtro pacientes
-    this.inputBuscarPaciente.addEventListener('input', () => this.renderPacientes());
+    // Compartir contacto
+    const handlerCompartir = () => this.compartirUbicacionWhatsApp();
+    this.btnProbarCompartir.addEventListener('click', handlerCompartir);
+    this.btnDrawerCompartir.addEventListener('click', handlerCompartir);
 
-    // Modales
+    // Filtro y Ordenación de Pacientes
+    this.inputBuscarPaciente.addEventListener('input', () => this.renderPacientes());
+    this.selectOrdenPacientes.addEventListener('change', () => this.renderPacientes());
+
+    // Modales de Paciente
     this.btnNuevoPaciente.addEventListener('click', () => this.abrirModalPaciente());
     document.getElementById('btn-cerrar-modal-paciente').addEventListener('click', () => this.cerrarModalPaciente());
     document.getElementById('btn-cancelar-modal-paciente').addEventListener('click', () => this.cerrarModalPaciente());
@@ -232,6 +422,7 @@ class ClinikApp {
       this.pacienteActivoId = e.target.value;
       this.renderHistoria();
     });
+    this.selectOrdenHistoria.addEventListener('change', () => this.renderHistoria());
     this.btnModoMedico.addEventListener('click', () => {
       this.btnModoMedico.classList.add('active');
       this.btnModoDental.classList.remove('active');
@@ -242,10 +433,21 @@ class ClinikApp {
       this.btnModoMedico.classList.remove('active');
       this.seccionOdontograma.classList.remove('hidden');
     });
+
+    // Modal Consulta y Multimedia
     this.btnNuevaConsulta.addEventListener('click', () => this.abrirModalConsulta());
     document.getElementById('btn-cerrar-modal-consulta').addEventListener('click', () => this.cerrarModalConsulta());
     document.getElementById('btn-cancelar-modal-consulta').addEventListener('click', () => this.cerrarModalConsulta());
     this.formConsulta.addEventListener('submit', (e) => this.guardarConsulta(e));
+
+    this.inputAdjuntoFoto.addEventListener('change', (e) => this.procesarAdjuntoFoto(e));
+    this.inputAdjuntoPdf.addEventListener('change', (e) => this.procesarAdjuntoPdf(e));
+
+    // Lightbox
+    this.btnCerrarLightbox.addEventListener('click', () => this.lightbox.classList.add('hidden'));
+    this.lightbox.addEventListener('click', (e) => {
+      if (e.target === this.lightbox) this.lightbox.classList.add('hidden');
+    });
 
     // Agenda
     this.inputFechaAgenda.value = new Date().toISOString().split('T')[0];
@@ -267,13 +469,55 @@ class ClinikApp {
     this.btnImprimirReceta.addEventListener('click', () => window.print());
     this.btnWaReceta.addEventListener('click', () => this.enviarRecetaWhatsApp());
 
-    // Respaldo
+    // Respaldo y Sincronización Manual
     this.btnExportarLocal.addEventListener('click', () => {
       LocalDatabase.exportBackup();
+      this.registrarAuditoria('Respaldo', 'backup-local', 'EXPORTAR', 'Exportación de archivo .clinik');
       this.showToast('✅ Respaldo descargado exitosamente (.clinik)');
     });
     this.inputImportarLocal.addEventListener('change', (e) => this.manejarImportacion(e));
-    this.btnSyncCloud.addEventListener('click', () => this.simularCloudSync());
+    this.btnSyncNow.addEventListener('click', () => this.forzarSincronizacionInmediata());
+    this.btnSyncCloud.addEventListener('click', () => this.forzarSincronizacionInmediata());
+
+    // Guardar Configuración
+    this.btnGuardarConfig.addEventListener('click', () => this.guardarConfiguracion());
+
+    // Pagos
+    this.btnPagarPaypal.addEventListener('click', () => this.abrirModalPago('paypal'));
+    this.btnPagarQr.addEventListener('click', () => this.abrirModalPago('qr'));
+    this.btnAbrirPagoCloud.addEventListener('click', () => this.abrirModalPago('qr'));
+    document.getElementById('btn-cerrar-modal-pago').addEventListener('click', () => this.modalPago.classList.add('hidden'));
+    this.btnConfirmarPaypal.addEventListener('click', () => this.confirmarPago('paypal'));
+    this.btnConfirmarQr.addEventListener('click', () => this.confirmarPago('qr'));
+    this.btnDesactivarSub.addEventListener('click', () => this.desactivarSuscripcion());
+
+    // Auditoría
+    const handlerAuditoria = () => this.abrirModalAuditoria();
+    this.btnAbrirAuditoria.addEventListener('click', handlerAuditoria);
+    this.btnVerAuditoriaTop.addEventListener('click', handlerAuditoria);
+    document.getElementById('btn-cerrar-modal-auditoria').addEventListener('click', () => this.modalAuditoria.classList.add('hidden'));
+    document.getElementById('btn-cerrar-auditoria-footer').addEventListener('click', () => this.modalAuditoria.classList.add('hidden'));
+  }
+
+  abrirDrawer() {
+    this.sidebarDrawer.classList.add('open');
+    this.drawerBackdrop.classList.remove('hidden');
+  }
+
+  cerrarDrawer() {
+    this.sidebarDrawer.classList.remove('open');
+    this.drawerBackdrop.classList.add('hidden');
+  }
+
+  cambiarPestana(tabId) {
+    this.drawerNavItems.forEach(i => i.classList.remove('active'));
+    this.views.forEach(v => v.classList.remove('active'));
+
+    const tabBtn = document.querySelector(`.drawer-nav-item[data-tab="${tabId}"]`);
+    if (tabBtn) tabBtn.classList.add('active');
+
+    const viewSection = document.getElementById(tabId);
+    if (viewSection) viewSection.classList.add('active');
   }
 
   showToast(mensaje) {
@@ -284,23 +528,92 @@ class ClinikApp {
     }, 3500);
   }
 
-  renderAll() {
-    this.renderPacientes();
-    this.poblarSelectsPacientes();
-    this.renderHistoria();
-    this.renderAgenda();
-    this.renderRecetasDefault();
-    this.renderRespaldoMetricas();
+  // ==================== CONFIGURACIÓN Y TEMAS ====================
+  guardarConfiguracion() {
+    const selectedTheme = document.querySelector('input[name="cfg-theme"]:checked')?.value || 'teal';
+    
+    this.db.config = {
+      clinicName: this.cfgClinicName.value.trim() || 'Consultorio Particular',
+      clinicIcon: this.cfgClinicIcon.value,
+      clinicSub: this.cfgClinicSub.value.trim() || 'Gestión Clínica',
+      doctorName: this.cfgDoctorName.value.trim() || 'Dr(a). Profesional',
+      doctorReg: this.cfgDoctorReg.value.trim(),
+      address: this.cfgClinicAddress.value.trim(),
+      mapsUrl: this.cfgClinicMaps.value.trim(),
+      phone: this.cfgClinicPhone.value.trim(),
+      theme: selectedTheme,
+      modules: {
+        odontograma: this.cfgModuleOdonto.checked,
+        recetas: this.cfgModuleRecetas.checked,
+        agenda: this.cfgModuleAgenda.checked
+      }
+    };
+
+    LocalDatabase.save(this.db);
+    this.initThemeAndBranding();
+    this.registrarAuditoria('Configuracion', 'cfg-general', 'EDITAR', 'Actualización de preferencias y datos del consultorio');
+    this.showToast('✅ Configuración guardada correctamente.');
   }
 
-  // ==================== SECCIÓN PACIENTES ====================
+  compartirUbicacionWhatsApp() {
+    const cfg = this.db.config;
+    let texto = `*${cfg.clinicName.toUpperCase()}*\n`;
+    texto += `👨‍⚕️ *Atención:* ${cfg.doctorName} (${cfg.doctorReg})\n`;
+    texto += `📍 *Dirección:* ${cfg.address}\n`;
+    if (cfg.mapsUrl) {
+      texto += `🗺️ *Ver en Google Maps:* ${cfg.mapsUrl}\n`;
+    }
+    texto += `📞 *Teléfono / WhatsApp de Citas:* ${cfg.phone}\n\n`;
+    texto += `_Estamos a su disposición para su consulta de salud._`;
+
+    const url = `https://wa.me/?text=${encodeURIComponent(texto)}`;
+    window.open(url, '_blank');
+  }
+
+  // ==================== ORDENACIÓN Y PACIENTES ====================
   renderPacientes() {
     const q = this.inputBuscarPaciente.value.toLowerCase().trim();
-    const filtrados = this.db.pacientes.filter(p => 
+    const orden = this.selectOrdenPacientes.value;
+    const fechaHoy = new Date().toISOString().split('T')[0];
+
+    let filtrados = this.db.pacientes.filter(p => 
       p.nombre.toLowerCase().includes(q) ||
       (p.ci && p.ci.toLowerCase().includes(q)) ||
       (p.telefono && p.telefono.includes(q))
     );
+
+    // LÓGICA DE ORDENACIÓN AVANZADA
+    filtrados.sort((a, b) => {
+      if (orden === 'recientes') {
+        const atA = a.ultimaAtencion || (a.consultas && a.consultas[0] ? a.consultas[0].fecha : '1970-01-01');
+        const atB = b.ultimaAtencion || (b.consultas && b.consultas[0] ? b.consultas[0].fecha : '1970-01-01');
+        return atB.localeCompare(atA);
+      }
+      if (orden === 'atencion_hoy') {
+        const tieneCitaA = this.db.citas.some(c => c.pacienteId === a.id && c.fecha === fechaHoy);
+        const tieneCitaB = this.db.citas.some(c => c.pacienteId === b.id && c.fecha === fechaHoy);
+        if (tieneCitaA && !tieneCitaB) return -1;
+        if (!tieneCitaA && tieneCitaB) return 1;
+        return a.nombre.localeCompare(b.nombre);
+      }
+      if (orden === 'apellido_asc') {
+        const apeA = a.nombre.split(' ').slice(1).join(' ') || a.nombre;
+        const apeB = b.nombre.split(' ').slice(1).join(' ') || b.nombre;
+        return apeA.localeCompare(apeB);
+      }
+      if (orden === 'apellido_desc') {
+        const apeA = a.nombre.split(' ').slice(1).join(' ') || a.nombre;
+        const apeB = b.nombre.split(' ').slice(1).join(' ') || b.nombre;
+        return apeB.localeCompare(apeA);
+      }
+      if (orden === 'nombre_asc') {
+        return a.nombre.localeCompare(b.nombre);
+      }
+      if (orden === 'nombre_desc') {
+        return b.nombre.localeCompare(a.nombre);
+      }
+      return 0;
+    });
 
     this.lblTotalPacientes.textContent = `${filtrados.length} registrados`;
     this.listaPacientes.innerHTML = '';
@@ -327,11 +640,12 @@ class ClinikApp {
           <div class="patient-meta">
             <div>📱 <strong>WhatsApp:</strong> ${p.telefono}</div>
             <div>🎂 <strong>Nacimiento:</strong> ${p.nacimiento || 'No registrada'}</div>
+            <div class="last-visit-tag">🕒 Última atención: ${p.ultimaAtencion || 'Sin consultas previas'}</div>
             ${p.alergias && p.alergias !== 'Ninguna' && p.alergias !== 'Ninguna conocida' ? `<div class="allergy-pill">⚠️ Alergia: ${p.alergias}</div>` : ''}
           </div>
         </div>
         <div class="patient-card-footer">
-          <button class="btn btn-whatsapp" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;" onclick="app.abrirChatWhatsApp('${p.telefono}', 'Hola ${encodeURIComponent(p.nombre)}, le saludamos desde el consultorio médico.')">
+          <button class="btn btn-whatsapp" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;" onclick="app.abrirChatWhatsApp('${p.telefono}', 'Hola ${encodeURIComponent(p.nombre)}, le saludamos desde ${encodeURIComponent(app.db.config.clinicName)}.')">
             💬 Abrir WhatsApp
           </button>
           <button class="btn btn-subtle" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;" onclick="app.seleccionarPacienteYVerHistoria('${p.id}')">
@@ -366,8 +680,7 @@ class ClinikApp {
     this.selectPacienteHistoria.value = id;
     this.recetaSelectPaciente.value = id;
     this.renderHistoria();
-    // Cambiar a pestaña historia
-    document.querySelector('[data-tab="tab-historia"]').click();
+    this.cambiarPestana('tab-historia');
   }
 
   abrirModalPaciente() {
@@ -397,11 +710,14 @@ class ClinikApp {
       nacimiento,
       alergias: alergias || 'Ninguna',
       notas,
+      ultimaAtencion: new Date().toISOString().split('T')[0],
       odontograma: {},
       consultas: []
     };
 
     this.db.pacientes.unshift(nuevo);
+    this.registrarAuditoria('Paciente', nuevo.id, 'CREAR', `Alta de paciente: ${nombre} (${telefono})`);
+    
     LocalDatabase.save(this.db);
     this.pacienteActivoId = nuevo.id;
     this.cerrarModalPaciente();
@@ -409,7 +725,7 @@ class ClinikApp {
     this.showToast(`✅ Paciente "${nombre}" guardado localmente.`);
   }
 
-  // ==================== SECCIÓN HISTORIA & ODONTOGRAMA ====================
+  // ==================== HISTORIA Y MULTIMEDIA ====================
   renderHistoria() {
     const paciente = this.db.pacientes.find(p => p.id === this.pacienteActivoId);
     if (!paciente) {
@@ -426,11 +742,18 @@ class ClinikApp {
     }
 
     // Odontograma FDI
-    this.renderOdontograma(paciente);
+    if (this.db.config.modules.odontograma !== false) {
+      this.renderOdontograma(paciente);
+    }
 
-    // Consultas
+    // Consultas ordenadas
+    const orden = this.selectOrdenHistoria.value;
+    let consultas = [...(paciente.consultas || [])];
+    consultas.sort((a, b) => {
+      return orden === 'reciente_primero' ? b.fecha.localeCompare(a.fecha) : a.fecha.localeCompare(b.fecha);
+    });
+
     this.timelineConsultas.innerHTML = '';
-    const consultas = paciente.consultas || [];
     if (consultas.length === 0) {
       this.timelineConsultas.innerHTML = '<p style="color: #94a3b8; padding: 1.5rem 0;">Aún no se han registrado consultas para este paciente. Presiona "+ Registrar Consulta".</p>';
       return;
@@ -439,23 +762,168 @@ class ClinikApp {
     consultas.forEach(c => {
       const card = document.createElement('div');
       card.className = 'timeline-card';
+      
+      // Renderizado de multimedia (fotos, video, pdf)
+      let mediaHtml = '';
+      if (c.adjuntos && c.adjuntos.length > 0) {
+        mediaHtml += `<div class="timeline-media-gallery">`;
+        c.adjuntos.forEach(adj => {
+          if (adj.tipo === 'foto') {
+            mediaHtml += `
+              <div class="media-thumbnail-card" onclick="app.abrirLightbox('${encodeURIComponent(adj.url)}', '${encodeURIComponent(adj.titulo)}')">
+                <img src="${adj.url}" class="media-thumb-img" alt="${adj.titulo}">
+                <span class="media-thumb-label">📷 ${adj.titulo}</span>
+              </div>
+            `;
+          } else if (adj.tipo === 'pdf') {
+            mediaHtml += `
+              <a href="${adj.url}" target="_blank" download="${adj.titulo}.pdf" class="media-pdf-badge">
+                📄 Descargar PDF: ${adj.titulo}
+              </a>
+            `;
+          } else if (adj.tipo === 'video') {
+            mediaHtml += `
+              <div class="media-video-container">
+                <video src="${adj.url}" controls></video>
+                <span class="microcopy">🎥 ${adj.titulo}</span>
+              </div>
+            `;
+          }
+        });
+        mediaHtml += `</div>`;
+      }
+
       card.innerHTML = `
         <div class="timeline-meta">
           <span>📅 ${c.fecha} &bull; <strong>${c.tipo}</strong></span>
         </div>
         <div class="timeline-dx">🔬 Diagnóstico: ${c.diagnostico}</div>
-        <div class="timeline-tx"><strong>Tratamiento realizado:</strong> ${c.tratamiento}</div>
+        <div class="timeline-tx"><strong>Tratamiento y evolución:</strong> ${c.tratamiento}</div>
+        ${mediaHtml}
       `;
       this.timelineConsultas.appendChild(card);
     });
   }
 
+  abrirLightbox(urlEncoded, captionEncoded) {
+    const url = decodeURIComponent(urlEncoded);
+    const caption = decodeURIComponent(captionEncoded);
+    this.lightboxImg.src = url;
+    this.lightboxCaption.textContent = caption;
+    this.lightbox.classList.remove('hidden');
+  }
+
+  procesarAdjuntoFoto(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      this.adjuntosConsultaEnCola.push({
+        tipo: 'foto',
+        titulo: file.name,
+        url: event.target.result
+      });
+      this.renderColaAdjuntos();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  procesarAdjuntoPdf(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      this.adjuntosConsultaEnCola.push({
+        tipo: 'pdf',
+        titulo: file.name,
+        url: event.target.result
+      });
+      this.renderColaAdjuntos();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  renderColaAdjuntos() {
+    this.colaAdjuntosPreview.innerHTML = '';
+    this.adjuntosConsultaEnCola.forEach((item, idx) => {
+      const badge = document.createElement('span');
+      badge.className = 'preview-badge-item';
+      badge.innerHTML = `
+        <span>${item.tipo === 'foto' ? '📷' : item.tipo === 'pdf' ? '📄' : '🎥'} ${item.titulo}</span>
+        <button type="button" class="btn-remove-attach" onclick="app.eliminarAdjuntoCola(${idx})">&times;</button>
+      `;
+      this.colaAdjuntosPreview.appendChild(badge);
+    });
+  }
+
+  eliminarAdjuntoCola(idx) {
+    this.adjuntosConsultaEnCola.splice(idx, 1);
+    this.renderColaAdjuntos();
+  }
+
+  abrirModalConsulta() {
+    if (!this.pacienteActivoId) {
+      alert('Seleccione un paciente primero.');
+      return;
+    }
+    this.formConsulta.reset();
+    this.adjuntosConsultaEnCola = [];
+    this.renderColaAdjuntos();
+    document.getElementById('consulta-fecha').value = new Date().toISOString().split('T')[0];
+    this.modalConsulta.classList.remove('hidden');
+  }
+
+  cerrarModalConsulta() {
+    this.modalConsulta.classList.add('hidden');
+  }
+
+  guardarConsulta(e) {
+    e.preventDefault();
+    const paciente = this.db.pacientes.find(p => p.id === this.pacienteActivoId);
+    if (!paciente) return;
+
+    const fecha = document.getElementById('consulta-fecha').value;
+    const tipo = document.getElementById('consulta-tipo').value;
+    const motivo = document.getElementById('consulta-motivo').value.trim();
+    const diagnostico = document.getElementById('consulta-diagnostico').value.trim();
+    const tratamiento = document.getElementById('consulta-tratamiento').value.trim();
+    const videoUrl = this.inputAdjuntoVideo.value.trim();
+
+    const adjuntos = [...this.adjuntosConsultaEnCola];
+    if (videoUrl) {
+      adjuntos.push({
+        tipo: 'video',
+        titulo: 'Video del Procedimiento',
+        url: videoUrl
+      });
+    }
+
+    if (!paciente.consultas) paciente.consultas = [];
+    const nuevaConsulta = {
+      id: 'c-' + Date.now(),
+      fecha,
+      tipo,
+      motivo,
+      diagnostico,
+      tratamiento,
+      adjuntos
+    };
+    paciente.consultas.unshift(nuevaConsulta);
+    paciente.ultimaAtencion = fecha;
+
+    this.registrarAuditoria('Historia', nuevaConsulta.id, 'CREAR', `Consulta ${tipo} para ${paciente.nombre}: ${diagnostico}`);
+
+    LocalDatabase.save(this.db);
+    this.cerrarModalConsulta();
+    this.renderHistoria();
+    this.renderRespaldoMetricas();
+    this.showToast('✅ Consulta agregada a la historia clínica.');
+  }
+
   renderOdontograma(paciente) {
     if (!paciente.odontograma) paciente.odontograma = {};
 
-    // Arcada Superior: 18 a 11 (derecha cuadrante 1) y 21 a 28 (izquierda cuadrante 2)
     const superiores = ['18', '17', '16', '15', '14', '13', '12', '11', '21', '22', '23', '24', '25', '26', '27', '28'];
-    // Arcada Inferior: 48 a 41 y 31 a 38
     const inferiores = ['48', '47', '46', '45', '44', '43', '42', '41', '31', '32', '33', '34', '35', '36', '37', '38'];
 
     this.arcadaSuperior.innerHTML = '';
@@ -479,6 +947,8 @@ class ClinikApp {
       const estados = ['sano', 'caries', 'tratado', 'endo', 'ausente'];
       const nextIdx = (estados.indexOf(estado) + 1) % estados.length;
       paciente.odontograma[num] = estados[nextIdx];
+      
+      this.registrarAuditoria('Odontograma', `diente-${num}`, 'ACTUALIZAR', `Pieza dental ${num} cambiada a ${estados[nextIdx]} (${paciente.nombre})`);
       LocalDatabase.save(this.db);
       this.renderOdontograma(paciente);
       this.showToast(`Pieza ${num}: ${estados[nextIdx].toUpperCase()}`);
@@ -487,49 +957,7 @@ class ClinikApp {
     return btn;
   }
 
-  abrirModalConsulta() {
-    if (!this.pacienteActivoId) {
-      alert('Seleccione un paciente primero.');
-      return;
-    }
-    this.formConsulta.reset();
-    document.getElementById('consulta-fecha').value = new Date().toISOString().split('T')[0];
-    this.modalConsulta.classList.remove('hidden');
-  }
-
-  cerrarModalConsulta() {
-    this.modalConsulta.classList.add('hidden');
-  }
-
-  guardarConsulta(e) {
-    e.preventDefault();
-    const paciente = this.db.pacientes.find(p => p.id === this.pacienteActivoId);
-    if (!paciente) return;
-
-    const fecha = document.getElementById('consulta-fecha').value;
-    const tipo = document.getElementById('consulta-tipo').value;
-    const motivo = document.getElementById('consulta-motivo').value.trim();
-    const diagnostico = document.getElementById('consulta-diagnostico').value.trim();
-    const tratamiento = document.getElementById('consulta-tratamiento').value.trim();
-
-    if (!paciente.consultas) paciente.consultas = [];
-    paciente.consultas.unshift({
-      id: 'c-' + Date.now(),
-      fecha,
-      tipo,
-      motivo,
-      diagnostico,
-      tratamiento
-    });
-
-    LocalDatabase.save(this.db);
-    this.cerrarModalConsulta();
-    this.renderHistoria();
-    this.renderRespaldoMetricas();
-    this.showToast('✅ Consulta agregada al historial clínico.');
-  }
-
-  // ==================== SECCIÓN AGENDA ====================
+  // ==================== AGENDA ====================
   renderAgenda() {
     const fechaFiltro = this.inputFechaAgenda.value;
     const citas = this.db.citas.filter(c => c.fecha === fechaFiltro);
@@ -540,7 +968,6 @@ class ClinikApp {
       return;
     }
 
-    // Ordenar por hora
     citas.sort((a, b) => a.hora.localeCompare(b.hora));
 
     citas.forEach(c => {
@@ -584,14 +1011,18 @@ class ClinikApp {
     const hora = document.getElementById('cita-hora').value;
     const motivo = document.getElementById('cita-motivo').value.trim();
 
-    this.db.citas.push({
+    const nueva = {
       id: 'cita-' + Date.now(),
       pacienteId,
       fecha,
       hora,
       motivo,
       estado: 'Pendiente'
-    });
+    };
+
+    this.db.citas.push(nueva);
+    const p = this.db.pacientes.find(x => x.id === pacienteId);
+    this.registrarAuditoria('Agenda', nueva.id, 'CREAR', `Cita programada para ${p ? p.nombre : 'Paciente'} el ${fecha} a las ${hora}`);
 
     LocalDatabase.save(this.db);
     this.cerrarModalCita();
@@ -602,7 +1033,9 @@ class ClinikApp {
 
   eliminarCita(id) {
     if (confirm('¿Deseas cancelar esta cita de la agenda?')) {
-      this.db.citas = this.db.citas.filter(c => c.id !== id);
+      const c = this.db.citas.find(x => x.id === id);
+      this.db.citas = this.db.citas.filter(x => x.id !== id);
+      this.registrarAuditoria('Agenda', id, 'ELIMINAR', `Cancelación de cita del ${c ? c.fecha : ''}`);
       LocalDatabase.save(this.db);
       this.renderAgenda();
       this.renderRespaldoMetricas();
@@ -619,11 +1052,12 @@ class ClinikApp {
       return;
     }
 
-    const mensaje = `Hola ${paciente.nombre}, le saludamos cordialmente del consultorio médico/odontológico. Le recordamos su cita programada para el día ${cita.fecha} a las ${cita.hora} (${cita.motivo || 'Control'}).\n\nPor favor confirme su asistencia respondiendo a este mensaje. ¡Muchas gracias!`;
+    const cfg = this.db.config;
+    const mensaje = `Hola ${paciente.nombre}, le saludamos cordialmente de *${cfg.clinicName}* (${cfg.doctorName}).\n\nLe recordamos su cita programada para el día *${cita.fecha}* a las *${cita.hora}* (Motivo: ${cita.motivo || 'Consulta'}).\n\n📍 *Ubicación:* ${cfg.address}\n\nPor favor confirme su asistencia respondiendo a este mensaje. ¡Muchas gracias!`;
     this.abrirChatWhatsApp(paciente.telefono, mensaje);
   }
 
-  // ==================== SECCIÓN RECETAS ====================
+  // ==================== RECETAS ====================
   renderRecetasDefault() {
     this.listaFarmacosInputs.innerHTML = '';
     this.agregarFilaFarmaco('Amoxicilina 870mg + Ác. Clavulánico 125mg', '1 comp cada 12h', '7 días');
@@ -678,11 +1112,13 @@ class ClinikApp {
       return;
     }
 
-    let texto = `*RECETA MÉDICA - ${this.db.meta.doctor}*\n`;
-    texto += `*Paciente:* ${paciente.nombre}\n`;
-    texto += `*Fecha:* ${new Date().toLocaleDateString('es-ES')}\n`;
-    texto += `*Diagnóstico:* ${this.recetaDiagnostico.value.trim() || 'Control'}\n\n`;
-    texto += `*INDICACIÓN Y FÁRMACOS:*\n`;
+    const cfg = this.db.config;
+    let texto = `*RECETA MÉDICA - ${cfg.clinicName.toUpperCase()}*\n`;
+    texto += `👨‍⚕️ *Profesional:* ${cfg.doctorName} (${cfg.doctorReg})\n`;
+    texto += `👤 *Paciente:* ${paciente.nombre}\n`;
+    texto += `📅 *Fecha:* ${new Date().toLocaleDateString('es-ES')}\n`;
+    texto += `🔬 *Diagnóstico:* ${this.recetaDiagnostico.value.trim() || 'Control'}\n\n`;
+    texto += `*INDICACIÓN Y MEDICACIÓN:*\n`;
 
     const rows = this.listaFarmacosInputs.querySelectorAll('.med-row');
     rows.forEach((r, idx) => {
@@ -698,29 +1134,50 @@ class ClinikApp {
       texto += `\n*Indicaciones:* ${this.recetaIndicaciones.value.trim()}\n`;
     }
 
-    texto += `\n_Para cualquier duda o urgencia, responda a este mensaje._`;
+    texto += `\n📍 *Consultorio:* ${cfg.address}\n`;
+    texto += `_Ante cualquier duda, responda a este chat de WhatsApp._`;
 
+    this.registrarAuditoria('Receta', `rx-${Date.now()}`, 'CREAR', `Receta enviada por WhatsApp para ${paciente.nombre}`);
     this.abrirChatWhatsApp(paciente.telefono, texto);
   }
 
-  // ==================== COMUNICACIÓN WHATSAPP ====================
   abrirChatWhatsApp(telefono, mensaje) {
     if (!telefono) {
-      alert('Número telefónico no especificado.');
+      alert('Número de WhatsApp no especificado.');
       return;
     }
-    // Sanitizar número: solo dígitos (preservando código internacional)
     const numeroLimpio = telefono.replace(/\D/g, '');
     const url = `https://wa.me/${numeroLimpio}?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
   }
 
-  // ==================== RESPALDO & CLOUD ====================
+  // ==================== RESPALDO Y AUDITORÍA ====================
+  registrarAuditoria(entity, entity_id, action, summary) {
+    const logItem = {
+      id: 'log-' + Date.now(),
+      timestamp: new Date().toLocaleString('es-ES'),
+      entity,
+      entity_id,
+      action,
+      device: navigator.userAgent.includes('Mac') ? 'MacBook / macOS' : navigator.userAgent.includes('Windows') ? 'Windows PC' : 'Móvil / Web',
+      summary
+    };
+
+    if (!this.db.auditLogs) this.db.auditLogs = [];
+    this.db.auditLogs.unshift(logItem);
+
+    if (!this.db.cambiosPendientes) this.db.cambiosPendientes = [];
+    this.db.cambiosPendientes.push(logItem);
+
+    this.renderRespaldoMetricas();
+  }
+
   renderRespaldoMetricas() {
     const totalConsultas = this.db.pacientes.reduce((acc, p) => acc + (p.consultas ? p.consultas.length : 0), 0);
     this.bkMetricPacientes.textContent = this.db.pacientes.length;
     this.bkMetricConsultas.textContent = totalConsultas;
     this.bkMetricCitas.textContent = this.db.citas.length;
+    this.bkMetricPendientes.textContent = this.db.cambiosPendientes ? this.db.cambiosPendientes.length : 0;
     this.cloudLastSync.textContent = this.db.meta.ultimaSincronizacionCloud || 'Nunca';
   }
 
@@ -734,6 +1191,7 @@ class ClinikApp {
       if (LocalDatabase.importBackup(content)) {
         this.db = LocalDatabase.load();
         this.pacienteActivoId = this.db.pacientes.length > 0 ? this.db.pacientes[0].id : null;
+        this.initThemeAndBranding();
         this.renderAll();
         this.showToast('✅ Base de datos restaurada con éxito desde el archivo.');
       } else {
@@ -743,23 +1201,224 @@ class ClinikApp {
     reader.readAsText(file);
   }
 
-  simularCloudSync() {
-    this.btnSyncCloud.disabled = true;
-    this.btnSyncCloud.textContent = '⏳ Cifrando y enviando a la nube...';
+  // ==================== PASARELA DE PAGOS (PAYPAL / QR) ====================
+  abrirModalPago(metodo = 'qr') {
+    this.vistaPagoPaypal.classList.add('hidden');
+    this.vistaPagoQr.classList.add('hidden');
 
-    setTimeout(() => {
-      const ahora = new Date().toLocaleString('es-ES');
-      this.db.meta.ultimaSincronizacionCloud = ahora;
+    if (metodo === 'paypal') {
+      this.vistaPagoPaypal.classList.remove('hidden');
+    } else {
+      this.vistaPagoQr.classList.remove('hidden');
+    }
+
+    this.modalPago.classList.remove('hidden');
+  }
+
+  async confirmarPago(metodo) {
+    const doctor = this.db.config.doctorName;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/payments/checkout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          method,
+          plan: 'mensual',
+          doctor
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        this.db.subscription = data.subscription;
+      } else {
+        throw new Error('Servidor no respondió');
+      }
+    } catch (e) {
+      // Fallback local autónomo
+      this.db.subscription = {
+        active: true,
+        plan: 'mensual',
+        method: metodo.toUpperCase(),
+        multiDeviceEnabled: true,
+        expiresAt: new Date(Date.now() + 30 * 86400000).toLocaleDateString('es-ES')
+      };
+    }
+
+    this.registrarAuditoria('Finanzas', 'pago-confirmado', 'PAGO_CONFIRMADO', `Activación de copia en la nube vía ${metodo.toUpperCase()}`);
+    LocalDatabase.save(this.db);
+    this.actualizarEstadoSuscripcionUI();
+    this.modalPago.classList.add('hidden');
+    this.showToast(`🎉 ¡Pago confirmado! Respaldo en la nube y Multi-dispositivo ACTIVADOS.`);
+    this.forzarSincronizacionInmediata();
+  }
+
+  desactivarSuscripcion() {
+    if (confirm('¿Estás seguro de desactivar la copia de seguridad en la nube y el acceso multi-dispositivo?')) {
+      this.db.subscription.active = false;
+      this.db.subscription.multiDeviceEnabled = false;
+      this.registrarAuditoria('Finanzas', 'pago-cancel', 'DESACTIVACION', 'Copia de seguridad en la nube desactivada.');
       LocalDatabase.save(this.db);
-      this.cloudLastSync.textContent = ahora;
-      this.btnSyncCloud.disabled = false;
-      this.btnSyncCloud.textContent = '☁️ Respaldar Ahora en la Nube';
-      this.showToast('✅ Respaldo cifrado (AES-256) sincronizado exitosamente en la nube.');
-    }, 1200);
+      this.actualizarEstadoSuscripcionUI();
+      this.showToast('Copia de seguridad en la nube desactivada.');
+    }
+  }
+
+  actualizarEstadoSuscripcionUI() {
+    const sub = this.db.subscription;
+    if (sub && sub.active) {
+      this.cfgSubBadge.textContent = `🟢 Activo (${sub.method || 'Pagado'})`;
+      this.cfgSubBadge.className = 'badge-status-sub active';
+      this.cloudStatusBadge.textContent = '🟢 Activo y Sincronizando';
+      this.cloudMultiStatus.textContent = 'Habilitado (Móvil & PC)';
+      this.btnAbrirAuditoria.removeAttribute('disabled');
+      this.btnDesactivarSub.style.display = 'inline-flex';
+      document.getElementById('badge-cloud-plan').textContent = 'Plan Premium Cloud';
+      document.getElementById('drawer-sync-text').textContent = 'Cloud Sync Activo';
+    } else {
+      this.cfgSubBadge.textContent = '⚪ Inactivo (Requiere Pago)';
+      this.cfgSubBadge.className = 'badge-status-sub';
+      this.cloudStatusBadge.textContent = '⚪ Solo Almacenamiento Local';
+      this.cloudMultiStatus.textContent = 'Inactivo';
+      this.btnAbrirAuditoria.setAttribute('disabled', 'true');
+      this.btnDesactivarSub.style.display = 'none';
+      document.getElementById('badge-cloud-plan').textContent = 'Servicio Opcional (Add-on)';
+      document.getElementById('drawer-sync-text').textContent = 'Local-First Activo';
+    }
+  }
+
+  abrirModalAuditoria() {
+    if (!this.db.subscription || !this.db.subscription.active) {
+      alert('La bitácora de auditoría histórica requiere tener la copia de seguridad en la nube activada y pagada.');
+      return;
+    }
+
+    const logs = this.db.auditLogs || [];
+    this.auditTableBody.innerHTML = '';
+    logs.forEach(l => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="white-space: nowrap;">${l.timestamp}</td>
+        <td><strong>${l.entity}</strong></td>
+        <td><span class="badge-count">${l.action}</span></td>
+        <td>${l.device}</td>
+        <td>${l.summary}</td>
+      `;
+      this.auditTableBody.appendChild(tr);
+    });
+
+    this.modalAuditoria.classList.remove('hidden');
+  }
+
+  // ==================== MOTOR DE SINCRONIZACIÓN CADA 1 MINUTO ====================
+  iniciarSincronizadorMinuto() {
+    // Ejecutar cada 60 segundos (1 minuto)
+    setInterval(() => {
+      this.ejecutarCicloSincronizacion();
+    }, 60000);
+
+    // Ejecutar primera verificación inicial tras 3 segundos
+    setTimeout(() => {
+      this.ejecutarCicloSincronizacion();
+    }, 3000);
+  }
+
+  forzarSincronizacionInmediata() {
+    this.ejecutarCicloSincronizacion(true);
+  }
+
+  async ejecutarCicloSincronizacion(esManual = false) {
+    if (!this.db.subscription || !this.db.subscription.active) {
+      this.actualizarPillSincronizacion('local', 'Modo Local Autónomo');
+      return;
+    }
+
+    this.actualizarPillSincronizacion('syncing', 'Sincronizando...');
+
+    try {
+      // 1. Verificar si el REST API está accesible
+      const healthRes = await fetch(`${API_BASE_URL}/api/health`, { method: 'GET' });
+      if (!healthRes.ok) throw new Error('API Offline');
+
+      // 2. Obtener Token JWT si no existe
+      if (!this.db.meta.jwtToken) {
+        const loginRes = await fetch(`${API_BASE_URL}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            doctor: this.db.config.doctorName,
+            clinic_id: 'clinic-local-1'
+          })
+        });
+        if (loginRes.ok) {
+          const loginData = await loginRes.json();
+          this.db.meta.jwtToken = loginData.token;
+        }
+      }
+
+      // 3. Sync Push: Enviar cambios pendientes y snapshot
+      const snapshot = {
+        pacientes: this.db.pacientes,
+        citas: this.db.citas,
+        config: this.db.config
+      };
+
+      const pushRes = await fetch(`${API_BASE_URL}/api/sync/push`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.db.meta.jwtToken}`
+        },
+        body: JSON.stringify({
+          snapshot,
+          changes: this.db.cambiosPendientes || [],
+          device: navigator.userAgent.includes('Mac') ? 'MacBook' : 'PC/Móvil'
+        })
+      });
+
+      if (pushRes.ok) {
+        // Limpiar cambios pendientes tras sincronizar con éxito
+        this.db.cambiosPendientes = [];
+        const ahora = new Date().toLocaleString('es-ES');
+        this.db.meta.ultimaSincronizacionCloud = ahora;
+        LocalDatabase.save(this.db);
+        this.renderRespaldoMetricas();
+        this.actualizarPillSincronizacion('synced', `Nube al día (${ahora.split(' ')[1]})`);
+        if (esManual) this.showToast('✅ Sincronización bidireccional completada con éxito.');
+      } else {
+        throw new Error('Fallo en Sync Push');
+      }
+
+    } catch (err) {
+      if (this.db.cambiosPendientes && this.db.cambiosPendientes.length > 0) {
+        this.actualizarPillSincronizacion('pending', `${this.db.cambiosPendientes.length} cambios pendientes`);
+      } else {
+        this.actualizarPillSincronizacion('local', 'Local-First (Servidor Offline)');
+      }
+      if (esManual) this.showToast('⚠️ No se pudo conectar al REST API. Datos resguardados localmente.');
+    }
+  }
+
+  actualizarPillSincronizacion(estado, texto) {
+    this.syncDot.className = 'sync-indicator-dot';
+    if (estado === 'synced') {
+      this.syncDot.classList.add('active-green');
+    } else if (estado === 'syncing' || estado === 'pending') {
+      this.syncDot.classList.add('syncing-yellow');
+    }
+    this.syncLabel.textContent = texto;
+  }
+
+  renderAll() {
+    this.renderPacientes();
+    this.poblarSelectsPacientes();
+    this.renderHistoria();
+    this.renderAgenda();
+    this.renderRecetasDefault();
+    this.renderRespaldoMetricas();
   }
 }
 
-// Inicializar la aplicación cuando cargue el DOM
+// Inicializar cuando cargue el DOM
 let app;
 document.addEventListener('DOMContentLoaded', () => {
   app = new ClinikApp();

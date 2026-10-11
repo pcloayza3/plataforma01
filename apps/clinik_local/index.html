@@ -6,39 +6,89 @@
   <title>ClinikLocal - Gestión Clínica y Dental Local-First</title>
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body data-theme="teal">
+
+  <!-- BACKDROP DEL MENÚ HAMBURGUESA -->
+  <div id="drawer-backdrop" class="drawer-backdrop hidden"></div>
+
+  <!-- SIDEBAR / DRAWER HAMBURGUESA -->
+  <aside id="sidebar-drawer" class="sidebar-drawer">
+    <div class="drawer-header">
+      <div class="drawer-brand">
+        <span class="drawer-logo" id="drawer-clinic-icon">🩺</span>
+        <div>
+          <h2 class="drawer-clinic-name" id="drawer-clinic-name">Consultorio Particular</h2>
+          <p class="drawer-clinic-sub" id="drawer-clinic-sub">Gestión Clínica</p>
+          <p class="drawer-doctor-name" id="drawer-doctor-name">Dr(a). Profesional Clínico</p>
+        </div>
+      </div>
+      <button id="btn-cerrar-drawer" class="btn-icon" title="Cerrar Menú">&times;</button>
+    </div>
+
+    <!-- NAVEGACIÓN EN EL DRAWER -->
+    <nav class="drawer-nav">
+      <button class="drawer-nav-item active" data-tab="tab-pacientes">
+        <span class="nav-icon">👤</span> Pacientes
+      </button>
+      <button class="drawer-nav-item" data-tab="tab-historia" id="menu-item-historia">
+        <span class="nav-icon">📋</span> Historia Clínica
+      </button>
+      <button class="drawer-nav-item" data-tab="tab-agenda" id="menu-item-agenda">
+        <span class="nav-icon">📅</span> Agenda & Citas
+      </button>
+      <button class="drawer-nav-item" data-tab="tab-recetas" id="menu-item-recetas">
+        <span class="nav-icon">💊</span> Recetas PDF
+      </button>
+      <button class="drawer-nav-item" data-tab="tab-respaldo">
+        <span class="nav-icon">🛡️</span> Respaldo & Nube
+      </button>
+      <button class="drawer-nav-item" data-tab="tab-configuracion">
+        <span class="nav-icon">⚙️</span> Configuración
+      </button>
+    </nav>
+
+    <!-- FOOTER DEL DRAWER -->
+    <div class="drawer-footer">
+      <button class="btn btn-subtle w-100" id="btn-drawer-compartir-contacto">
+        📍 Compartir Ubicación y Contacto
+      </button>
+      <div class="drawer-status-note">
+        <span class="pulse-dot"></span>
+        <span id="drawer-sync-text">Local-First Activo</span>
+      </div>
+    </div>
+  </aside>
+
   <!-- BARRA SUPERIOR MINIMALISTA -->
   <header class="app-header">
-    <div class="brand-section">
-      <div class="brand-logo">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 2v20M2 12h20M7 7l10 10M17 7L7 17" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <div>
-        <h1 class="brand-title">ClinikLocal</h1>
-        <p class="brand-subtitle">Gestión Clínica y Dental &bull; <span class="badge-local">100% Local en este Equipo</span></p>
+    <div class="header-left">
+      <!-- BOTÓN HAMBURGUESA -->
+      <button id="btn-menu-hamburguesa" class="btn-burger" title="Abrir Menú">
+        <span class="burger-bar"></span>
+        <span class="burger-bar"></span>
+        <span class="burger-bar"></span>
+      </button>
+
+      <div class="brand-section">
+        <span class="clinic-top-icon" id="header-clinic-icon">🩺</span>
+        <div>
+          <h1 class="brand-title" id="header-clinic-title">ClinikLocal</h1>
+          <p class="brand-subtitle" id="header-clinic-subtitle">
+            <span id="header-doc-label">Dr. Alejandro Fernández</span> &bull; 
+            <span class="badge-local">100% Local</span>
+          </p>
+        </div>
       </div>
     </div>
 
-    <!-- NAVEGACIÓN PRINCIPAL -->
-    <nav class="nav-tabs">
-      <button class="nav-tab active" data-tab="tab-pacientes">
-        <span class="tab-icon">👤</span> Pacientes
-      </button>
-      <button class="nav-tab" data-tab="tab-historia">
-        <span class="tab-icon">📋</span> Historia & Odontograma
-      </button>
-      <button class="nav-tab" data-tab="tab-agenda">
-        <span class="tab-icon">📅</span> Agenda & Citas
-      </button>
-      <button class="nav-tab" data-tab="tab-recetas">
-        <span class="tab-icon">💊</span> Recetas PDF
-      </button>
-      <button class="nav-tab" data-tab="tab-respaldo">
-        <span class="tab-icon">🛡️</span> Respaldo & Nube
-      </button>
-    </nav>
+    <!-- ESTADO DE SINCRONIZACIÓN EN VIVO (CADA 1 MINUTO) -->
+    <div class="header-sync-status">
+      <div class="sync-indicator-pill" id="sync-pill" title="Sincronización en la nube cada minuto">
+        <span class="sync-indicator-dot" id="sync-dot"></span>
+        <span class="sync-indicator-label" id="sync-label">Modo Local Autónomo</span>
+      </div>
+      <button class="btn-icon-refresh" id="btn-sync-now" title="Sincronizar ahora con la nube">🔄</button>
+    </div>
   </header>
 
   <!-- CONTENEDOR PRINCIPAL DE PANTALLAS -->
@@ -54,10 +104,26 @@
         <button class="btn btn-primary" id="btn-nuevo-paciente">+ Nuevo Paciente</button>
       </div>
 
-      <!-- BUSCADOR LIMPIO -->
-      <div class="search-bar">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="input-buscar-paciente" placeholder="Buscar por nombre, documento o teléfono..." autocomplete="off">
+      <!-- BARRA DE FILTRO Y ORDENACIÓN AVANZADA -->
+      <div class="filter-sort-bar">
+        <div class="search-input-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="input-buscar-paciente" placeholder="Buscar por nombre, documento o teléfono..." autocomplete="off">
+        </div>
+
+        <!-- SELECTOR DE ORDENACIÓN -->
+        <div class="sort-selector-box">
+          <label for="select-orden-pacientes">Ordenar por:</label>
+          <select id="select-orden-pacientes" class="select-sort">
+            <option value="recientes" selected>🕒 Más recientes atendidos (Por defecto)</option>
+            <option value="atencion_hoy">📅 Atendidos hoy / Con cita hoy</option>
+            <option value="apellido_asc">🔤 Apellido (A - Z)</option>
+            <option value="apellido_desc">🔤 Apellido (Z - A)</option>
+            <option value="nombre_asc">👤 Nombre (A - Z)</option>
+            <option value="nombre_desc">👤 Nombre (Z - A)</option>
+          </select>
+        </div>
+
         <span class="badge-count" id="lbl-total-pacientes">0 registrados</span>
       </div>
 
@@ -71,8 +137,8 @@
     <section id="tab-historia" class="view-section">
       <div class="section-header">
         <div>
-          <h2 class="section-title">Historia Médica & Odontograma</h2>
-          <p class="section-desc">Evolución clínica, diagnósticos y piezas dentales intervenidas.</p>
+          <h2 class="section-title">Historia Clínica & Evolución</h2>
+          <p class="section-desc">Consultas, diagnósticos, soporte multimedia (fotos, video, PDF) y odontograma.</p>
         </div>
         <div class="header-actions">
           <select id="select-paciente-historia" class="select-patient">
@@ -88,13 +154,13 @@
           ⚠️ <strong>Alerta Médica:</strong> <span id="txt-alergias-paciente">Ninguna reportada</span>
         </div>
 
-        <!-- SELECTOR DE ESPECIALIDAD -->
-        <div class="specialty-toggle">
-          <button class="toggle-btn active" id="btn-modo-medico">🩺 Consulta Médica General / Especialidad</button>
+        <!-- SELECTOR DE ESPECIALIDAD / MODO -->
+        <div class="specialty-toggle" id="toggle-odontograma-wrapper">
+          <button class="toggle-btn active" id="btn-modo-medico">🩺 Consulta Médica y Evolución</button>
           <button class="toggle-btn" id="btn-modo-dental">🦷 Odontograma Dental (FDI)</button>
         </div>
 
-        <!-- MODO ODONTOGRAMA DENTAL -->
+        <!-- MODO ODONTOGRAMA DENTAL (ACTIVABLE/DESACTIVABLE EN CONFIG) -->
         <div id="seccion-odontograma" class="odontograma-box hidden">
           <div class="odontograma-header">
             <div>
@@ -119,11 +185,19 @@
           <div class="teeth-row" id="arcada-inferior"></div>
         </div>
 
-        <!-- TIMELINE DE CONSULTAS -->
+        <!-- TIMELINE DE CONSULTAS CON SOPORTE MULTIMEDIA -->
         <div class="timeline-box">
-          <h3 class="box-title">Evolución Cronológica de Consultas</h3>
+          <div class="timeline-box-header">
+            <h3 class="box-title">Evolución Cronológica de Consultas</h3>
+            <div class="sort-timeline-box">
+              <select id="select-orden-historia" class="select-sort-mini">
+                <option value="reciente_primero" selected>Más reciente primero</option>
+                <option value="antiguo_primero">Más antiguo primero</option>
+              </select>
+            </div>
+          </div>
           <div id="timeline-consultas" class="timeline-list">
-            <!-- Renderizado dinámico -->
+            <!-- Renderizado dinámico con fotos, video, PDF y texto -->
           </div>
         </div>
       </div>
@@ -202,16 +276,16 @@
         <!-- PREVISUALIZACIÓN DE RECETA IMPRESA -->
         <div class="prescription-preview-card" id="area-receta-imprimible">
           <div class="rx-header">
-            <div class="rx-doctor-name">Dr(a). Especialista Clínico & Odontológico</div>
-            <div class="rx-doctor-subtitle">Matrícula Profesional / Registro Médico Nº 12458-CBBA</div>
-            <div class="rx-doctor-contact">Consultorio Particular &bull; Tel: +591 70000000</div>
+            <div class="rx-doctor-name" id="rx-header-doctor">Dr(a). Especialista Clínico</div>
+            <div class="rx-doctor-subtitle" id="rx-header-clinic">Centro Médico / Consultorio Particular</div>
+            <div class="rx-doctor-contact" id="rx-header-contact">Teléfono &bull; Dirección</div>
           </div>
 
           <div class="rx-divider"></div>
 
           <div class="rx-patient-info">
             <div><strong>Paciente:</strong> <span id="rx-preview-paciente">Seleccione paciente</span></div>
-            <div><strong>Fecha:</strong> <span id="rx-preview-fecha">10/10/2026</span></div>
+            <div><strong>Fecha:</strong> <span id="rx-preview-fecha">11/10/2026</span></div>
           </div>
 
           <div class="rx-dx">
@@ -220,8 +294,7 @@
 
           <div class="rx-body-title">Rp. (Prescripción):</div>
           <ol class="rx-meds-list" id="rx-preview-meds">
-            <li>Amoxicilina 870mg + Ác. Clavulánico 125mg &mdash; 1 comprimido cada 12 horas por 7 días.</li>
-            <li>Ibuprofeno 400mg &mdash; 1 tableta cada 8 horas en caso de dolor moderado.</li>
+            <!-- Medicamentos -->
           </ol>
 
           <div class="rx-instructions">
@@ -244,8 +317,9 @@
       <div class="section-header">
         <div>
           <h2 class="section-title">Respaldo y Seguridad de la Información</h2>
-          <p class="section-desc">Garantía de soberanía local y servicio opcional de respaldo en la nube.</p>
+          <p class="section-desc">Persistencia local soberana y sincronización automática continua en la nube.</p>
         </div>
+        <button class="btn btn-subtle" id="btn-ver-auditoria-top">📜 Ver Historial de Cambios</button>
       </div>
 
       <div class="backup-grid">
@@ -254,7 +328,7 @@
           <div class="backup-badge-local">Nivel Base: 100% Autónomo</div>
           <h3 class="backup-title">Almacenamiento Local en este Equipo</h3>
           <p class="backup-desc">
-            Todos los datos clínicos, pacientes, recetas y citas residen exclusivamente en la base de datos interna de este equipo. No dependen de conexión a internet ni de servidores de terceros.
+            Todos los datos clínicos, fotos, recetas y citas residen prioritariamente en la base de datos interna de este equipo. Funcionamiento instantáneo garantizado aun sin internet.
           </p>
 
           <div class="storage-metrics">
@@ -270,6 +344,10 @@
               <span class="metric-label">Citas registradas:</span>
               <strong id="bk-metric-citas">0</strong>
             </div>
+            <div class="metric-item">
+              <span class="metric-label">Cambios locales pendientes de subir:</span>
+              <strong id="bk-metric-pendientes" style="color: var(--color-warning);">0</strong>
+            </div>
           </div>
 
           <div class="backup-actions">
@@ -282,38 +360,238 @@
           <p class="microcopy">Guarda tu archivo .clinik en una memoria USB o disco externo para copias manuales.</p>
         </div>
 
-        <!-- TARJETA 2: RESPALDO CLOUD (ADD-ON FREEMIUM) -->
+        <!-- TARJETA 2: RESPALDO CLOUD (ADD-ON FREEMIUM / PAGO PREVIO) -->
         <div class="backup-card cloud-card">
-          <div class="backup-badge-cloud">Servicio Comercial Opcional (Add-on)</div>
-          <h3 class="backup-title">Copia de Seguridad Centralizada en la Nube</h3>
+          <div class="backup-badge-cloud" id="badge-cloud-plan">Servicio Comercial (Add-on)</div>
+          <h3 class="backup-title">Sincronización Continua cada Minuto</h3>
           <p class="backup-desc">
-            Protege tus historias clínicas contra robo, rotura, formateo o pérdida de tu equipo. El respaldo viaja con <strong>cifrado de conocimiento cero (AES-256-GCM)</strong>; nadie en el servidor puede leer tus datos sin tu clave.
+            La app verifica automáticamente cambios cada 60 segundos y se sincroniza bidireccionalmente con el servidor seguro mediante <strong>JWT y HTTPS</strong>.
           </p>
 
           <div class="cloud-features">
-            <div class="feature-item">✔ Copia automática programada o a un solo clic.</div>
-            <div class="feature-item">✔ Restauración instantánea al cambiar o renovar computadora/teléfono.</div>
-            <div class="feature-item">✔ Almacenamiento seguro en bóvedas certificadas de alta disponibilidad.</div>
+            <div class="feature-item">✔ Sincronización automática de dos vías cada 1 minuto.</div>
+            <div class="feature-item">✔ Acceso simultáneo desde múltiples dispositivos (Móvil, Laptop, Consultorio).</div>
+            <div class="feature-item">✔ Bitácora de auditoría detallada de todos los cambios realizados.</div>
           </div>
 
           <div class="cloud-status-box">
             <div class="cloud-status-row">
               <span>Estado del servicio:</span>
-              <span class="badge-active" id="cloud-status-badge">Listo para sincronizar</span>
+              <span class="badge-active" id="cloud-status-badge">Verificando...</span>
             </div>
             <div class="cloud-status-row">
               <span>Última sincronización:</span>
               <span id="cloud-last-sync">Nunca</span>
             </div>
+            <div class="cloud-status-row">
+              <span>Acceso Multi-dispositivo:</span>
+              <span id="cloud-multidevice-status">Inactivo</span>
+            </div>
           </div>
 
-          <button class="btn btn-cloud" id="btn-sync-cloud">☁️ Respaldar Ahora en la Nube</button>
-          <p class="microcopy">Disponible como suscripción comercial accesible para consultorios independientes.</p>
+          <div class="cloud-buttons-group">
+            <button class="btn btn-cloud" id="btn-sync-cloud">☁️ Sincronizar Ahora</button>
+            <button class="btn btn-subtle" id="btn-abrir-pago-cloud">💳 Gestionar Suscripción / Pago</button>
+          </div>
+          <p class="microcopy">Requiere suscripción activa para sincronización multi-dispositivo y auditoría.</p>
         </div>
       </div>
     </section>
 
+    <!-- ==================== PANTALLA 6: CONFIGURACIÓN ==================== -->
+    <section id="tab-configuracion" class="view-section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Configuración del Consultorio y Preferencias</h2>
+          <p class="section-desc">Personaliza identidad, temas visuales, módulos activos, datos de contacto y pagos.</p>
+        </div>
+        <button class="btn btn-primary" id="btn-guardar-config">💾 Guardar Configuración</button>
+      </div>
+
+      <div class="config-grid">
+        <!-- BLOQUE 1: IDENTIDAD DEL CONSULTORIO -->
+        <div class="config-card">
+          <h3 class="config-card-title">🏥 Identidad del Consultorio y Profesional</h3>
+          <p class="config-card-sub">Estos datos aparecerán en los encabezados, recetas PDF y mensajes de WhatsApp.</p>
+
+          <div class="form-group">
+            <label>Nombre del Consultorio / Clínica:</label>
+            <input type="text" id="cfg-clinic-name" class="input-field" placeholder="Ej. Centro Dental & Especialidades San Lucas">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Ícono / Logo del Consultorio:</label>
+              <select id="cfg-clinic-icon" class="input-field">
+                <option value="🩺">🩺 Estetoscopio (Médico General / Especialista)</option>
+                <option value="🦷">🦷 Diente (Odontología / Dental)</option>
+                <option value="🏥">🏥 Clínica / Hospital</option>
+                <option value="⚕️">⚕️ Vara de Esculapio (Medicina)</option>
+                <option value="👶">👶 Pediatría</option>
+                <option value="👁️">👁️ Oftalmología</option>
+                <option value="❤️">❤️ Cardiología</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Subtítulo de la App:</label>
+              <input type="text" id="cfg-clinic-sub" class="input-field" placeholder="Ej. Gestión Clínica">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nombre del Dr. o Dra.:</label>
+              <input type="text" id="cfg-doctor-name" class="input-field" placeholder="Ej. Dr. Alejandro Fernández">
+            </div>
+            <div class="form-group">
+              <label>Registro / Matrícula Profesional:</label>
+              <input type="text" id="cfg-doctor-reg" class="input-field" placeholder="Ej. MP Nº 14592 - CBBA">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Dirección Física del Consultorio:</label>
+            <input type="text" id="cfg-clinic-address" class="input-field" placeholder="Ej. Av. Heroínas #450, Edif. Los Cedros, Piso 3, Consultorio 302">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Enlace de Ubicación (Google Maps):</label>
+              <input type="url" id="cfg-clinic-maps" class="input-field" placeholder="https://maps.app.goo.gl/ejemplo">
+            </div>
+            <div class="form-group">
+              <label>Teléfono Oficial (con WhatsApp):</label>
+              <input type="tel" id="cfg-clinic-phone" class="input-field" placeholder="+591 71234567">
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-whatsapp w-100" id="btn-probar-compartir-contacto">
+            📍 Compartir Ubicación y Contacto con Pacientes por WhatsApp
+          </button>
+        </div>
+
+        <!-- BLOQUE 2: PLANTILLA DE COLORES & MÓDULOS -->
+        <div class="config-card">
+          <h3 class="config-card-title">🎨 Plantilla de Colores (Tema Visual)</h3>
+          <p class="config-card-sub">Selecciona el esquema visual que mejor represente a tu especialidad.</p>
+
+          <div class="theme-options-grid">
+            <label class="theme-option">
+              <input type="radio" name="cfg-theme" value="teal" checked>
+              <span class="theme-swatch swatch-teal"></span>
+              <span class="theme-title">Médico Teal (Predeterminado)</span>
+            </label>
+            <label class="theme-option">
+              <input type="radio" name="cfg-theme" value="sky">
+              <span class="theme-swatch swatch-sky"></span>
+              <span class="theme-title">Azul Clínico</span>
+            </label>
+            <label class="theme-option">
+              <input type="radio" name="cfg-theme" value="purple">
+              <span class="theme-swatch swatch-purple"></span>
+              <span class="theme-title">Violeta Dental / Estética</span>
+            </label>
+            <label class="theme-option">
+              <input type="radio" name="cfg-theme" value="slate">
+              <span class="theme-swatch swatch-slate"></span>
+              <span class="theme-title">Grafito Minimalista</span>
+            </label>
+          </div>
+
+          <hr class="config-divider">
+
+          <h3 class="config-card-title">🧩 Activación / Desactivación de Módulos</h3>
+          <p class="config-card-sub">Adapta la interfaz desactivando las opciones que no utilices.</p>
+
+          <div class="module-switches-list">
+            <div class="switch-row">
+              <div>
+                <strong>Odontograma Dental FDI</strong>
+                <p class="microcopy">Actívalo si eres odontólogo; desactívalo si eres médico especialista.</p>
+              </div>
+              <label class="switch-control">
+                <input type="checkbox" id="cfg-module-odontograma" checked>
+                <span class="switch-slider"></span>
+              </label>
+            </div>
+
+            <div class="switch-row">
+              <div>
+                <strong>Módulo de Recetas en PDF</strong>
+                <p class="microcopy">Emisión de prescripciones y envío por WhatsApp.</p>
+              </div>
+              <label class="switch-control">
+                <input type="checkbox" id="cfg-module-recetas" checked>
+                <span class="switch-slider"></span>
+              </label>
+            </div>
+
+            <div class="switch-row">
+              <div>
+                <strong>Agenda de Citas y Turnos</strong>
+                <p class="microcopy">Control de turnos y recordatorios automáticos.</p>
+              </div>
+              <label class="switch-control">
+                <input type="checkbox" id="cfg-module-agenda" checked>
+                <span class="switch-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- BLOQUE 3: SUSCRIPCIÓN, MULTI-DISPOSITIVO & PAGOS -->
+        <div class="config-card span-2">
+          <div class="sub-header-row">
+            <div>
+              <h3 class="config-card-title">🔐 Copia de Seguridad Cloud & Multi-Dispositivo</h3>
+              <p class="config-card-sub">Accede desde tu teléfono (Android/iPhone) y tu computadora (Windows/Mac/Linux) con sincronización cada minuto.</p>
+            </div>
+            <span class="badge-status-sub" id="cfg-sub-badge">Verificando suscripción...</span>
+          </div>
+
+          <div class="payment-action-box">
+            <div class="payment-intro">
+              <p>
+                Para activar la sincronización automática cada 60 segundos y habilitar el inicio de sesión en varios dispositivos, se requiere un <strong>pago previo</strong>.
+                Para desactivar o cambiar de plan, puedes gestionar tu cuenta con PayPal o pago QR.
+              </p>
+              <div class="payment-methods-badges">
+                <span class="pay-badge">💳 PayPal</span>
+                <span class="pay-badge">📱 Código QR (Transferencia Bancaria)</span>
+              </div>
+            </div>
+
+            <div class="payment-buttons-row">
+              <button class="btn btn-paypal" id="btn-pagar-paypal">
+                💳 Activar con PayPal ($15 USD / mes)
+              </button>
+              <button class="btn btn-qr" id="btn-pagar-qr">
+                📱 Activar con Código QR (Bs. 100 / mes)
+              </button>
+              <button class="btn btn-subtle" id="btn-desactivar-sub" style="display:none;">
+                Desactivar Copia en la Nube
+              </button>
+            </div>
+          </div>
+
+          <!-- BOTÓN HISTORIAL DE CAMBIOS AUDITADOS -->
+          <div class="audit-banner-box">
+            <div class="audit-banner-content">
+              <strong>📜 Historial de Cambios y Auditoría de Datos</strong>
+              <p class="microcopy">Revisa la bitácora completa de cada cambio realizado a pacientes, citas, recetas e historia clínica.</p>
+            </div>
+            <button class="btn btn-primary" id="btn-abrir-auditoria" disabled>
+              Ver Historial de Cambios
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
   </main>
+
+  <!-- ==================== MODALES ==================== -->
 
   <!-- MODAL: REGISTRAR / EDITAR PACIENTE -->
   <div id="modal-paciente" class="modal-backdrop hidden">
@@ -395,7 +673,7 @@
     </div>
   </div>
 
-  <!-- MODAL: REGISTRAR CONSULTA CLÍNICA -->
+  <!-- MODAL: REGISTRAR CONSULTA CLÍNICA CON SOPORTE MULTIMEDIA -->
   <div id="modal-consulta" class="modal-backdrop hidden">
     <div class="modal-box modal-large">
       <div class="modal-header">
@@ -425,14 +703,139 @@
           <input type="text" id="consulta-diagnostico" class="input-field" placeholder="Ej. Pulpitis reversible en pieza 16 / Faringoamigdalitis">
         </div>
         <div class="form-group">
-          <label>Tratamiento Realizado y Observaciones</label>
+          <label>Tratamiento Realizado y Observaciones (Texto)</label>
           <textarea id="consulta-tratamiento" class="input-field" rows="3" placeholder="Ej. Apertura cameral, limpieza con hipoclorito, colocación de curación provisoria. Próximo control en 7 días."></textarea>
         </div>
+
+        <!-- ADJUNTOS MULTIMEDIA (FOTOS, VIDEOS, PDF) -->
+        <div class="multimedia-upload-section">
+          <label class="multimedia-section-label">📎 Adjuntos Multimedia (Fotos, Video, PDF):</label>
+          <div class="multimedia-inputs-row">
+            <!-- Subir Foto / Radiografía -->
+            <label class="btn btn-subtle file-btn">
+              📷 Adjuntar Foto / Radiografía
+              <input type="file" id="input-adjunto-foto" accept="image/*" style="display:none;">
+            </label>
+            <!-- Subir PDF de Laboratorio -->
+            <label class="btn btn-subtle file-btn">
+              📄 Adjuntar PDF (Laboratorio/Estudios)
+              <input type="file" id="input-adjunto-pdf" accept="application/pdf" style="display:none;">
+            </label>
+          </div>
+
+          <div class="form-group" style="margin-top: 0.5rem;">
+            <label style="font-size: 0.8rem;">Enlace a Video Clínico (Opcional):</label>
+            <input type="url" id="input-adjunto-video" class="input-field" placeholder="Ej. https://miservidor.com/video-caso.mp4 o enlace YouTube">
+          </div>
+
+          <!-- Previsualización de adjuntos en cola -->
+          <div id="cola-adjuntos-preview" class="attachments-preview-grid"></div>
+        </div>
+
         <div class="modal-footer">
           <button type="button" class="btn btn-subtle" id="btn-cancelar-modal-consulta">Cancelar</button>
           <button type="submit" class="btn btn-primary">Guardar en Historia</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- MODAL: PASARELA DE PAGO (PAYPAL / QR) -->
+  <div id="modal-pago" class="modal-backdrop hidden">
+    <div class="modal-box modal-pago-box">
+      <div class="modal-header">
+        <h3 id="modal-pago-titulo">Activar Copia en la Nube y Multi-Dispositivo</h3>
+        <button class="modal-close" id="btn-cerrar-modal-pago">&times;</button>
+      </div>
+      <div id="contenido-pago-paso1">
+        <p class="modal-pago-desc">
+          Disfruta de sincronización bidireccional automática cada 1 minuto y respaldo seguro en la nube.
+        </p>
+
+        <!-- PAGO PAYPAL -->
+        <div id="vista-pago-paypal" class="pago-panel hidden">
+          <div class="paypal-badge-box">
+            <span class="paypal-logo-text">PayPal</span>
+            <span class="paypal-amount">$15.00 USD / mes</span>
+          </div>
+          <p class="pago-instrucciones">
+            Al confirmar, se procesará el pago seguro mediante PayPal Checkout y se activará inmediatamente la licencia multi-dispositivo para tu consultorio.
+          </p>
+          <button class="btn btn-paypal w-100" id="btn-confirmar-pago-paypal">
+            Pagar $15.00 USD con PayPal
+          </button>
+        </div>
+
+        <!-- PAGO QR -->
+        <div id="vista-pago-qr" class="pago-panel hidden">
+          <div class="qr-code-container">
+            <div class="qr-box-simulated">
+              <svg width="140" height="140" viewBox="0 0 100 100" fill="#0f172a">
+                <rect x="10" y="10" width="25" height="25" fill="#0f172a"/>
+                <rect x="15" y="15" width="15" height="15" fill="#ffffff"/>
+                <rect x="65" y="10" width="25" height="25" fill="#0f172a"/>
+                <rect x="70" y="15" width="15" height="15" fill="#ffffff"/>
+                <rect x="10" y="65" width="25" height="25" fill="#0f172a"/>
+                <rect x="15" y="70" width="15" height="15" fill="#ffffff"/>
+                <rect x="45" y="20" width="10" height="10"/>
+                <rect x="45" y="45" width="10" height="10"/>
+                <rect x="70" y="45" width="10" height="10"/>
+                <rect x="45" y="70" width="10" height="10"/>
+                <rect x="65" y="70" width="20" height="10"/>
+              </svg>
+            </div>
+            <div class="qr-details">
+              <strong>Simple QR - Pago Fácil</strong>
+              <div class="qr-monto">Bs. 100 / mes</div>
+              <p class="microcopy">Escanea desde tu app bancaria (Banco Unión, BCP, BNB, Mercantil, etc.).</p>
+            </div>
+          </div>
+          <button class="btn btn-qr w-100" id="btn-confirmar-pago-qr">
+            Confirmar Transferencia QR
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: HISTORIAL DE AUDITORÍA Y CAMBIOS -->
+  <div id="modal-auditoria" class="modal-backdrop hidden">
+    <div class="modal-box modal-extra-large">
+      <div class="modal-header">
+        <div>
+          <h3>📜 Bitácora de Auditoría y Control de Cambios</h3>
+          <p class="section-desc">Trazabilidad histórica de modificaciones en personas, agendas, recetas e historias clínicas.</p>
+        </div>
+        <button class="modal-close" id="btn-cerrar-modal-auditoria">&times;</button>
+      </div>
+      <div class="audit-table-wrapper">
+        <table class="audit-table">
+          <thead>
+            <tr>
+              <th>Fecha y Hora</th>
+              <th>Entidad</th>
+              <th>Acción</th>
+              <th>Dispositivo</th>
+              <th>Detalle del Cambio</th>
+            </tr>
+          </thead>
+          <tbody id="audit-table-body">
+            <!-- Filas dinámicas -->
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-subtle" id="btn-cerrar-auditoria-footer">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIGHTBOX PARA FOTOS Y RADIOGRAFÍAS -->
+  <div id="lightbox" class="lightbox-backdrop hidden">
+    <div class="lightbox-content">
+      <button class="lightbox-close" id="btn-cerrar-lightbox">&times;</button>
+      <img id="lightbox-img" src="" alt="Vista ampliada">
+      <div id="lightbox-caption" class="lightbox-caption"></div>
     </div>
   </div>
 

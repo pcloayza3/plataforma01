@@ -1,0 +1,70 @@
+{
+  "subscription": {
+    "active": true,
+    "plan": "mensual",
+    "payment_method": "QR",
+    "reference": "PAY-1791731456",
+    "multi_device_enabled": true,
+    "activated_at": "2026-10-11 11:10:56",
+    "expires_at": "2026-11-10 11:10:56"
+  },
+  "snapshots": {
+    "current": {
+      "pacientes": [
+        {
+          "id": "p-1",
+          "nombre": "Carlos López"
+        }
+      ],
+      "citas": []
+    }
+  },
+  "audit_logs": [
+    {
+      "id": "log-001",
+      "timestamp": "2026-10-11 11:05:41",
+      "entity": "Sistema",
+      "entity_id": "init",
+      "action": "INICIALIZACION",
+      "device": "Servidor Cloud",
+      "summary": "Servidor de sincronización ClinikLocal iniciado y listo."
+    },
+    {
+      "id": "log-1791731141481",
+      "timestamp": "2026-10-11 11:05:41",
+      "entity": "Finanzas",
+      "entity_id": "PAY-1791731141",
+      "action": "PAGO_CONFIRMADO",
+      "device": "Pasarela QR",
+      "summary": "Pago confirmado vía QR para Dra. Sofía Mendoza. Respaldo Cloud y Multi-Dispositivo ACTIVADO."
+    },
+    {
+      "id": "log-1791731141482-2",
+      "timestamp": "2026-10-11 11:05:41",
+      "entity": "Paciente",
+      "entity_id": "p-1",
+      "action": "CREAR",
+      "device": "MacBook Pro M2",
+      "summary": "Alta de Carlos López"
+    },
+    {
+      "id": "log-1791731456934",
+      "timestamp": "2026-10-11 11:10:56",
+      "entity": "Finanzas",
+      "entity_id": "PAY-1791731456",
+      "action": "PAGO_CONFIRMADO",
+      "device": "Pasarela QR",
+      "summary": "Pago confirmado vía QR para Dra. Sofía Mendoza. Respaldo Cloud y Multi-Dispositivo ACTIVADO."
+    },
+    {
+      "id": "log-1791731456934-4",
+      "timestamp": "2026-10-11 11:10:56",
+      "entity": "Paciente",
+      "entity_id": "p-1",
+      "action": "CREAR",
+      "device": "MacBook Pro M2",
+      "summary": "Alta de Carlos López"
+    }
+  ],
+  "last_synced_at": "2026-10-11 11:10:56"
+}

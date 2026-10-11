@@ -6,74 +6,84 @@
 ## 1. Filosofía de Diseño: *Clean Medical Minimalist*
 
 Para asegurar una experiencia de usuario rápida y sin fricciones durante la consulta médica, el diseño sigue principios estrictos:
-1. **No cargado ni saturado:** Márgenes generosos (espaciado de 16px/24px), tipografía limpia (Inter / Roboto / System Sans), y ausencia de elementos visuales superfluos o distractores.
+1. **Menú Hamburguesa & Espacio Limpio:** Se eliminan barras saturadas de pestañas. La navegación se centraliza en un botón hamburguesa (`☰`) que despliega un cajón lateral (*drawer*) elegante con la identidad completa del consultorio.
 2. **Explicativo:** Microtextos sutiles (*microcopy*) debajo de los campos y en encabezados de tarjetas que guían al médico de inmediato sin manuales.
 3. **Jerarquía visual clara:** Acciones primarias destacadas (ej. botón "Nueva Consulta" o "Enviar Recordatorio WhatsApp") y acciones secundarias con bordes sutiles.
-4. **Paleta cromática serena y profesional:**
-   * **Fondo Principal:** `#F8FAFC` (Slate 50 neutro).
-   * **Contenedores y Tarjetas:** `#FFFFFF` con bordes suaves `#E2E8F0`.
-   * **Acento Clínico Primario:** `#0D9488` (Teal 600 - serenidad y salud).
+4. **Paleta cromática dinámica seleccionable:**
+   * **Médico Teal (Predeterminado):** `#0D9488` (Teal 600 - serenidad y salud).
+   * **Azul Clínico:** `#0284C7` (Sky 600 - confianza y sobriedad médica).
+   * **Violeta Dental / Estética:** `#7C3AED` (Purple 600 - estética y ortodoncia).
+   * **Grafito Minimalista:** `#334155` (Slate 700 - neutralidad ejecutiva).
    * **Acento WhatsApp:** `#25D366` (Verde oficial WhatsApp para reconocimiento inmediato).
-   * **Tipografía Primaria:** `#0F172A` (Slate 900 - máxima legibilidad).
-   * **Texto Guía / Secundario:** `#64748B` (Slate 500).
 
 ---
 
 ## 2. Mapa de Navegación del Sistema
 
 ```
-[ CLINIKLOCAL (Barra de Navegación Lateral o Inferior) ]
-   ├── 1. Pacientes (Directorio, búsqueda rápida y ficha personal)
-   ├── 2. Historia Clínica (Consultas cronológicas, tratamientos y odontograma)
-   ├── 3. Agenda & Turnos (Citas del día/semana y recordatorios WhatsApp)
-   ├── 4. Recetas Médicas (Prescripción, generador PDF y envío directo)
-   └── 5. Respaldo Local & Nube (Gestor de persistencia y copia de seguridad)
+[ MENÚ HAMBURGUESA (☰ Drawer Lateral) ]
+   ├── 🏥 Encabezado del Consultorio (Logo, Nombre, Subtítulo y Dr./Dra.)
+   ├── 👤 1. Pacientes (Directorio, ordenación avanzada y ficha personal)
+   ├── 📋 2. Historia Clínica (Consultas, multimedia: fotos/video/PDF y odontograma)
+   ├── 📅 3. Agenda & Turnos (Citas del día/semana y recordatorios WhatsApp)
+   ├── 💊 4. Recetas PDF (Prescripción, generador PDF y envío directo)
+   ├── 🛡️ 5. Respaldo & Nube (Persistencia local y sincronización cada minuto)
+   ├── ⚙️ 6. Configuración (Identidad, temas, módulos activos, QR/PayPal)
+   └── 📍 Botón: Compartir Ubicación y Contacto del Consultorio
 ```
 
 ---
 
-## 3. Especificación Detallada de las 5 Pantallas
+## 3. Especificación Detallada de Pantallas
 
-### 3.1. Pantalla 1: Directorio y Perfil de Pacientes
-* **Objetivo:** Localizar a un paciente en menos de 2 segundos o dar de alta a uno nuevo con sus datos esenciales.
+### 3.1. Pantalla 1: Directorio de Pacientes y Ordenación Avanzada
+* **Objetivo:** Localizar a un paciente en menos de 2 segundos con ordenación flexible.
 * **Componentes clave:**
-  * Barra superior: Buscador en tiempo real por nombre, documento o teléfono + botón primario `+ Nuevo Paciente`.
-  * Contador informativo: *"34 pacientes registrados en este equipo"*.
-  * Tarjetas de paciente con avatar inicial, nombre completo, edad, teléfono WhatsApp (con botón de acceso rápido), última consulta y etiqueta de alergias si existen.
-  * Modal/Panel lateral de creación de paciente con campos limpios y validación de código de país para WhatsApp.
+  * **Criterios de Ordenación:**
+    1. *Más recientes atendidos (Por defecto):* Ordena según la fecha de su última consulta o atención.
+    2. *Atendidos hoy / Con cita hoy:* Filtra primero los pacientes con turno o consulta en el día corriente.
+    3. *Por Apellido (A - Z y Z - A).*
+    4. *Por Nombre (A - Z y Z - A).*
+  * Tarjetas de paciente con avatar inicial, nombre, teléfono WhatsApp con botón directo, última visita y etiqueta de alergias.
 
-### 3.2. Pantalla 2: Ficha Médica y Odontograma
-* **Objetivo:** Registrar y consultar diagnósticos, evolución, tratamientos y piezas dentales en segundos.
+### 3.2. Pantalla 2: Historia Clínica con Soporte Multimedia & Odontograma
+* **Objetivo:** Registrar evolución clínica con evidencia multimedia y gráfica.
 * **Componentes clave:**
-  * Cabecera del paciente seleccionado con datos de alerta médica (ej. *Alergia a la Penicilina* en pastilla ámbar suave).
-  * Selector de Modo: `Modo Medicina General / Especialidad` o `Modo Odontología`.
-  * **Odontograma simplificado e interactivo:** Cuadrantes superior e inferior con piezas dentales numeradas (FDI). Al hacer clic en un diente, se abre un selector limpio de intervención (Sano, Caries, Obturado, Corona, Extracción).
-  * Cronología de consultas pasadas con fecha, motivo y tratamiento aplicado.
+  * **Soporte Multimedia Integral:**
+    * **Fotos / Radiografías:** Visualización en miniatura con lightbox a pantalla completa al hacer clic.
+    * **Videos Clínicos:** Reproductor nativo embebido para procedimientos o ecografías.
+    * **Documentos PDF:** Botón de descarga/visualización directa para análisis de laboratorio y estudios clínicos.
+    * **Texto Clínico:** Anamnesis, diagnóstico y evolución detallada.
+  * **Odontograma FDI (32 piezas):** Activable/desactivable según especialidad del médico.
 
 ### 3.3. Pantalla 3: Agenda de Turnos y Recordatorios WhatsApp
 * **Objetivo:** Organizar las consultas diarias y reducir el ausentismo mediante recordatorios rápidos por WhatsApp.
 * **Componentes clave:**
-  * Selector de fecha con vista de "Hoy", "Mañana" o calendario mensual.
-  * Tarjetas de turnos con hora, paciente, motivo de consulta y badge de estado (*Pendiente*, *Confirmada*, *Atendida*).
-  * **Botón Explicativo Destacado:** `💬 Recordatorio WhatsApp`. Al pulsarlo, abre WhatsApp con el mensaje precargado:
-    > *"Hola [Nombre], le recordamos su cita con el Dr. [Médico] programada para el [Día] a las [Hora]. Por favor confirme su asistencia respondiendo a este mensaje."*
+  * Selector de fecha con vista de "Hoy".
+  * Botón directo con ícono de WhatsApp: abre el chat con el paciente con texto precargado, fecha, hora, ubicación del consultorio y solicitud de confirmación.
 
 ### 3.4. Pantalla 4: Emisión de Recetas y Prescripción en PDF
 * **Objetivo:** Redactar prescripciones legibles y entregarlas al paciente en formato digital o impreso.
 * **Componentes clave:**
-  * Selector de paciente asociado.
-  * Lista dinámica de medicamentos: Nombre del fármaco, concentración, dosis/posología y duración del tratamiento.
-  * Campo de indicaciones adicionales o cuidados generales.
-  * **Botón Primario:** `📄 Previsualizar y Generar Receta PDF` (con membrete, fecha y firma digital).
-  * **Botón Secundario:** `💬 Enviar Receta a WhatsApp` (adjunta o redacta el resumen de medicación directamente al chat).
+  * Generador de membrete dinámico con nombre del consultorio y doctor configurados.
+  * Botón para exportar/imprimir en PDF.
+  * Botón para enviar la receta formateada directamente por WhatsApp.
 
-### 3.5. Pantalla 5: Respaldo y Recuperación Local-First (Seguridad de Datos)
-* **Objetivo:** Dar tranquilidad total al profesional sobre la propiedad de sus datos y ofrecer la opción comercial de copia en la nube.
+### 3.5. Pantalla 5: Respaldo y Sincronización en la Nube (1 Minuto)
+* **Objetivo:** Soberanía de datos en local y sincronización continua en la nube.
 * **Componentes clave:**
-  * **Tarjeta 1: Almacenamiento Local (Activo):**
-    * Mensaje explicativo: *"Tus datos se encuentran 100% resguardados en este dispositivo. No dependen de servidores externos ni de conexión a internet."*
-    * Botón: `Exportar Respaldo Local (.clinik / .json)` para guardar en memoria USB o disco externo.
-  * **Tarjeta 2: Respaldo Centralizado en la Nube (Add-on Premium):**
-    * Mensaje explicativo: *"Protege tus historias clínicas contra robo, rotura o pérdida de este equipo. Los respaldos se transmiten con cifrado de conocimiento cero (AES-256)."*
-    * Estado: `Suscripción Opcional Disponible` / `Respaldar ahora a la Nube`.
-    * Historial de últimas copias de seguridad remotas con fecha y peso del archivo.
+  * Exportación e importación local de archivos `.clinik`.
+  * **Sincronización Continua cada 60 Segundos:** Verificación automática de cambios locales y sincronización bidireccional mediante REST API con JWT.
+  * Indicador de estado en tiempo real (Pill superior): `🟢 Nube al día`, `🟡 Cambios pendientes`, `⏳ Sincronizando`.
+
+### 3.6. Pantalla 6: Configuración del Consultorio, Temas y Pagos
+* **Objetivo:** Personalización integral de la aplicación y gestión de suscripción.
+* **Componentes clave:**
+  * **Identidad:** Nombre del consultorio, ícono/logo, subtítulo, Dr./Dra., matrícula, dirección física, link de Google Maps y teléfono.
+  * **Botón de Compartir:** Envía la ficha completa del consultorio con link de Google Maps al WhatsApp del paciente.
+  * **Plantilla de Colores:** Selector dinámico entre Teal, Sky, Purple y Slate.
+  * **Switches de Módulos:** Activar/desactivar Odontograma FDI, Recetas PDF y Agenda.
+  * **Gestión de Pago Previo (PayPal / QR):**
+    * Panel para activar la copia de seguridad y multi-dispositivo.
+    * Pasarela PayPal ($15 USD / mes) y Simple QR (Bs. 100 / mes).
+  * **Bitácora de Auditoría (Audit Log):** Al estar la copia pagada, habilita la visualización histórica de todos los cambios realizados en personas, citas, recetas e historia clínica.
