@@ -970,6 +970,52 @@ body {
   padding: 0.4rem 0.75rem;
   border-radius: var(--radius-sm);
   text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.media-pdf-badge:hover {
+  background: #fee2e2;
+  transform: translateY(-1px);
+}
+
+.media-doc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.media-doc-badge:hover {
+  background: #dcfce7;
+  transform: translateY(-1px);
+}
+
+.media-video-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.media-video-badge:hover {
+  background: #dbeafe;
+  transform: translateY(-1px);
 }
 
 /* ==================== PANTALLA 3: AGENDA ==================== */

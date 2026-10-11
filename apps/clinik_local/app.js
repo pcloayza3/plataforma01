@@ -26,6 +26,8 @@ const DEFAULT_SERVICIOS = [
   'Ecografía Diagnóstica'
 ];
 
+const SAMPLE_RX_VALERIA = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgMjYwIiB3aWR0aD0iNDAwIiBoZWlnaHQ9IjI2MCI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSIyNjAiIGZpbGw9IiMwYjEzMjkiLz48cmVjdCB4PSIxNSIgeT0iMTUiIHdpZHRoPSIzNzAiIGhlaWdodD0iMjMwIiByeD0iNiIgZmlsbD0iIzExMWMzOCIgc3Ryb2tlPSIjMzhiZGY4IiBzdHJva2Utd2lkdGg9IjEuNSIvPjxjaXJjbGUgY3g9IjM1IiBjeT0iMzUiIHI9IjQiIGZpbGw9IiMzOGJkZjgiLz48dGV4dCB4PSIzNjAiIHk9IjM4IiBmaWxsPSIjOTRhM2I4IiBmb250LWZhbWlseT0ic3lzdGVtLXVpLCAtYXBwbGUtc3lzdGVtLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9ImVuZCI+Ui0yNiDigKIgUEVSSUFQSUNBTDwvdGV4dD48cGF0aCBkPSJNIDEyMCAxODAgUSAxNTAgMTQwIDE4MCAxODAgUSAyMDAgMTM1IDIyMCAxODAgUSAyNTAgMTQwIDI4MCAxODAgQyAyODAgMjMwIDEyMCAyMzAgMTIwIDE4MCBaIiBmaWxsPSIjMWUyOTNiIiBzdHJva2U9IiM2NDc0OGIiIHN0cm9rZS13aWR0aD0iMiIvPjxwYXRoIGQ9Ik0gMTcwIDE3MCBDIDE3MCAxMTAgMTgwIDgwIDIwMCA4MCBDIDIyMCA4MCAyMzAgMTEwIDIzMCAxNzAgQyAyMjAgMTc1IDE4MCAxNzUgMTcwIDE3MCBaIiBmaWxsPSIjNDc1NTY5IiBzdHJva2U9IiM5NGEzYjgiIHN0cm9rZS13aWR0aD0iMiIvPjxwYXRoIGQ9Ik0gMTgwIDkwIFEgMjAwIDc1IDIyMCA5MCBRIDIyNSAxMTUgMjAwIDExNSBRIDE3NSAxMTUgMTgwIDkwIFoiIGZpbGw9IiNmOGZhZmMiIHN0cm9rZT0iIzM4YmRmOCIgc3Ryb2tlLXdpZHRoPSIxLjUiLz48cGF0aCBkPSJNIDE4MCAxNjUgUSAxNzUgMjEwIDE4NSAyMjAgUSAxOTAgMjAwIDE5MiAxNjUgWiIgZmlsbD0iIzMzNDE1NSIvPjxwYXRoIGQ9Ik0gMjIwIDE2NSBRIDIyNSAyMTAgMjE1IDIyMCBRIDIxMCAyMDAgMjA4IDE2NSBaIiBmaWxsPSIjMzM0MTU1Ii8+PGxpbmUgeDE9IjIwMCIgeTE9IjExNSIgeDI9IjE4NSIgeTI9IjIxNSIgc3Ryb2tlPSIjMzhiZGY4IiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWRhc2hhcnJheT0iMiwyIi8+PGxpbmUgeDE9IjIwMCIgeTE9IjExNSIgeDI9IjIxNSIgeTI9IjIxNSIgc3Ryb2tlPSIjMzhiZGY4IiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWRhc2hhcnJheT0iMiwyIi8+PHJlY3QgeD0iMzAiIHk9IjIwMCIgd2lkdGg9IjEzMCIgaGVpZ2h0PSIzMCIgcng9IjQiIGZpbGw9InJnYmEoMTUsIDIzLCA0MiwgMC44NSkiIHN0cm9rZT0iIzMzNDE1NSIvPjx0ZXh0IHg9Ijk1IiB5PSIyMjAiIGZpbGw9IiMzOGJkZjgiIGZvbnQtZmFtaWx5PSJzeXN0ZW0tdWksIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI2MDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlBpZXphIDI2IFRyYXRhZGE8L3RleHQ+PHRleHQgeD0iMjAwIiB5PSIyNTAiIGZpbGw9IiM2NDc0OGIiIGZvbnQtZmFtaWx5PSJzeXN0ZW0tdWksIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlBhY2llbnRlOiBWYWxlcmlhIFF1aXNwZSAtIENsaW5pa0xvY2FsIERpZ2l0YWwgUng8L3RleHQ+PC9zdmc+';
+
 const DEFAULT_DB = {
   config: {
     clinicName: 'Centro Dental & Especialidades San Lucas',
@@ -83,7 +85,7 @@ const DEFAULT_DB = {
               tipo: 'foto',
               titulo: 'Rx Pieza 26',
               descripcion: 'Radiografía de control post-curación',
-              url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" style="background:%231e293b;fill:%23f8fafc;font-family:sans-serif;font-size:14px;"><text x="20" y="100">Radiografía Pieza 26 (Pieza Tratada)</text></svg>'
+              url: SAMPLE_RX_VALERIA
             }
           ]
         }
@@ -153,6 +155,17 @@ class LocalDatabase {
         if (parsed.pacientes && Array.isArray(parsed.pacientes)) {
           parsed.pacientes.forEach(p => {
             if (!p.tipo) p.tipo = 'paciente';
+            if (p.consultas && Array.isArray(p.consultas)) {
+              p.consultas.forEach(c => {
+                if (c.adjuntos && Array.isArray(c.adjuntos)) {
+                  c.adjuntos.forEach(adj => {
+                    if (adj.url && (adj.url.startsWith('data:image/svg+xml;utf8') || adj.url.includes('Radiograf%C3%ADa') || adj.url.includes('Piece 26'))) {
+                      adj.url = SAMPLE_RX_VALERIA;
+                    }
+                  });
+                }
+              });
+            }
           });
         }
         return parsed;
@@ -233,6 +246,7 @@ class ClinikApp {
     this.lblTotalPacientes = document.getElementById('lbl-total-pacientes');
     this.btnNuevoPaciente = document.getElementById('btn-nuevo-paciente');
     this.btnNuevoContactoRapido = document.getElementById('btn-nuevo-contacto-rapido');
+    this.btnImportarContacto = document.getElementById('btn-importar-contacto-dispositivo');
     this.modalPaciente = document.getElementById('modal-paciente');
     this.formPaciente = document.getElementById('form-paciente');
     this.bloqueDatosClinicos = document.getElementById('bloque-datos-clinicos-paciente');
@@ -254,13 +268,16 @@ class ClinikApp {
     this.formConsulta = document.getElementById('form-consulta');
     this.consultaServicioSelect = document.getElementById('consulta-servicio-select');
 
-    // Multimedia inputs (Cámara directa y archivos)
+    // Multimedia inputs (Cámara directa, archivos y enlaces web/nube)
     this.inputCamaraFoto = document.getElementById('input-camara-foto');
     this.inputAdjuntoFoto = document.getElementById('input-adjunto-foto');
     this.inputCamaraVideo = document.getElementById('input-camara-video');
     this.inputAdjuntoPdf = document.getElementById('input-adjunto-pdf');
     this.inputAdjuntoDesc = document.getElementById('input-adjunto-desc');
-    this.inputAdjuntoVideoUrl = document.getElementById('input-adjunto-video-url');
+    this.inputEnlaceWebUrl = document.getElementById('input-enlace-web-url');
+    this.inputEnlaceWebTitulo = document.getElementById('input-enlace-web-titulo');
+    this.selectEnlaceWebTipo = document.getElementById('select-enlace-web-tipo');
+    this.btnAgregarEnlaceWeb = document.getElementById('btn-agregar-enlace-web');
     this.colaAdjuntosPreview = document.getElementById('cola-adjuntos-preview');
 
     // Agenda
@@ -458,6 +475,9 @@ class ClinikApp {
     // Modales de Paciente y Contacto Rápido
     this.btnNuevoPaciente.addEventListener('click', () => this.abrirModalPaciente('paciente'));
     this.btnNuevoContactoRapido.addEventListener('click', () => this.abrirModalPaciente('contacto'));
+    if (this.btnImportarContacto) {
+      this.btnImportarContacto.addEventListener('click', () => this.importarContactoDesdeDispositivo());
+    }
     document.getElementById('btn-cerrar-modal-paciente').addEventListener('click', () => this.cerrarModalPaciente());
     document.getElementById('btn-cancelar-modal-paciente').addEventListener('click', () => this.cerrarModalPaciente());
     this.formPaciente.addEventListener('submit', (e) => this.guardarPaciente(e));
@@ -493,12 +513,30 @@ class ClinikApp {
     document.getElementById('btn-cancelar-modal-consulta').addEventListener('click', () => this.cerrarModalConsulta());
     this.formConsulta.addEventListener('submit', (e) => this.guardarConsulta(e));
 
-    // Captura Multimedia (Cámara y Archivos)
-    const procFoto = (e) => this.procesarArchivoAdjunto(e.target.files[0], 'foto');
-    this.inputCamaraFoto.addEventListener('change', procFoto);
-    this.inputAdjuntoFoto.addEventListener('change', procFoto);
-    this.inputCamaraVideo.addEventListener('change', (e) => this.procesarArchivoAdjunto(e.target.files[0], 'video'));
-    this.inputAdjuntoPdf.addEventListener('change', (e) => this.procesarArchivoAdjunto(e.target.files[0], 'pdf'));
+    // Captura Multimedia (Cámara, Archivos Imagen/Video y Enlaces Web/Nube)
+    const procArchivo = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const tipo = file.type.startsWith('video/') ? 'video' : 'foto';
+      this.procesarArchivoAdjunto(file, tipo);
+      e.target.value = '';
+    };
+    this.inputCamaraFoto.addEventListener('change', (e) => {
+      this.procesarArchivoAdjunto(e.target.files[0], 'foto');
+      e.target.value = '';
+    });
+    this.inputAdjuntoFoto.addEventListener('change', procArchivo);
+    this.inputCamaraVideo.addEventListener('change', (e) => {
+      this.procesarArchivoAdjunto(e.target.files[0], 'video');
+      e.target.value = '';
+    });
+    this.inputAdjuntoPdf.addEventListener('change', (e) => {
+      this.procesarArchivoAdjunto(e.target.files[0], 'pdf');
+      e.target.value = '';
+    });
+    if (this.btnAgregarEnlaceWeb) {
+      this.btnAgregarEnlaceWeb.addEventListener('click', () => this.agregarEnlaceWebCola());
+    }
 
     // Dictado por Voz (Web Speech API)
     this.setupVoiceDictation('btn-voice-motivo', 'consulta-motivo');
@@ -866,6 +904,40 @@ class ClinikApp {
     this.modalPaciente.classList.add('hidden');
   }
 
+  async importarContactoDesdeDispositivo() {
+    // Contact Picker API para navegadores móviles compatibles (Android Chrome / Web PWA)
+    if ('contacts' in navigator && 'ContactsManager' in window) {
+      try {
+        const props = ['name', 'tel', 'email'];
+        const contacts = await navigator.contacts.select(props, { multiple: false });
+        if (contacts && contacts.length > 0) {
+          const c = contacts[0];
+          if (c.name && c.name.length > 0) {
+            document.getElementById('paciente-nombre').value = c.name[0];
+          }
+          if (c.tel && c.tel.length > 0) {
+            document.getElementById('paciente-telefono').value = c.tel[0];
+          }
+          if (c.email && c.email.length > 0) {
+            document.getElementById('paciente-email').value = c.email[0];
+          }
+          this.showToast(`✅ Contacto "${c.name ? c.name[0] : 'del dispositivo'}" importado exitosamente.`);
+          return;
+        }
+      } catch (err) {
+        console.warn('Acceso a contactos cancelado por el usuario o error:', err);
+      }
+    } else {
+      // Explicación guiada en entornos de escritorio o navegadores sin soporte directo
+      alert(
+        '📲 Importación de Contactos desde el Dispositivo:\n\n' +
+        '1. En teléfonos móviles con Google Chrome / Android (y navegadores con soporte de Contact Picker API), al presionar este botón se abre la lista de contactos de tu celular y rellena automáticamente el Nombre, Teléfono/WhatsApp y Correo.\n\n' +
+        '2. En computadoras de escritorio (Mac, Windows, Linux) el sistema operativo protege la agenda por seguridad. Puedes ingresar o pegar los datos directamente en el formulario.\n\n' +
+        '3. Además, si una persona te escribió primero por WhatsApp solicitando informes, puedes registrarla con 1 clic en "+ Contacto Rápido" y posteriormente convertirla a Paciente formal con el botón "⚡ Convertir a Paciente".'
+      );
+    }
+  }
+
   guardarPaciente(e) {
     e.preventDefault();
     const idExistente = document.getElementById('paciente-id').value;
@@ -1129,18 +1201,35 @@ class ClinikApp {
               </div>
             `;
           } else if (adj.tipo === 'pdf') {
+            const isData = adj.url && adj.url.startsWith('data:');
             mediaHtml += `
-              <a href="${adj.url}" target="_blank" download="${adj.titulo}.pdf" class="media-pdf-badge">
-                📄 PDF: ${adj.titulo} ${adj.descripcion ? `(${adj.descripcion})` : ''}
+              <a href="${adj.url}" target="_blank" ${isData ? `download="${adj.titulo}.pdf"` : 'rel="noopener noreferrer"'} class="media-pdf-badge">
+                📑 PDF: ${adj.titulo} ${adj.descripcion ? `(${adj.descripcion})` : ''} ↗
               </a>
             `;
           } else if (adj.tipo === 'video') {
+            const isWeb = adj.url && adj.url.startsWith('http');
+            if (isWeb) {
+              mediaHtml += `
+                <a href="${adj.url}" target="_blank" rel="noopener noreferrer" class="media-video-badge">
+                  🎥 Video Web: ${adj.titulo} ${adj.descripcion ? `(${adj.descripcion})` : ''} ↗
+                </a>
+              `;
+            } else {
+              mediaHtml += `
+                <div class="media-thumbnail-card" style="max-width: 200px;">
+                  <video src="${adj.url}" controls style="width:100%; border-radius:4px;"></video>
+                  <span class="media-thumb-label">🎥 ${adj.titulo}</span>
+                  ${adj.descripcion ? `<span class="media-thumb-desc">${adj.descripcion}</span>` : ''}
+                </div>
+              `;
+            }
+          } else {
+            // Documento / Enlace en la nube
             mediaHtml += `
-              <div class="media-thumbnail-card" style="max-width: 200px;">
-                <video src="${adj.url}" controls style="width:100%; border-radius:4px;"></video>
-                <span class="media-thumb-label">🎥 ${adj.titulo}</span>
-                ${adj.descripcion ? `<span class="media-thumb-desc">${adj.descripcion}</span>` : ''}
-              </div>
+              <a href="${adj.url}" target="_blank" rel="noopener noreferrer" class="media-doc-badge">
+                🌐 Documento / Nube: ${adj.titulo} ${adj.descripcion ? `(${adj.descripcion})` : ''} ↗
+              </a>
             `;
           }
         });
@@ -1169,19 +1258,60 @@ class ClinikApp {
   procesarArchivoAdjunto(file, tipo) {
     if (!file) return;
     const reader = new FileReader();
-    const desc = this.inputAdjuntoDesc.value.trim();
+    const desc = this.inputAdjuntoDesc ? this.inputAdjuntoDesc.value.trim() : '';
+
+    let finalTipo = tipo;
+    if (file.type.startsWith('video/')) finalTipo = 'video';
+    else if (file.type.startsWith('image/')) finalTipo = 'foto';
+    else if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) finalTipo = 'pdf';
 
     reader.onload = (event) => {
       this.adjuntosConsultaEnCola.push({
-        tipo,
+        tipo: finalTipo,
         titulo: file.name,
-        descripcion: desc,
+        descripcion: desc || (finalTipo === 'video' ? 'Video adjunto' : finalTipo === 'foto' ? 'Imagen adjunta' : 'Documento PDF'),
         url: event.target.result
       });
-      this.inputAdjuntoDesc.value = '';
+      if (this.inputAdjuntoDesc) this.inputAdjuntoDesc.value = '';
       this.renderColaAdjuntos();
+      this.showToast(`✅ Archivo "${file.name}" agregado.`);
     };
     reader.readAsDataURL(file);
+  }
+
+  agregarEnlaceWebCola() {
+    const url = this.inputEnlaceWebUrl ? this.inputEnlaceWebUrl.value.trim() : '';
+    if (!url) {
+      alert('Ingresa una URL válida (ej. https://drive.google.com/...)');
+      return;
+    }
+    const titulo = (this.inputEnlaceWebTitulo && this.inputEnlaceWebTitulo.value.trim()) || 'Enlace Web';
+    let tipo = this.selectEnlaceWebTipo ? this.selectEnlaceWebTipo.value : 'auto';
+
+    if (tipo === 'auto') {
+      const lower = url.toLowerCase();
+      if (lower.endsWith('.pdf') || lower.includes('/pdf')) {
+        tipo = 'pdf';
+      } else if (lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png') || lower.endsWith('.webp') || lower.endsWith('.svg')) {
+        tipo = 'foto';
+      } else if (lower.endsWith('.mp4') || lower.endsWith('.webm') || lower.includes('youtube.com') || lower.includes('youtu.be') || lower.includes('vimeo.com')) {
+        tipo = 'video';
+      } else {
+        tipo = 'documento';
+      }
+    }
+
+    this.adjuntosConsultaEnCola.push({
+      tipo,
+      titulo,
+      descripcion: `Enlace en la nube: ${url}`,
+      url
+    });
+
+    if (this.inputEnlaceWebUrl) this.inputEnlaceWebUrl.value = '';
+    if (this.inputEnlaceWebTitulo) this.inputEnlaceWebTitulo.value = '';
+    this.renderColaAdjuntos();
+    this.showToast(`✅ Enlace "${titulo}" agregado.`);
   }
 
   renderColaAdjuntos() {
@@ -1189,8 +1319,9 @@ class ClinikApp {
     this.adjuntosConsultaEnCola.forEach((item, idx) => {
       const badge = document.createElement('span');
       badge.className = 'preview-badge-item';
+      const icon = item.tipo === 'foto' ? '📷' : item.tipo === 'pdf' ? '📑' : item.tipo === 'video' ? '🎥' : '🌐';
       badge.innerHTML = `
-        <span>${item.tipo === 'foto' ? '📷' : item.tipo === 'pdf' ? '📄' : '🎥'} ${item.titulo} ${item.descripcion ? `("${item.descripcion}")` : ''}</span>
+        <span>${icon} ${item.tipo.toUpperCase()}: ${item.titulo} ${item.descripcion ? `("${item.descripcion}")` : ''}</span>
         <button type="button" class="btn-remove-attach" onclick="app.eliminarAdjuntoCola(${idx})">&times;</button>
       `;
       this.colaAdjuntosPreview.appendChild(badge);
@@ -1208,6 +1339,9 @@ class ClinikApp {
       return;
     }
     this.formConsulta.reset();
+    if (this.inputEnlaceWebUrl) this.inputEnlaceWebUrl.value = '';
+    if (this.inputEnlaceWebTitulo) this.inputEnlaceWebTitulo.value = '';
+    if (this.inputAdjuntoDesc) this.inputAdjuntoDesc.value = '';
     this.adjuntosConsultaEnCola = [];
     this.renderColaAdjuntos();
     document.getElementById('consulta-fecha').value = new Date().toISOString().split('T')[0];
@@ -1228,17 +1362,29 @@ class ClinikApp {
     const motivo = document.getElementById('consulta-motivo').value.trim();
     const diagnostico = document.getElementById('consulta-diagnostico').value.trim();
     const tratamiento = document.getElementById('consulta-tratamiento').value.trim();
-    const videoUrl = this.inputAdjuntoVideoUrl.value.trim();
+
+    // Si quedó un enlace escrito en el input sin pulsar el botón
+    const enlaceUrl = this.inputEnlaceWebUrl ? this.inputEnlaceWebUrl.value.trim() : '';
+    if (enlaceUrl) {
+      const titulo = (this.inputEnlaceWebTitulo && this.inputEnlaceWebTitulo.value.trim()) || 'Enlace Externo';
+      let tipo = this.selectEnlaceWebTipo ? this.selectEnlaceWebTipo.value : 'auto';
+      if (tipo === 'auto') {
+        const lower = enlaceUrl.toLowerCase();
+        if (lower.endsWith('.pdf') || lower.includes('/pdf')) tipo = 'pdf';
+        else if (lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png') || lower.endsWith('.webp') || lower.endsWith('.svg')) tipo = 'foto';
+        else if (lower.endsWith('.mp4') || lower.endsWith('.webm') || lower.includes('youtube.com') || lower.includes('youtu.be') || lower.includes('vimeo.com')) tipo = 'video';
+        else tipo = 'documento';
+      }
+      this.adjuntosConsultaEnCola.push({
+        tipo,
+        titulo,
+        descripcion: `Enlace en la nube: ${enlaceUrl}`,
+        url: enlaceUrl
+      });
+      this.inputEnlaceWebUrl.value = '';
+    }
 
     const adjuntos = [...this.adjuntosConsultaEnCola];
-    if (videoUrl) {
-      adjuntos.push({
-        tipo: 'video',
-        titulo: 'Video Web',
-        descripcion: 'Video adjunto por enlace',
-        url: videoUrl
-      });
-    }
 
     if (!paciente.consultas) paciente.consultas = [];
     const nuevaConsulta = {

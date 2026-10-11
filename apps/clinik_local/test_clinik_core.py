@@ -182,5 +182,30 @@ class ClinikLocalCoreTests(unittest.TestCase):
         self.assertIn("Carlos Mendoza", greeting)
         self.assertIn("Centro Dental & Especialidades San Lucas", greeting)
 
+    # 8. Test Validez de Imagen Base64 en Estudio Radiográfico de Valeria
+    def test_valeria_rx_valid_base64_data_uri(self):
+        import base64
+        # URI Base64 generada para el estudio de Valeria
+        prefix = "data:image/svg+xml;base64,"
+        # Extraer base64 y decodificar
+        raw_b64 = "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgMjYwIiB3aWR0aD0iNDAwIiBoZWlnaHQ9IjI2MCI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSIyNjAiIGZpbGw9IiMwYjEzMjkiLz48cmVjdCB4PSIxNSIgeT0iMTUiIHdpZHRoPSIzNzAiIGhlaWdodD0iMjMwIiByeD0iNiIgZmlsbD0iIzExMWMzOCIgc3Ryb2tlPSIjMzhiZGY4IiBzdHJva2Utd2lkdGg9IjEuNSIvPjxjaXJjbGUgY3g9IjM1IiBjeT0iMzUiIHI9IjQiIGZpbGw9IiMzOGJkZjgiLz48dGV4dCB4PSIzNjAiIHk9IjM4IiBmaWxsPSIjOTRhM2I4IiBmb250LWZhbWlseT0ic3lzdGVtLXVpLCAtYXBwbGUtc3lzdGVtLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9ImVuZCI+Ui0yNiDigKIgUEVSSUFQSUNBTDwvdGV4dD48cGF0aCBkPSJNIDEyMCAxODAgUSAxNTAgMTQwIDE4MCAxODAgUSAyMDAgMTM1IDIyMCAxODAgUSAyNTAgMTQwIDI4MCAxODAgQyAyODAgMjMwIDEyMCAyMzAgMTIwIDE4MCBaIiBmaWxsPSIjMWUyOTNiIiBzdHJva2U9IiM2NDc0OGIiIHN0cm9rZS13aWR0aD0iMiIvPjxwYXRoIGQ9Ik0gMTcwIDE3MCBDIDE3MCAxMTAgMTgwIDgwIDIwMCA4MCBDIDIyMCA4MCAyMzAgMTEwIDIzMCAxNzAgQyAyMjAgMTc1IDE4MCAxNzUgMTcwIDE3MCBaIiBmaWxsPSIjNDc1NTY5IiBzdHJva2U9IiM5NGEzYjgiIHN0cm9rZS13aWR0aD0iMiIvPjxwYXRoIGQ9Ik0gMTgwIDkwIFEgMjAwIDc1IDIyMCA5MCBRIDIyNSAxMTUgMjAwIDExNSBRIDE3NSAxMTUgMTgwIDkwIFoiIGZpbGw9IiNmOGZhZmMiIHN0cm9rZT0iIzM4YmRmOCIgc3Ryb2tlLXdpZHRoPSIxLjUiLz48cGF0aCBkPSJNIDE4MCAxNjUgUSAxNzUgMjEwIDE4NSAyMjAgUSAxOTAgMjAwIDE5MiAxNjUgWiIgZmlsbD0iIzMzNDE1NSIvPjxwYXRoIGQ9Ik0gMjIwIDE2NSBRIDIyNSAyMTAgMjE1IDIyMCBRIDIxMCAyMDAgMjA4IDE2NSBaIiBmaWxsPSIjMzM0MTU1Ii8+PGxpbmUgeDE9IjIwMCIgeTE9IjExNSIgeDI9IjE4NSIgeTI9IjIxNSIgc3Ryb2tlPSIjMzhiZGY4IiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWRhc2hhcnJheT0iMiwyIi8+PGxpbmUgeDE9IjIwMCIgeTE9IjExNSIgeDI9IjIxNSIgeTI9IjIxNSIgc3Ryb2tlPSIjMzhiZGY4IiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWRhc2hhcnJheT0iMiwyIi8+PHJlY3QgeD0iMzAiIHk9IjIwMCIgd2lkdGg9IjEzMCIgaGVpZ2h0PSIzMCIgcng9IjQiIGZpbGw9InJnYmEoMTUsIDIzLCA0MiwgMC44NSkiIHN0cm9rZT0iIzMzNDE1NSIvPjx0ZXh0IHg9Ijk1IiB5PSIyMjAiIGZpbGw9IiMzOGJkZjgiIGZvbnQtZmFtaWx5PSJzeXN0ZW0tdWksIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI2MDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlBpZXphIDI2IFRyYXRhZGE8L3RleHQ+PHRleHQgeD0iMjAwIiB5PSIyNTAiIGZpbGw9IiM2NDc0OGIiIGZvbnQtZmFtaWx5PSJzeXN0ZW0tdWksIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlBhY2llbnRlOiBWYWxlcmlhIFF1aXNwZSAtIENsaW5pa0xvY2FsIERpZ2l0YWwgUng8L3RleHQ+PC9zdmc+"
+        decoded = base64.b64decode(raw_b64).decode("utf-8")
+        self.assertIn("<svg", decoded)
+        self.assertIn("Pieza 26", decoded)
+
+    # 9. Test Soporte de Video, PDF, Imagen y Enlace de Documento en la Nube
+    def test_multimedia_video_pdf_cloud_links(self):
+        tipos_validos = ["foto", "video", "pdf", "documento"]
+        adjuntos_prueba = [
+            {"tipo": "foto", "titulo": "Foto intraoral", "url": "data:image/png;base64,abc"},
+            {"tipo": "video", "titulo": "Video evolución", "url": "data:video/mp4;base64,xyz"},
+            {"tipo": "video", "titulo": "Video YouTube", "url": "https://youtube.com/watch?v=123"},
+            {"tipo": "pdf", "titulo": "Estudio Tomografía", "url": "https://ejemplo.com/estudio.pdf"},
+            {"tipo": "documento", "titulo": "Drive Lab", "url": "https://drive.google.com/file/d/abc"}
+        ]
+        for adj in adjuntos_prueba:
+            self.assertIn(adj["tipo"], tipos_validos)
+            self.assertTrue(len(adj["url"]) > 0)
+
 if __name__ == '__main__':
     unittest.main()

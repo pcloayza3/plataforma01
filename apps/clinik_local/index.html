@@ -651,6 +651,17 @@
         </label>
       </div>
 
+      <!-- ACCESO A AGENDA DEL DISPOSITIVO -->
+      <div class="import-contact-helper-box" style="margin-bottom: 1rem; padding: 0.65rem 0.85rem; background: var(--color-primary-light); border: 1px dashed var(--color-primary-border); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;">
+        <div>
+          <strong style="font-size: 0.82rem; color: var(--color-primary); display: block;">📲 ¿Tienes este contacto en tu teléfono?</strong>
+          <span style="font-size: 0.75rem; color: var(--text-secondary);">Importa nombre y WhatsApp de tu agenda con 1 toque.</span>
+        </div>
+        <button type="button" id="btn-importar-contacto-dispositivo" class="btn btn-subtle" style="font-size: 0.78rem; font-weight: 600; padding: 0.4rem 0.75rem; white-space: nowrap; border-color: var(--color-primary); color: var(--color-primary);">
+          📲 Importar de Agenda
+        </button>
+      </div>
+
       <form id="form-paciente">
         <input type="hidden" id="paciente-id">
         <div class="form-group">
@@ -800,35 +811,56 @@
           <div class="multimedia-inputs-row">
             <!-- CÁMARA DIRECTA PARA FOTOS / RADIOGRAFÍAS -->
             <label class="btn btn-subtle file-btn" title="Tomar foto con la cámara del dispositivo">
-              📸 Tomar Foto con Cámara
+              📸 Tomar Foto
               <input type="file" id="input-camara-foto" accept="image/*" capture="environment" style="display:none;">
             </label>
-            <!-- SUBIR ARCHIVO DE IMAGEN EXISTENTE -->
-            <label class="btn btn-subtle file-btn">
-              🖼️ Subir Imagen / Rx
-              <input type="file" id="input-adjunto-foto" accept="image/*" style="display:none;">
+            <!-- SUBIR ARCHIVO DE IMAGEN O VIDEO EXISTENTE -->
+            <label class="btn btn-subtle file-btn" title="Subir foto o video guardado en el dispositivo">
+              🖼️🎥 Subir Imagen / Video
+              <input type="file" id="input-adjunto-foto" accept="image/*,video/*" style="display:none;">
             </label>
             <!-- CÁMARA DIRECTA PARA GRABAR VIDEO -->
-            <label class="btn btn-subtle file-btn" title="Grabar video con la cámara">
-              🎥 Grabar Video
+            <label class="btn btn-subtle file-btn" title="Grabar video con la cámara del dispositivo">
+              🎬 Grabar Video
               <input type="file" id="input-camara-video" accept="video/*" capture="environment" style="display:none;">
             </label>
             <!-- SUBIR PDF DE ESTUDIOS O LABORATORIO -->
-            <label class="btn btn-subtle file-btn">
+            <label class="btn btn-subtle file-btn" title="Adjuntar documento o estudio en PDF">
               📄 Adjuntar PDF
               <input type="file" id="input-adjunto-pdf" accept="application/pdf" style="display:none;">
             </label>
           </div>
 
           <!-- CAMPO PARA DESCRIPCIÓN OPCIONAL DEL ADJUNTO -->
-          <div class="form-row" style="margin-top: 0.75rem;">
-            <div class="form-group">
-              <label style="font-size: 0.8rem;">Nota o descripción para el archivo adjunto (Opcional):</label>
-              <input type="text" id="input-adjunto-desc" class="input-field" placeholder="Ej. Radiografía panorámica inicial / Análisis de sangre">
-            </div>
-            <div class="form-group">
-              <label style="font-size: 0.8rem;">O enlace web de video (Opcional):</label>
-              <input type="url" id="input-adjunto-video-url" class="input-field" placeholder="https://miservidor.com/video.mp4">
+          <div class="form-group" style="margin-top: 0.75rem;">
+            <label style="font-size: 0.8rem;">Nota o descripción para el archivo capturado / subido (Opcional):</label>
+            <input type="text" id="input-adjunto-desc" class="input-field" placeholder="Ej. Radiografía periapical post-curación / Análisis de sangre">
+          </div>
+
+          <!-- SECCIÓN: ADJUNTAR ENLACE WEB O NUBE (DOCUMENTO, PDF, IMAGEN O VIDEO) -->
+          <div class="enlace-web-box" style="margin-top: 0.75rem; padding: 0.75rem; background: var(--bg-page); border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+            <label style="font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 0.4rem;">
+              🌐 O Agregar Enlace Web / Nube (Documento, PDF, Imagen o Video):
+            </label>
+            <div class="form-row" style="align-items: flex-end; gap: 0.5rem;">
+              <div class="form-group" style="flex: 1.2; margin-bottom: 0;">
+                <input type="url" id="input-enlace-web-url" class="input-field" placeholder="https://drive.google.com/... o https://...">
+              </div>
+              <div class="form-group" style="flex: 0.9; margin-bottom: 0;">
+                <input type="text" id="input-enlace-web-titulo" class="input-field" placeholder="Título (Ej. Tomografía en Drive)">
+              </div>
+              <div class="form-group" style="flex: 0.7; margin-bottom: 0;">
+                <select id="select-enlace-web-tipo" class="input-field">
+                  <option value="auto">⚡ Auto-detectar</option>
+                  <option value="documento">📄 Documento / Drive</option>
+                  <option value="pdf">📑 PDF Web</option>
+                  <option value="foto">🖼️ Imagen Web</option>
+                  <option value="video">🎥 Video Web</option>
+                </select>
+              </div>
+              <button type="button" class="btn btn-subtle" id="btn-agregar-enlace-web" style="white-space: nowrap; height: 38px;">
+                + Agregar Enlace
+              </button>
             </div>
           </div>
 
