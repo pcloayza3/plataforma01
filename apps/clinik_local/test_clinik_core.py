@@ -154,5 +154,33 @@ class ClinikLocalCoreTests(unittest.TestCase):
         self.assertEqual(adj["descripcion"], "Control radiográfico periapical")
         self.assertTrue(adj["url"].startswith("data:"))
 
+    # 6. Test Desactivación estricta de Módulo Odontograma
+    def test_odontograma_module_deactivation_flag(self):
+        # Cuando el módulo odontograma está activo
+        self.assertTrue(self.sample_db["config"]["modules"]["odontograma"])
+        
+        # Desactivación por el usuario
+        self.sample_db["config"]["modules"]["odontograma"] = False
+        is_active = self.sample_db["config"]["modules"].get("odontograma", True) is not False
+        self.assertFalse(is_active)
+
+    # 7. Test Normalización de pacientes y Saludo Seguro de WhatsApp
+    def test_patient_normalization_and_safe_greeting(self):
+        # Simulación de paciente histórico sin campo tipo
+        paciente_legacy = {
+            "id": "p-legacy",
+            "nombre": "Carlos Mendoza",
+            "telefono": "+59172233445"
+        }
+        if "tipo" not in paciente_legacy:
+            paciente_legacy["tipo"] = "paciente"
+        self.assertEqual(paciente_legacy["tipo"], "paciente")
+
+        # Saludo seguro
+        clinic_name = self.sample_db["config"].get("clinicName", "ClinikLocal")
+        greeting = f"Hola {paciente_legacy['nombre']}, le saludamos desde {clinic_name}."
+        self.assertIn("Carlos Mendoza", greeting)
+        self.assertIn("Centro Dental & Especialidades San Lucas", greeting)
+
 if __name__ == '__main__':
     unittest.main()

@@ -145,10 +145,16 @@ class LocalDatabase {
       if (data) {
         const parsed = JSON.parse(data);
         if (!parsed.config) parsed.config = DEFAULT_DB.config;
+        if (!parsed.config.modules) parsed.config.modules = DEFAULT_DB.config.modules;
         if (!parsed.config.servicios) parsed.config.servicios = DEFAULT_SERVICIOS;
         if (!parsed.subscription) parsed.subscription = DEFAULT_DB.subscription;
         if (!parsed.auditLogs) parsed.auditLogs = [];
         if (!parsed.cambiosPendientes) parsed.cambiosPendientes = [];
+        if (parsed.pacientes && Array.isArray(parsed.pacientes)) {
+          parsed.pacientes.forEach(p => {
+            if (!p.tipo) p.tipo = 'paciente';
+          });
+        }
         return parsed;
       }
     } catch (e) {
@@ -195,6 +201,7 @@ class LocalDatabase {
 // ==================== APLICACIÓN PRINCIPAL ====================
 class ClinikApp {
   constructor() {
+    window.app = this;
     this.db = LocalDatabase.load();
     this.pacienteActivoId = this.db.pacientes.length > 0 ? this.db.pacientes[0].id : null;
     this.adjuntosConsultaEnCola = [];
@@ -388,19 +395,42 @@ class ClinikApp {
 
   aplicarVisibilidadModulos() {
     const mods = this.db.config.modules;
+    const odontogramaActivo = mods && mods.odontograma !== false;
+
     // REGLA 3: Si el odontograma está desactivado, NO DEBE SER MOSTRADO EN ABSOLUTO
-    if (mods.odontograma === false) {
-      if (this.toggleOdontoWrapper) this.toggleOdontoWrapper.style.display = 'none';
-      if (this.seccionOdontograma) this.seccionOdontograma.classList.add('hidden');
+    if (!odontogramaActivo) {
+      if (this.toggleOdontoWrapper) {
+        this.toggleOdontoWrapper.style.setProperty('display', 'none', 'important');
+      }
+      if (this.seccionOdontograma) {
+        this.seccionOdontograma.classList.add('hidden');
+        this.seccionOdontograma.style.setProperty('display', 'none', 'important');
+      }
+      if (this.btnModoMedico) this.btnModoMedico.classList.add('active');
+      if (this.btnModoDental) this.btnModoDental.classList.remove('active');
     } else {
-      if (this.toggleOdontoWrapper) this.toggleOdontoWrapper.style.display = 'flex';
+      if (this.toggleOdontoWrapper) {
+        this.toggleOdontoWrapper.style.removeProperty('display');
+        this.toggleOdontoWrapper.style.display = 'flex';
+      }
+      if (this.btnModoDental && this.btnModoDental.classList.contains('active')) {
+        if (this.seccionOdontograma) {
+          this.seccionOdontograma.classList.remove('hidden');
+          this.seccionOdontograma.style.removeProperty('display');
+        }
+      } else {
+        if (this.seccionOdontograma) {
+          this.seccionOdontograma.classList.add('hidden');
+          this.seccionOdontograma.style.setProperty('display', 'none', 'important');
+        }
+      }
     }
 
     const menuRecetas = document.getElementById('menu-item-recetas');
-    if (menuRecetas) menuRecetas.style.display = mods.recetas === false ? 'none' : 'flex';
+    if (menuRecetas) menuRecetas.style.display = (mods && mods.recetas === false) ? 'none' : 'flex';
 
     const menuAgenda = document.getElementById('menu-item-agenda');
-    if (menuAgenda) menuAgenda.style.display = mods.agenda === false ? 'none' : 'flex';
+    if (menuAgenda) menuAgenda.style.display = (mods && mods.agenda === false) ? 'none' : 'flex';
   }
 
   initEvents() {
@@ -447,11 +477,14 @@ class ClinikApp {
       this.btnModoMedico.classList.add('active');
       this.btnModoDental.classList.remove('active');
       this.seccionOdontograma.classList.add('hidden');
+      this.seccionOdontograma.style.setProperty('display', 'none', 'important');
     });
     this.btnModoDental.addEventListener('click', () => {
+      if (this.db.config.modules.odontograma === false) return;
       this.btnModoDental.classList.add('active');
       this.btnModoMedico.classList.remove('active');
       this.seccionOdontograma.classList.remove('hidden');
+      this.seccionOdontograma.style.removeProperty('display');
     });
 
     // Modal Consulta y Multimedia
@@ -516,6 +549,27 @@ class ClinikApp {
     this.btnAgregarServicio.addEventListener('click', () => this.agregarNuevoServicio());
     this.btnGuardarConfig.addEventListener('click', () => this.guardarConfiguracion());
 
+    // Switch Reactivo de Módulos (Aplicación inmediata)
+    this.cfgModuleOdonto.addEventListener('change', () => {
+      this.db.config.modules.odontograma = this.cfgModuleOdonto.checked;
+      LocalDatabase.save(this.db);
+      this.aplicarVisibilidadModulos();
+      this.renderHistoria();
+      this.showToast(this.cfgModuleOdonto.checked ? '🦷 Módulo Odontograma activado' : '🩺 Módulo Odontograma desactivado');
+    });
+
+    this.cfgModuleRecetas.addEventListener('change', () => {
+      this.db.config.modules.recetas = this.cfgModuleRecetas.checked;
+      LocalDatabase.save(this.db);
+      this.aplicarVisibilidadModulos();
+    });
+
+    this.cfgModuleAgenda.addEventListener('change', () => {
+      this.db.config.modules.agenda = this.cfgModuleAgenda.checked;
+      LocalDatabase.save(this.db);
+      this.aplicarVisibilidadModulos();
+    });
+
     // Pagos
     this.btnPagarPaypal.addEventListener('click', () => this.abrirModalPago('paypal'));
     this.btnPagarQr.addEventListener('click', () => this.abrirModalPago('qr'));
@@ -552,6 +606,11 @@ class ClinikApp {
 
     const viewSection = document.getElementById(tabId);
     if (viewSection) viewSection.classList.add('active');
+
+    if (tabId === 'tab-historia') {
+      this.aplicarVisibilidadModulos();
+      this.renderHistoria();
+    }
   }
 
   showToast(mensaje) {
@@ -747,6 +806,8 @@ class ClinikApp {
 
     LocalDatabase.save(this.db);
     this.initThemeAndBranding();
+    this.aplicarVisibilidadModulos();
+    this.renderHistoria();
     this.registrarAuditoria('Configuracion', 'cfg-general', 'EDITAR', 'Actualización de preferencias y datos del consultorio');
     this.showToast('✅ Configuración guardada correctamente.');
   }
@@ -941,7 +1002,7 @@ class ClinikApp {
           </div>
         </div>
         <div class="patient-card-footer">
-          <button class="btn btn-whatsapp" style="font-size: 0.8rem; padding: 0.4rem 0.65rem;" onclick="app.abrirChatWhatsApp('${p.telefono}', 'Hola ${encodeURIComponent(p.nombre)}, le saludamos desde ${encodeURIComponent(app.db.config.clinicName)}.')">
+          <button class="btn btn-whatsapp" style="font-size: 0.8rem; padding: 0.4rem 0.65rem;" onclick="app.saludarPacienteWhatsApp('${p.id}')">
             💬 WhatsApp
           </button>
           ${esContacto ? `
@@ -957,6 +1018,14 @@ class ClinikApp {
       `;
       this.listaPacientes.appendChild(card);
     });
+  }
+
+  saludarPacienteWhatsApp(pacienteId) {
+    const p = this.db.pacientes.find(item => item.id === pacienteId);
+    if (!p) return;
+    const clinic = (this.db.config && this.db.config.clinicName) || 'ClinikLocal';
+    const msg = `Hola ${p.nombre}, le saludamos desde ${clinic}.`;
+    this.abrirChatWhatsApp(p.telefono, msg);
   }
 
   poblarSelectsPacientes() {
@@ -983,6 +1052,7 @@ class ClinikApp {
     this.recetaSelectPaciente.value = id;
     this.renderHistoria();
     this.cambiarPestana('tab-historia');
+    this.aplicarVisibilidadModulos();
   }
 
   // ==================== HISTORIA CLÍNICA & MULTIMEDIA ====================
@@ -1002,7 +1072,32 @@ class ClinikApp {
 
     // Odontograma FDI (Solo si está activo en config)
     if (this.db.config.modules.odontograma !== false) {
+      if (this.toggleOdontoWrapper) {
+        this.toggleOdontoWrapper.style.removeProperty('display');
+        this.toggleOdontoWrapper.style.display = 'flex';
+      }
+      if (this.btnModoDental && this.btnModoDental.classList.contains('active')) {
+        if (this.seccionOdontograma) {
+          this.seccionOdontograma.classList.remove('hidden');
+          this.seccionOdontograma.style.removeProperty('display');
+        }
+      } else {
+        if (this.seccionOdontograma) {
+          this.seccionOdontograma.classList.add('hidden');
+          this.seccionOdontograma.style.setProperty('display', 'none', 'important');
+        }
+      }
       this.renderOdontograma(paciente);
+    } else {
+      if (this.toggleOdontoWrapper) {
+        this.toggleOdontoWrapper.style.setProperty('display', 'none', 'important');
+      }
+      if (this.seccionOdontograma) {
+        this.seccionOdontograma.classList.add('hidden');
+        this.seccionOdontograma.style.setProperty('display', 'none', 'important');
+      }
+      if (this.btnModoMedico) this.btnModoMedico.classList.add('active');
+      if (this.btnModoDental) this.btnModoDental.classList.remove('active');
     }
 
     const orden = this.selectOrdenHistoria.value;
