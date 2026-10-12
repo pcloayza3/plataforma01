@@ -1828,24 +1828,110 @@ html, body {
 
 @media (max-width: 768px) {
   .app-header { padding: 0.65rem 0.85rem; }
-  .view-section { padding: 0.85rem 0.65rem; }
+  .view-section { padding: 0.75rem 0.5rem; }
+  .section-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .header-actions { width: 100%; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .header-actions .btn { flex: 1 1 auto; min-width: 130px; font-size: 0.82rem; }
+  
+  /* Filtro de pacientes vertical en celular */
+  .filter-sort-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    padding: 0.65rem 0.75rem;
+  }
+  .search-input-box {
+    width: 100%;
+    min-width: 0;
+  }
+  .sort-selector-box {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+  .select-sort {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Tarjetas de pacientes a 1 columna completa en celular */
+  .patient-grid {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+  .patient-card {
+    padding: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .patient-card-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .patient-card-footer .btn {
+    flex: 1 1 auto;
+    font-size: 0.8rem;
+  }
+
+  /* Citas / Agenda en celular */
+  .appointment-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.85rem 0.75rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .appointment-patient {
+    width: 100%;
+    min-width: 0;
+  }
+  .appointment-actions {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--border-color);
+  }
+
   .prescription-workspace, .backup-grid, .config-grid { grid-template-columns: 1fr; }
   .form-row { grid-template-columns: 1fr; }
   .theme-options-grid { grid-template-columns: 1fr; }
   
-  /* Medicamentos: campo por línea en celulares */
+  /* Medicamentos: campo por línea en celulares con etiquetas claras */
   .med-row {
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.4rem;
     background: var(--bg-subtle);
-    padding: 0.65rem;
+    padding: 0.75rem;
     border-radius: var(--radius-sm);
     border: 1px solid var(--border-color);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .med-row .med-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    width: 100%;
+  }
+  .med-row .med-field-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-secondary);
   }
   .med-row .input-field {
     width: 100% !important;
+    box-sizing: border-box;
+  }
+  .btn-remove-med {
+    align-self: flex-end;
+    margin-top: 0.25rem;
   }
   
   /* Odontograma ajustado para móviles pequeños */
@@ -1854,14 +1940,25 @@ html, body {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     padding: 0.75rem 0.5rem;
+    box-sizing: border-box;
   }
   .teeth-row {
     flex-wrap: nowrap;
     overflow-x: auto;
     justify-content: flex-start;
     padding-bottom: 0.5rem;
+    -webkit-overflow-scrolling: touch;
   }
   .tooth-btn { width: 38px; min-height: 56px; font-size: 0.65rem; padding: 0.2rem 0.1rem; flex-shrink: 0; }
   .tooth-icon { font-size: 0.75rem; }
-  .odontograma-legend-responsive { font-size: 0.72rem; justify-content: center; }
+  .odontograma-legend-responsive { font-size: 0.72rem; justify-content: flex-start; flex-wrap: wrap; }
+
+  /* Modales en celular */
+  .modal-box {
+    width: 95% !important;
+    max-width: 95vw !important;
+    padding: 1.25rem 1rem !important;
+    margin: 1rem auto !important;
+    box-sizing: border-box !important;
+  }
 }
