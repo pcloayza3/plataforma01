@@ -321,7 +321,7 @@ public class MainActivity extends Activity {
         f.write(java_code)
 
     # 6. Copiar assets de ClinikLocal
-    for file_name in ['index.html', 'landing.html', 'styles.css', 'app.js', 'manifest.json', 'sw.js']:
+    for file_name in ['index.html', 'landing.html', 'styles.css', 'app.js', 'jspdf.min.js', 'manifest.json', 'sw.js']:
         src = os.path.join(BASE_DIR, file_name)
         if os.path.exists(src):
             shutil.copy(src, assets_dir)

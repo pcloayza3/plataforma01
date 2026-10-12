@@ -33,7 +33,7 @@
     <!-- NAVEGACIÓN EN EL DRAWER -->
     <nav class="drawer-nav">
       <button class="drawer-nav-item active" data-tab="tab-pacientes">
-        <span class="nav-icon">👤</span> Pacientes & Contactos
+        <span class="nav-icon">👤</span> Pacientes
       </button>
       <button class="drawer-nav-item" data-tab="tab-historia" id="menu-item-historia">
         <span class="nav-icon">📋</span> Historia Clínica
@@ -94,18 +94,31 @@
     </div>
   </header>
 
+  <!-- BARRA DE PACIENTE EN ATENCIÓN ACTIVA (TRANSVERSAL A TODAS LAS PANTALLAS) -->
+  <div id="banner-paciente-atencion" class="active-patient-bar hidden">
+    <div class="active-patient-content">
+      <span class="active-patient-dot"></span>
+      <span class="active-patient-text">
+        En Atención: <strong id="lbl-paciente-atencion-nombre">Sin paciente</strong>
+      </span>
+    </div>
+    <div class="active-patient-actions">
+      <button type="button" class="btn-goto-history" id="btn-ir-historia-activa">📂 Ver Ficha</button>
+      <button type="button" class="btn-end-care" id="btn-finalizar-atencion" title="Finalizar sesión de atención">✖ Finalizar</button>
+    </div>
+  </div>
+
   <!-- CONTENEDOR PRINCIPAL DE PANTALLAS -->
   <main class="app-content">
 
-    <!-- ==================== PANTALLA 1: PACIENTES Y CONTACTOS ==================== -->
+    <!-- ==================== PANTALLA 1: PACIENTES Y FICHAS CLÍNICAS ==================== -->
     <section id="tab-pacientes" class="view-section active">
       <div class="section-header">
         <div>
-          <h2 class="section-title">Pacientes & Contactos</h2>
-          <p class="section-desc">Gestiona fichas clínicas y transforma contactos preliminares a pacientes en un clic.</p>
+          <h2 class="section-title">Pacientes & Fichas Clínicas</h2>
+          <p class="section-desc">Gestiona historias clínicas completas, antecedentes y tratamientos.</p>
         </div>
         <div class="header-actions">
-          <button class="btn btn-subtle" id="btn-nuevo-contacto-rapido">⚡ + Contacto Rápido</button>
           <button class="btn btn-primary" id="btn-nuevo-paciente">+ Nuevo Paciente</button>
         </div>
       </div>
@@ -171,15 +184,16 @@
           <div class="odontograma-header">
             <div>
               <h3>Odontograma Interactivo (Sistema FDI)</h3>
-              <p class="odontograma-guide">Haz clic en cada pieza dental para alternar su estado clínico.</p>
+              <p class="odontograma-guide">Haz clic en cada pieza dental para asignar su estado y nota clínica (máx. 25 caracteres).</p>
             </div>
-            <!-- LEYENDA RESPONSIVA -->
+            <!-- LEYENDA RESPONSIVA CON LETRAS EXPLÍCITAS -->
             <div class="odontograma-legend-responsive">
-              <span class="legend-item"><span class="dot dot-sano"></span> Sano</span>
-              <span class="legend-item"><span class="dot dot-caries"></span> Caries</span>
-              <span class="legend-item"><span class="dot dot-tratado"></span> Restaurado</span>
-              <span class="legend-item"><span class="dot dot-endo"></span> Endodoncia</span>
-              <span class="legend-item"><span class="dot dot-ausente"></span> Ausente</span>
+              <span class="legend-item"><strong class="tooth-letter-badge badge-s">S</strong> Sano</span>
+              <span class="legend-item"><strong class="tooth-letter-badge badge-c">C</strong> Caries</span>
+              <span class="legend-item"><strong class="tooth-letter-badge badge-r">R</strong> Restaurado</span>
+              <span class="legend-item"><strong class="tooth-letter-badge badge-e">E</strong> Endodoncia</span>
+              <span class="legend-item"><strong class="tooth-letter-badge badge-x">X</strong> Ausente</span>
+              <span class="legend-item"><strong class="tooth-letter-badge badge-cr">Cr</strong> Corona</span>
             </div>
           </div>
 
@@ -243,7 +257,8 @@
           <p class="section-desc">Escribe o escanea tu recetario manuscrito para digitalizar la receta automáticamente.</p>
         </div>
         <div class="header-actions">
-          <button class="btn btn-subtle" id="btn-imprimir-receta">🖨️ Imprimir / Guardar PDF</button>
+          <button class="btn btn-primary" id="btn-guardar-receta">💾 Guardar Receta</button>
+          <button class="btn btn-subtle" id="btn-imprimir-receta">📄 Generar / Imprimir PDF</button>
           <button class="btn btn-whatsapp" id="btn-wa-receta">💬 WhatsApp</button>
           <button class="btn btn-subtle" id="btn-email-receta">✉️ Enviar por Email</button>
         </div>
@@ -252,6 +267,7 @@
       <div class="prescription-workspace">
         <!-- FORMULARIO DE PRESCRIPCIÓN CON OCR Y DICTADO POR VOZ -->
         <div class="prescription-form-card">
+          <input type="hidden" id="receta-edit-id">
           <div class="box-title-row">
             <h3 class="box-title">Datos de la Prescripción</h3>
             <!-- BOTÓN OCR DE RECETARIO FÍSICO -->
@@ -334,6 +350,17 @@
               <span>Firma y Sello del Profesional</span>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- HISTORIAL DE RECETAS EMITIDAS PARA EL PACIENTE SELECCIONADO -->
+      <div class="prescription-history-box" style="margin-top: 1.5rem; background: var(--bg-surface); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+        <div class="box-title-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+          <h3 class="box-title" style="margin: 0;">📋 Recetas Emitidas de este Paciente</h3>
+          <span class="microcopy" style="color: var(--text-muted);">Solo se pueden editar las recetas emitidas el día de hoy.</span>
+        </div>
+        <div id="lista-recetas-guardadas" class="saved-prescriptions-list">
+          <!-- Renderizado dinámico -->
         </div>
       </div>
     </section>
@@ -518,7 +545,21 @@
 
           <hr class="config-divider">
 
-          <h3 class="config-card-title">🎨 Plantilla de Colores (Tema Visual)</h3>
+          <h3 class="config-card-title">🌓 Fondo de Pantalla (Modo Claro / Oscuro)</h3>
+          <div class="theme-options-grid" style="margin-bottom: 1.25rem;">
+            <label class="theme-option">
+              <input type="radio" name="cfg-theme-mode" value="light" checked>
+              <span class="theme-swatch" style="background: #ffffff; border: 2px solid #cbd5e1; display:flex; align-items:center; justify-content:center;">☀️</span>
+              <span class="theme-title">Modo Claro (Clásico)</span>
+            </label>
+            <label class="theme-option">
+              <input type="radio" name="cfg-theme-mode" value="dark">
+              <span class="theme-swatch" style="background: #0f172a; border: 2px solid #334155; color: #ffffff; display:flex; align-items:center; justify-content:center;">🌙</span>
+              <span class="theme-title">Modo Oscuro (Descanso Visual)</span>
+            </label>
+          </div>
+
+          <h3 class="config-card-title">🎨 Paleta de Colores de Acento</h3>
           <div class="theme-options-grid">
             <label class="theme-option">
               <input type="radio" name="cfg-theme" value="teal" checked>
@@ -531,6 +572,11 @@
               <span class="theme-title">Azul Clínico</span>
             </label>
             <label class="theme-option">
+              <input type="radio" name="cfg-theme" value="emerald">
+              <span class="theme-swatch" style="background: #059669;"></span>
+              <span class="theme-title">Esmeralda Salud</span>
+            </label>
+            <label class="theme-option">
               <input type="radio" name="cfg-theme" value="purple">
               <span class="theme-swatch swatch-purple"></span>
               <span class="theme-title">Violeta Dental / Estética</span>
@@ -540,6 +586,20 @@
               <span class="theme-swatch swatch-slate"></span>
               <span class="theme-title">Grafito Minimalista</span>
             </label>
+          </div>
+
+          <hr class="config-divider">
+
+          <h3 class="config-card-title">🆔 Licencia & Código de Usuario de este Dispositivo</h3>
+          <p class="config-card-sub">Cada instalación genera un identificador único para validar tu compra e ingresar al portal de descargas.</p>
+          <div style="background: var(--bg-page); border: 1px dashed var(--border-color); padding: 0.85rem 1rem; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.25rem;">
+            <div>
+              <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Código de Usuario Asignado:</span>
+              <strong id="cfg-device-user-id" style="font-size: 1.05rem; font-family: monospace; color: var(--color-primary); letter-spacing: 0.5px;">CK-84920-USR</strong>
+            </div>
+            <button type="button" class="btn btn-subtle" id="btn-copiar-user-id" style="font-size: 0.8rem;">
+              📋 Copiar Código
+            </button>
           </div>
 
           <hr class="config-divider">
@@ -637,35 +697,12 @@
 
   <!-- ==================== MODALES ==================== -->
 
-  <!-- MODAL: REGISTRAR / EDITAR PACIENTE O CONTACTO RÁPIDO -->
+  <!-- MODAL: REGISTRAR / EDITAR PACIENTE -->
   <div id="modal-paciente" class="modal-backdrop hidden">
     <div class="modal-box">
       <div class="modal-header">
-        <h3 id="modal-paciente-titulo">Registrar Paciente / Contacto</h3>
+        <h3 id="modal-paciente-titulo">Registrar / Editar Paciente</h3>
         <button class="modal-close" id="btn-cerrar-modal-paciente">&times;</button>
-      </div>
-
-      <!-- PESTAÑA RÁPIDA: CONTACTO PRELIMINAR vs PACIENTE COMPLETO -->
-      <div class="contact-mode-toggle">
-        <label class="radio-label">
-          <input type="radio" name="modal-tipo-registro" value="paciente" checked>
-          <span>👤 Ficha de Paciente Completa</span>
-        </label>
-        <label class="radio-label">
-          <input type="radio" name="modal-tipo-registro" value="contacto">
-          <span>⚡ Contacto Rápido Preliminar</span>
-        </label>
-      </div>
-
-      <!-- ACCESO A AGENDA DEL DISPOSITIVO -->
-      <div class="import-contact-helper-box" style="margin-bottom: 1rem; padding: 0.65rem 0.85rem; background: var(--color-primary-light); border: 1px dashed var(--color-primary-border); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;">
-        <div>
-          <strong style="font-size: 0.82rem; color: var(--color-primary); display: block;">📲 ¿Tienes este contacto en tu teléfono?</strong>
-          <span style="font-size: 0.75rem; color: var(--text-secondary);">Importa nombre y WhatsApp de tu agenda con 1 toque.</span>
-        </div>
-        <button type="button" id="btn-importar-contacto-dispositivo" class="btn btn-subtle" style="font-size: 0.78rem; font-weight: 600; padding: 0.4rem 0.75rem; white-space: nowrap; border-color: var(--color-primary); color: var(--color-primary);">
-          📲 Importar de Agenda
-        </button>
       </div>
 
       <form id="form-paciente">
@@ -727,7 +764,7 @@
       </div>
       <form id="form-cita">
         <div class="form-group">
-          <label>Paciente o Contacto *</label>
+          <label>Paciente *</label>
           <select id="cita-paciente-select" class="input-field" required></select>
         </div>
         <div class="form-row">
@@ -749,9 +786,21 @@
           </div>
         </div>
 
-        <div class="form-group">
-          <label>Motivo Adicional o Nota de la Cita:</label>
-          <input type="text" id="cita-motivo" class="input-field" placeholder="Ej. Traerá radiografía previa / Primera consulta">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Alerta Previa para Confirmar:</label>
+            <select id="cita-dias-alerta" class="input-field">
+              <option value="1">🔔 1 día antes</option>
+              <option value="2" selected>🔔 2 días antes</option>
+              <option value="3">🔔 3 días antes</option>
+              <option value="4">🔔 4 días antes</option>
+              <option value="5">🔔 5 días antes</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Motivo Adicional o Nota:</label>
+            <input type="text" id="cita-motivo" class="input-field" placeholder="Ej. Traerá radiografía previa">
+          </div>
         </div>
 
         <div class="modal-footer">
@@ -762,14 +811,15 @@
     </div>
   </div>
 
-  <!-- MODAL: REGISTRAR CONSULTA CLÍNICA CON DICTADO POR VOZ, SERVICIOS Y CÁMARA DIRECTA -->
+  <!-- MODAL: REGISTRAR O EDITAR CONSULTA CLÍNICA -->
   <div id="modal-consulta" class="modal-backdrop hidden">
     <div class="modal-box modal-large">
       <div class="modal-header">
-        <h3>Registrar Consulta Clínica</h3>
+        <h3 id="modal-consulta-titulo">Registrar Consulta Clínica</h3>
         <button class="modal-close" id="btn-cerrar-modal-consulta">&times;</button>
       </div>
       <form id="form-consulta">
+        <input type="hidden" id="consulta-id">
         <div class="form-row">
           <div class="form-group">
             <label>Fecha de Consulta</label>
@@ -811,9 +861,9 @@
           <textarea id="consulta-tratamiento" class="input-field" rows="3" placeholder="Ej. Apertura cameral, limpieza con hipoclorito, curación provisional..."></textarea>
         </div>
 
-        <!-- ADJUNTOS MULTIMEDIA CON CÁMARA DIRECTA Y DESCRIPCIÓN OPICIONAL -->
+        <!-- ADJUNTOS MULTIMEDIA EXCLUSIVAMENTE FOTO, VIDEO Y PDF -->
         <div class="multimedia-upload-section">
-          <label class="multimedia-section-label">📎 Adjuntar Estudios (Cámara directa, Video, PDF):</label>
+          <label class="multimedia-section-label">📎 Adjuntar Estudios (Solo Foto, Video o PDF):</label>
           <div class="multimedia-inputs-row">
             <!-- CÁMARA DIRECTA PARA FOTOS / RADIOGRAFÍAS -->
             <label class="btn btn-subtle file-btn" title="Tomar foto con la cámara del dispositivo">
@@ -822,7 +872,7 @@
             </label>
             <!-- SUBIR ARCHIVO DE IMAGEN O VIDEO EXISTENTE -->
             <label class="btn btn-subtle file-btn" title="Subir foto o video guardado en el dispositivo">
-              🖼️🎥 Subir Imagen / Video
+              🖼️🎥 Subir Foto/Video
               <input type="file" id="input-adjunto-foto" accept="image/*,video/*" style="display:none;">
             </label>
             <!-- CÁMARA DIRECTA PARA GRABAR VIDEO -->
@@ -843,40 +893,94 @@
             <input type="text" id="input-adjunto-desc" class="input-field" placeholder="Ej. Radiografía periapical post-curación / Análisis de sangre">
           </div>
 
-          <!-- SECCIÓN: ADJUNTAR ENLACE WEB O NUBE (DOCUMENTO, PDF, IMAGEN O VIDEO) -->
-          <div class="enlace-web-box" style="margin-top: 0.75rem; padding: 0.75rem; background: var(--bg-page); border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
-            <label style="font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 0.4rem;">
-              🌐 O Agregar Enlace Web / Nube (Documento, PDF, Imagen o Video):
-            </label>
-            <div class="form-row" style="align-items: flex-end; gap: 0.5rem;">
-              <div class="form-group" style="flex: 1.2; margin-bottom: 0;">
-                <input type="url" id="input-enlace-web-url" class="input-field" placeholder="https://drive.google.com/... o https://...">
-              </div>
-              <div class="form-group" style="flex: 0.9; margin-bottom: 0;">
-                <input type="text" id="input-enlace-web-titulo" class="input-field" placeholder="Título (Ej. Tomografía en Drive)">
-              </div>
-              <div class="form-group" style="flex: 0.7; margin-bottom: 0;">
-                <select id="select-enlace-web-tipo" class="input-field">
-                  <option value="auto">⚡ Auto-detectar</option>
-                  <option value="documento">📄 Documento / Drive</option>
-                  <option value="pdf">📑 PDF Web</option>
-                  <option value="foto">🖼️ Imagen Web</option>
-                  <option value="video">🎥 Video Web</option>
-                </select>
-              </div>
-              <button type="button" class="btn btn-subtle" id="btn-agregar-enlace-web" style="white-space: nowrap; height: 38px;">
-                + Agregar Enlace
-              </button>
-            </div>
-          </div>
-
           <!-- Previsualización de adjuntos en cola -->
           <div id="cola-adjuntos-preview" class="attachments-preview-grid"></div>
         </div>
 
         <div class="modal-footer">
           <button type="button" class="btn btn-subtle" id="btn-cancelar-modal-consulta">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Guardar en Historia</button>
+          <button type="submit" class="btn btn-primary" id="btn-guardar-consulta">Guardar en Historia</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: DETALLE / NOTA DE INASISTENCIA A CITA -->
+  <div id="modal-inasistencia" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Registrar Inasistencia</h3>
+        <button class="modal-close" id="btn-cerrar-modal-inasistencia">&times;</button>
+      </div>
+      <form id="form-inasistencia">
+        <input type="hidden" id="inasistencia-cita-id">
+        <div class="form-group">
+          <label>Paciente:</label>
+          <div id="inasistencia-paciente-nombre" style="font-weight: 600; padding: 0.5rem 0;"></div>
+        </div>
+        <div class="form-group">
+          <label>Nota o Motivo de la Inasistencia *:</label>
+          <textarea id="inasistencia-nota" class="input-field" rows="3" required placeholder="Ej. El paciente llamó indicando que tuvo un imprevisto laboral; reprogramar para la próxima semana."></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-subtle" id="btn-cancelar-modal-inasistencia">Cancelar</button>
+          <button type="submit" class="btn btn-danger">Guardar Inasistencia</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: REGISTRAR / EDITAR PIEZA DENTAL EN ODONTOGRAMA -->
+  <div id="modal-diente" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modal-diente-titulo">Pieza Dental #--</h3>
+        <button class="modal-close" id="btn-cerrar-modal-diente">&times;</button>
+      </div>
+      <form id="form-diente">
+        <input type="hidden" id="diente-numero">
+        
+        <div class="form-group">
+          <label>Estado Clínico de la Pieza:</label>
+          <div class="tooth-state-options-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-top: 0.5rem;">
+            <label class="radio-label" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); cursor: pointer;">
+              <input type="radio" name="diente-estado-radio" value="sano" checked>
+              <span class="tooth-letter-badge badge-s" style="margin: 0;">S</span> Sano
+            </label>
+            <label class="radio-label" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); cursor: pointer;">
+              <input type="radio" name="diente-estado-radio" value="caries">
+              <span class="tooth-letter-badge badge-c" style="margin: 0;">C</span> Caries
+            </label>
+            <label class="radio-label" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); cursor: pointer;">
+              <input type="radio" name="diente-estado-radio" value="restaurado">
+              <span class="tooth-letter-badge badge-r" style="margin: 0;">R</span> Restaurado
+            </label>
+            <label class="radio-label" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); cursor: pointer;">
+              <input type="radio" name="diente-estado-radio" value="endodoncia">
+              <span class="tooth-letter-badge badge-e" style="margin: 0;">E</span> Endodoncia
+            </label>
+            <label class="radio-label" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); cursor: pointer;">
+              <input type="radio" name="diente-estado-radio" value="ausente">
+              <span class="tooth-letter-badge badge-x" style="margin: 0;">X</span> Ausente / Ext.
+            </label>
+            <label class="radio-label" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); cursor: pointer;">
+              <input type="radio" name="diente-estado-radio" value="corona">
+              <span class="tooth-letter-badge badge-cr" style="margin: 0;">Cr</span> Corona
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 1rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label>Texto corto o nota clínica:</label>
+            <span id="diente-nota-counter" style="font-size: 0.75rem; color: var(--text-muted);">0 / 25 car.</span>
+          </div>
+          <input type="text" id="diente-nota-input" class="input-field" maxlength="25" placeholder="Ej. Oclusal leve, perno...">
+        </div>
+
+        <div class="modal-footer" style="margin-top: 1.25rem;">
+          <button type="button" class="btn btn-subtle" id="btn-cancelar-modal-diente">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Pieza</button>
         </div>
       </form>
     </div>
@@ -984,6 +1088,7 @@
   <!-- NOTIFICACIÓN TOAST -->
   <div id="toast" class="toast hidden"></div>
 
+  <script src="jspdf.min.js"></script>
   <script src="app.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
