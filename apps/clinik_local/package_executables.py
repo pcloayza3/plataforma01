@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-Generador y Empaquetador de Ejecutables Multiplataforma para ClinikLocal v2.5
+Generador y Empaquetador de Ejecutables Multiplataforma para ClinikLocal v2.6
 Genera paquetes e instaladores listos para descarga directa:
-1. macOS: ClinikLocal.app y ClinikLocal-macOS-v2.5.zip
-2. Windows: ClinikLocal-Windows-v2.5.zip (Ejecutable .bat / launcher desktop con icono)
-3. Linux: ClinikLocal-Linux-v2.5.tar.gz (Script ejecutable y .desktop launcher)
-4. Android: ClinikLocal-Android-v2.5.apk (Paquete APK y PWA offline)
-5. iOS: ClinikLocal-iOS-v2.5.mobileconfig (Perfil WebClip de instalación nativa en iOS)
+1. macOS: ClinikLocal-macOS-v2.6.zip (y v2.5 alias)
+2. Windows: ClinikLocal-Windows-v2.6.zip (y v2.5 alias)
+3. Linux: ClinikLocal-Linux-v2.6.tar.gz (y v2.5 alias)
+4. Android: ClinikLocal-Android-v2.6.apk (y v2.5 alias)
+5. iOS: clinik-ios-profile.mobileconfig (Perfil WebClip de instalación nativa en iOS)
 """
 
 import os
@@ -18,6 +18,17 @@ import tarfile
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DOWNLOADS_DIR = os.path.join(BASE_DIR, 'downloads')
 os.makedirs(DOWNLOADS_DIR, exist_ok=True)
+
+CORE_FILES = [
+    'index.html',
+    'landing.html',
+    'landing.css',
+    'styles.css',
+    'app.js',
+    'jspdf.min.js',
+    'manifest.json',
+    'sw.js'
+]
 
 def generate_macos_bundle():
     print("-> Generando paquete para macOS...")
@@ -50,9 +61,9 @@ def generate_macos_bundle():
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>2.5.0</string>
+    <string>2.6.0</string>
     <key>CFBundleVersion</key>
-    <string>2.5.0</string>
+    <string>2.6.0</string>
     <key>LSMinimumSystemVersion</key>
     <string>10.13</string>
     <key>NSHighResolutionCapable</key>
@@ -63,18 +74,16 @@ def generate_macos_bundle():
     with open(os.path.join(contents_dir, 'Info.plist'), 'w', encoding='utf-8') as f:
         f.write(info_plist)
 
-    # Executable shell launcher
+    # Launcher shell script
     launcher = """#!/usr/bin/env bash
 DIR="$(cd "$(dirname "$0")/../Resources/app" && pwd)"
 PORT=4042
 
-# Iniciar servidor local autónomo en segundo plano si no está corriendo
 python3 -m http.server $PORT --directory "$DIR" > /dev/null 2>&1 &
 SERVER_PID=$!
 
 sleep 0.5
 
-# Abrir en modo aplicación
 if open -Ra "Google Chrome" ; then
     open -na "Google Chrome" --args --app="http://localhost:$PORT/index.html"
 elif open -Ra "Microsoft Edge" ; then
@@ -91,24 +100,30 @@ wait $SERVER_PID
     os.chmod(exec_path, 0o755)
 
     # Copiar archivos esenciales
-    for f in ['index.html', 'landing.html', 'styles.css', 'app.js', 'manifest.json', 'sw.js']:
+    for f in CORE_FILES:
         src = os.path.join(BASE_DIR, f)
         if os.path.exists(src):
             shutil.copy(src, app_assets_dir)
     
     # Copiar iconos
-    shutil.copytree(os.path.join(BASE_DIR, 'icons'), os.path.join(app_assets_dir, 'icons'), dirs_exist_ok=True)
+    icons_src = os.path.join(BASE_DIR, 'icons')
+    if os.path.exists(icons_src):
+        shutil.copytree(icons_src, os.path.join(app_assets_dir, 'icons'), dirs_exist_ok=True)
 
-    # Empaquetar a ZIP
-    zip_path = os.path.join(DOWNLOADS_DIR, 'ClinikLocal-macOS-v2.5.zip')
-    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+    # Empaquetar a ZIP v2.6 y v2.5
+    zip_path_v26 = os.path.join(DOWNLOADS_DIR, 'ClinikLocal-macOS-v2.6.zip')
+    with zipfile.ZipFile(zip_path_v26, 'w', zipfile.ZIP_DEFLATED) as zipf:
         for root, _, files in os.walk(app_dir):
             for file in files:
                 full_path = os.path.join(root, file)
                 rel_path = os.path.relpath(full_path, DOWNLOADS_DIR)
                 zipf.write(full_path, rel_path)
+
+    zip_path_v25 = os.path.join(DOWNLOADS_DIR, 'ClinikLocal-macOS-v2.5.zip')
+    shutil.copy2(zip_path_v26, zip_path_v25)
+
     shutil.rmtree(app_dir)
-    print("  -> Creado:", zip_path)
+    print("  -> Creado macOS v2.6 y v2.5:", zip_path_v26)
 
 
 def generate_windows_package():
@@ -143,14 +158,16 @@ exit
         f.write(win_bat)
 
     # Copiar web app
-    for f in ['index.html', 'landing.html', 'styles.css', 'app.js', 'manifest.json', 'sw.js']:
+    for f in CORE_FILES:
         src = os.path.join(BASE_DIR, f)
         if os.path.exists(src):
             shutil.copy(src, win_dir)
-    shutil.copytree(os.path.join(BASE_DIR, 'icons'), os.path.join(win_dir, 'icons'), dirs_exist_ok=True)
+    icons_src = os.path.join(BASE_DIR, 'icons')
+    if os.path.exists(icons_src):
+        shutil.copytree(icons_src, os.path.join(win_dir, 'icons'), dirs_exist_ok=True)
 
     # README de instalación
-    readme_txt = """CLINIKLOCAL - APLICACION CLINICA Y DENTAL AUTONOMA (WINDOWS)
+    readme_txt = """CLINIKLOCAL - APLICACION CLINICA Y DENTAL AUTONOMA (WINDOWS) v2.6
 =============================================================
 1. Descomprime esta carpeta en tu computadora (ej. en C:\\ClinikLocal o en tu Escritorio).
 2. Haz doble clic en 'Iniciar-ClinikLocal.bat'.
@@ -160,16 +177,20 @@ exit
     with open(os.path.join(win_dir, 'LEEME-INSTALACION.txt'), 'w', encoding='utf-8') as f:
         f.write(readme_txt)
 
-    # Comprimir en ZIP
-    zip_path = os.path.join(DOWNLOADS_DIR, 'ClinikLocal-Windows-v2.5.zip')
-    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+    # Comprimir en ZIP v2.6 y v2.5
+    zip_path_v26 = os.path.join(DOWNLOADS_DIR, 'ClinikLocal-Windows-v2.6.zip')
+    with zipfile.ZipFile(zip_path_v26, 'w', zipfile.ZIP_DEFLATED) as zipf:
         for root, _, files in os.walk(win_dir):
             for file in files:
                 full_path = os.path.join(root, file)
                 rel_path = os.path.relpath(full_path, DOWNLOADS_DIR)
                 zipf.write(full_path, rel_path)
+
+    zip_path_v25 = os.path.join(DOWNLOADS_DIR, 'ClinikLocal-Windows-v2.5.zip')
+    shutil.copy2(zip_path_v26, zip_path_v25)
+
     shutil.rmtree(win_dir)
-    print("  -> Creado:", zip_path)
+    print("  -> Creado Windows v2.6 y v2.5:", zip_path_v26)
 
 
 def generate_linux_package():
@@ -216,17 +237,23 @@ Categories=Office;Medical;
     os.chmod(os.path.join(linux_dir, 'ClinikLocal.desktop'), 0o755)
 
     # Copiar web app
-    for f in ['index.html', 'landing.html', 'styles.css', 'app.js', 'manifest.json', 'sw.js']:
+    for f in CORE_FILES:
         src = os.path.join(BASE_DIR, f)
         if os.path.exists(src):
             shutil.copy(src, linux_dir)
-    shutil.copytree(os.path.join(BASE_DIR, 'icons'), os.path.join(linux_dir, 'icons'), dirs_exist_ok=True)
+    icons_src = os.path.join(BASE_DIR, 'icons')
+    if os.path.exists(icons_src):
+        shutil.copytree(icons_src, os.path.join(linux_dir, 'icons'), dirs_exist_ok=True)
 
-    tar_path = os.path.join(DOWNLOADS_DIR, 'ClinikLocal-Linux-v2.5.tar.gz')
-    with tarfile.open(tar_path, "w:gz") as tar:
+    tar_path_v26 = os.path.join(DOWNLOADS_DIR, 'ClinikLocal-Linux-v2.6.tar.gz')
+    with tarfile.open(tar_path_v26, "w:gz") as tar:
         tar.add(linux_dir, arcname='ClinikLocal')
+
+    tar_path_v25 = os.path.join(DOWNLOADS_DIR, 'ClinikLocal-Linux-v2.5.tar.gz')
+    shutil.copy2(tar_path_v26, tar_path_v25)
+
     shutil.rmtree(linux_dir)
-    print("  -> Creado:", tar_path)
+    print("  -> Creado Linux v2.6 y v2.5:", tar_path_v26)
 
 
 def generate_android_apk_bundle():
@@ -236,12 +263,10 @@ def generate_android_apk_bundle():
         compile_android_apk.main()
     except Exception as e:
         print(f"  [!] Advertencia al compilar con Android SDK: {e}")
-        print("  Asegúrese de contar con Java y Android build-tools disponibles.")
 
 
 def generate_ios_profile():
     print("-> Generando perfil WebClip nativo para iOS...")
-    mobileconfig_path = os.path.join(DOWNLOADS_DIR, 'ClinikLocal-iOS-v2.5.mobileconfig')
     profile_content = """<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -290,12 +315,17 @@ def generate_ios_profile():
 </dict>
 </plist>
 """
-    with open(mobileconfig_path, 'w', encoding='utf-8') as f:
-        f.write(profile_content)
-    print("  -> Creado:", mobileconfig_path)
+    p1 = os.path.join(DOWNLOADS_DIR, 'clinik-ios-profile.mobileconfig')
+    p2 = os.path.join(DOWNLOADS_DIR, 'ClinikLocal-iOS-v2.6.mobileconfig')
+    p3 = os.path.join(DOWNLOADS_DIR, 'ClinikLocal-iOS-v2.5.mobileconfig')
+    for p in [p1, p2, p3]:
+        with open(p, 'w', encoding='utf-8') as f:
+            f.write(profile_content)
+    print("  -> Creado perfil iOS:", p1)
+
 
 if __name__ == '__main__':
-    print("=== Empaquetado Multiplataforma ClinikLocal v2.5 ===")
+    print("=== Empaquetado Multiplataforma ClinikLocal v2.6 ===")
     generate_macos_bundle()
     generate_windows_package()
     generate_linux_package()

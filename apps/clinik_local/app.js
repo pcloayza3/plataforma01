@@ -1,15 +1,19 @@
 /**
- * ClinikLocal - Lógica de Aplicación Local-First Avanzada v2.5
- * Soporta:
- * 1. Transformación de Contacto Rápido a Paciente.
- * 2. Catálogo dinámico de Servicios y Análisis Clínicos (Configuración, Citas, Historia).
- * 3. Selección de uno o varios servicios en citas e historia.
- * 4. Captura directa de foto/video desde la cámara con descripción de texto opcional.
- * 5. Dictado por voz (Web Speech API) para anamnesis, diagnóstico y tratamiento.
- * 6. OCR inteligente de recetarios físicos (Tesseract.js).
- * 7. Correo electrónico como canal opcional (mailto:).
- * 8. Odontograma 100% responsivo y configurable.
- * 9. Sincronización continua en segundo plano cada 1 minuto con REST API y JWT.
+ * ClinikLocal - Lógica de Aplicación Local-First Avanzada v2.6
+ * Novedades v2.6:
+ * 1. Edición completa de pacientes existentes.
+ * 2. Remoción total de conversión de contactos (todos son pacientes estándar).
+ * 3. Enfoque 100% responsivo para celulares (sin desbordamiento horizontal).
+ * 4. Adjuntos de historia médica exclusivos: Foto, Video (cámara/archivo) y PDF.
+ * 5. Edición de consultas clínicas permitida únicamente el mismo día de registro.
+ * 6. Odontograma con notas cortas (máx 25 car.) y letras de estado explícitas (S, C, R, E, X, Cr).
+ * 7. Agenda con alertas de 1 a 5 días, confirmación, asistencias, notas de inasistencia, enlace a historia
+ *    y flujo transversal de "Paciente en Atención" en todas las pantallas.
+ * 8. Formulario de medicamentos con diseño vertical amigable en celulares (un campo por línea).
+ * 9. Generación real de PDF en recetas médicas utilizando jsPDF offline.
+ * 10. Persistencia y listado de recetas emitidas con edición restringida al mismo día.
+ * 11. Identificador único de usuario por instalación (CK-XXXXX-USR) para descargas.
+ * 12. Soporte completo de modo Claro / Oscuro y selección de paleta de colores.
  */
 
 const STORAGE_KEY = 'clinik_local_db_v2';
@@ -26,20 +30,21 @@ const DEFAULT_SERVICIOS = [
   'Ecografía Diagnóstica'
 ];
 
-const SAMPLE_RX_VALERIA = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgMjYwIiB3aWR0aD0iNDAwIiBoZWlnaHQ9IjI2MCI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSIyNjAiIGZpbGw9IiMwYjEzMjkiLz48cmVjdCB4PSIxNSIgeT0iMTUiIHdpZHRoPSIzNzAiIGhlaWdodD0iMjMwIiByeD0iNiIgZmlsbD0iIzExMWMzOCIgc3Ryb2tlPSIjMzhiZGY4IiBzdHJva2Utd2lkdGg9IjEuNSIvPjxjaXJjbGUgY3g9IjM1IiBjeT0iMzUiIHI9IjQiIGZpbGw9IiMzOGJkZjgiLz48dGV4dCB4PSIzNjAiIHk9IjM4IiBmaWxsPSIjOTRhM2I4IiBmb250LWZhbWlseT0ic3lzdGVtLXVpLCAtYXBwbGUtc3lzdGVtLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9ImVuZCI+Ui0yNiDigKIgUEVSSUFQSUNBTDwvdGV4dD48cGF0aCBkPSJNIDEyMCAxODAgUSAxNTAgMTQwIDE4MCAxODAgUSAyMDAgMTM1IDIyMCAxODAgUSAyNTAgMTQwIDI4MCAxODAgQyAyODAgMjMwIDEyMCAyMzAgMTIwIDE4MCBaIiBmaWxsPSIjMWUyOTNiIiBzdHJva2U9IiM2NDc0OGIiIHN0cm9rZS13aWR0aD0iMiIvPjxwYXRoIGQ9Ik0gMTcwIDE3MCBDIDE3MCAxMTAgMTgwIDgwIDIwMCA4MCBDIDIyMCA4MCAyMzAgMTEwIDIzMCAxNzAgQyAyMjAgMTc1IDE4MCAxNzUgMTcwIDE3MCBaIiBmaWxsPSIjNDc1NTY5IiBzdHJva2U9IiM5NGEzYjgiIHN0cm9rZS13aWR0aD0iMiIvPjxwYXRoIGQ9Ik0gMTgwIDkwIFEgMjAwIDc1IDIyMCA5MCBRIDIyNSAxMTUgMjAwIDExNSBRIDE3NSAxMTUgMTgwIDkwIFoiIGZpbGw9IiNmOGZhZmMiIHN0cm9rZT0iIzM4YmRmOCIgc3Ryb2tlLXdpZHRoPSIxLjUiLz48cGF0aCBkPSJNIDE4MCAxNjUgUSAxNzUgMjEwIDE4NSAyMjAgUSAxOTAgMjAwIDE5MiAxNjUgWiIgZmlsbD0iIzMzNDE1NSIvPjxwYXRoIGQ9Ik0gMjIwIDE2NSBRIDIyNSAyMTAgMjE1IDIyMCBRIDIxMCAyMDAgMjA4IDE2NSBaIiBmaWxsPSIjMzM0MTU1Ii8+PGxpbmUgeDE9IjIwMCIgeTE9IjExNSIgeDI9IjE4NSIgeTI9IjIxNSIgc3Ryb2tlPSIjMzhiZGY4IiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWRhc2hhcnJheT0iMiwyIi8+PGxpbmUgeDE9IjIwMCIgeTE9IjExNSIgeDI9IjIxNSIgeTI9IjIxNSIgc3Ryb2tlPSIjMzhiZGY4IiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWRhc2hhcnJheT0iMiwyIi8+PHJlY3QgeD0iMzAiIHk9IjIwMCIgd2lkdGg9IjEzMCIgaGVpZ2h0PSIzMCIgcng9IjQiIGZpbGw9InJnYmEoMTUsIDIzLCA0MiwgMC44NSkiIHN0cm9rZT0iIzMzNDE1NSIvPjx0ZXh0IHg9Ijk1IiB5PSIyMjAiIGZpbGw9IiMzOGJkZjgiIGZvbnQtZmFtaWx5PSJzeXN0ZW0tdWksIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI2MDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlBpZXphIDI2IFRyYXRhZGE8L3RleHQ+PHRleHQgeD0iMjAwIiB5PSIyNTAiIGZpbGw9IiM2NDc0OGIiIGZvbnQtZmFtaWx5PSJzeXN0ZW0tdWksIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlBhY2llbnRlOiBWYWxlcmlhIFF1aXNwZSAtIENsaW5pa0xvY2FsIERpZ2l0YWwgUng8L3RleHQ+PC9zdmc+';
+const SAMPLE_RX_VALERIA = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgMjYwIiB3aWR0aD0iNDAwIiBoZWlnaHQ9IjI2MCI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSIyNjAiIGZpbGw9IiMwYjEzMjkiLz48cmVjdCB4PSIxNSIgeT0iMTUiIHdpZHRoPSIzNzAiIGhlaWdodD0iMjMwIiByeD0iNiIgZmlsbD0iIzExMWMzOCIgc3Ryb2tlPSIjMzhiZGY4IiBzdHJva2Utd2lkdGg9IjEuNSIvPjxjaXJjbGUgY3g9IjM1IiBjeT0iMzUiIHI9IjQiIGZpbGw9IiMzOGJkZjgiLz48dGV4dCB4PSIzNjAiIHk9IjM4IiBmaWxsPSIjOTRhM2I4IiBmb250LWZhbWlseT0ic3lzdGVtLXVpLCAtYXBwbGUtc3lzdGVtLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9ImVuZCI+Ui0yNiDigKIgUEVSSUFQSUNBTDwvdGV4dD48cGF0aCBkPSJNIDEyMCAxODAgUSAxNTAgMTQwIDE4MCAxODAgUSAyMDAgMTM1IDIyMCAxODAgUSAyNTAgMTQwIDI4MCAxODAgQyAyODAgMjMwIDEyMCAyMzAgMTIwIDE4MCBaIiBmaWxsPSIjMWUyOTNiIiBzdHJva2U9IiM2NDc0OGIiIHN0cm9rZS13aWR0aD0iMiIvPjxwYXRoIGQ9Ik0gMTcwIDE3MCBDIDE3MCAxMTAgMTgwIDgwIDIwMCA4MCBDIDIyMCA4MCAyMzAgMTEwIDIzMCAxNzAgQyAyMjAgMTc1IDE4MCAxNzUgMTcwIDE3MCBaIiBmaWxsPSIjNDc1NTY5IiBzdHJva2U9IiM5NGEzYjgiIHN0cm9rZS13aWR0aD0iMiIvPjxwYXRoIGQ9Ik0gMTgwIDkwIFEgMjAwIDc1IDIyMCA5MCBRIDIyNSAxMTUgMjAwIDExNSBRIDE3NSAxMTUgMTgwIDkwIFoiIGZpbGw9IiNmOGZhZmMiIHN0cm9rZT0iIzM4YmRmOCIgc3Ryb2tlLXdpZHRoPSIxLjSIvPjxwYXRoIGQ9Ik0gMTgwIDE2NSBRIDE3NSAyMTAgMTg1IDIyMCBRIDE5MCAyMDAgMTkyIDE2NSBaIiBmaWxsPSIjMzM0MTU1Ii8+PHBhdGggZD0iTSAyMjAgMTY1IFEgMjI1IDIxMCAyMTUgMjIwIFEgMjEwIDIwMCAyMDggMTY1IFoiIGZpbGw9IiMzMzQxNTUiLz48bGluZSB4MT0iMjAwIiB5MT0iMTE1IiB4Mj0iMTg1IiB5Mj0iMjE1IiBzdHJva2U9IiMzOGJkZjgiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtZGFzaGFycmF5PSIyLDIiLz48bGluZSB4MT0iMjAwIiB5MT0iMTE1IiB4Mj0iMjE1IiB5Mj0iMjE1IiBzdHJva2U9IiMzOGJkZjgiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtZGFzaGFycmF5PSIyLDIiLz48cmVjdCB4PSIzMCIgeT0iMjAwIiB3aWR0aD0iMTMwIiBoZWlnaHQ9IjMwIiByeD0iNCIgZmlsbD0icmdiYSgxNSwgMjMsIDQyLCAwLjg1KSIgc3Ryb2tlPSIjMzM0MTU1Ii8+PHRleHQgeD0iOTUiIHk9IjIyMCIgZmlsbD0iIzM4YmRmOCIgZm9udC1mYW1pbHk9InN5c3RlbS11aSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+UGllemEgMjYgVHJhdGFkYTwvdGV4dD48dGV4dCB4PSIyMDAiIHk9IjI1MCIgZmlsbD0iIzY0NzQ4YiIgZm9udC1mYW1pbHk9InN5c3RlbS11aSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+UGFjaWVudGU6IFZhbGVyaWEgUXVpc3BlIC0gQ2xpbmlrTG9jYWwgRGlnaXRhbCBSeDwvdGV4dD48L3N2Zz4=';
 
 const DEFAULT_DB = {
   config: {
-    clinicName: 'Centro Dental & Especialidades San Lucas',
+    clinicName: 'Centro Médico & Dental San Lucas',
     clinicIcon: '🩺',
     clinicSub: 'Gestión Clínica',
     doctorName: 'Dr. Alejandro Fernández',
     doctorReg: 'Matrícula Nac. Nº 14890 - CBBA',
-    address: 'Av. Heroínas #450, Edif. Los Cedros, Piso 3, Consultorio 302',
+    address: 'Av. Heroínas #450, Edif. Los Cedros, Piso 3, Of. 302',
     mapsUrl: 'https://maps.app.goo.gl/ejemploSanLucas',
     phone: '+59170000000',
     email: 'contacto@sanlucasclinic.com',
     theme: 'teal',
+    themeMode: 'light',
     servicios: DEFAULT_SERVICIOS,
     modules: {
       odontograma: true,
@@ -67,10 +72,10 @@ const DEFAULT_DB = {
       notas: 'Tratamiento de ortodoncia en curso. Sensibilidad en molares.',
       ultimaAtencion: '2026-10-09',
       odontograma: {
-        '16': 'tratado',
-        '26': 'caries',
-        '36': 'endo',
-        '48': 'ausente'
+        '16': { estado: 'restaurado', nota: 'Amalgama Oclusal' },
+        '26': { estado: 'caries', nota: 'Caries en surco' },
+        '36': { estado: 'endodoncia', nota: 'Conducto tratado' },
+        '48': { estado: 'ausente', nota: 'Tercer molar extr.' }
       },
       consultas: [
         {
@@ -102,19 +107,22 @@ const DEFAULT_DB = {
       alergias: 'Ninguna conocida',
       notas: 'Paciente con bruxismo nocturno.',
       ultimaAtencion: '2026-09-18',
-      odontograma: { '37': 'tratado', '46': 'caries' },
+      odontograma: {
+        '37': { estado: 'restaurado', nota: 'Resina distal' },
+        '46': { estado: 'caries', nota: 'Fosa oclusal' }
+      },
       consultas: []
     },
     {
       id: 'p-3',
-      tipo: 'contacto',
+      tipo: 'paciente',
       nombre: 'Mariana Rojas Benítez',
       telefono: '+59176543210',
-      email: '',
-      ci: '',
-      nacimiento: '',
+      email: 'mariana.rojas@ejemplo.com',
+      ci: '9120345 SCZ',
+      nacimiento: '1996-08-12',
       alergias: 'Ninguna',
-      notas: 'Contacto preliminar: solicitó información y presupuesto por WhatsApp.',
+      notas: 'Consulta inicial de evaluación y profilaxis.',
       ultimaAtencion: '2026-10-10',
       odontograma: {},
       consultas: []
@@ -128,7 +136,22 @@ const DEFAULT_DB = {
       hora: '10:30',
       servicios: ['Profilaxis y Limpieza Dental', 'Radiografía Panorámica / Periapical'],
       motivo: 'Control de Caries en Pieza 26',
-      estado: 'Confirmada'
+      estado: 'Confirmada',
+      diasAlerta: 2,
+      notaInasistencia: ''
+    }
+  ],
+  recetas: [
+    {
+      id: 'rx-default-1',
+      pacienteId: 'p-1',
+      fecha: new Date().toISOString().split('T')[0],
+      diagnostico: 'Pulpitis reversible en pieza 26',
+      medicamentos: [
+        { nombre: 'Amoxicilina 870mg', dosis: '1 comp cada 12h', tiempo: '7 días' },
+        { nombre: 'Ibuprofeno 400mg', dosis: '1 comp cada 8h si hay dolor', tiempo: '3 días' }
+      ],
+      indicaciones: 'Tomar la medicación tras los alimentos con abundante agua. Mantener reposo relativo.'
     }
   ],
   auditLogs: [],
@@ -149,12 +172,25 @@ class LocalDatabase {
         if (!parsed.config) parsed.config = DEFAULT_DB.config;
         if (!parsed.config.modules) parsed.config.modules = DEFAULT_DB.config.modules;
         if (!parsed.config.servicios) parsed.config.servicios = DEFAULT_SERVICIOS;
+        if (!parsed.config.themeMode) parsed.config.themeMode = 'light';
         if (!parsed.subscription) parsed.subscription = DEFAULT_DB.subscription;
         if (!parsed.auditLogs) parsed.auditLogs = [];
         if (!parsed.cambiosPendientes) parsed.cambiosPendientes = [];
+        if (!parsed.recetas) parsed.recetas = DEFAULT_DB.recetas || [];
         if (parsed.pacientes && Array.isArray(parsed.pacientes)) {
           parsed.pacientes.forEach(p => {
-            if (!p.tipo) p.tipo = 'paciente';
+            p.tipo = 'paciente'; // Normalizar: todos son pacientes plenos
+            // Normalizar odontograma a objetos { estado, nota }
+            if (p.odontograma) {
+              Object.keys(p.odontograma).forEach(k => {
+                if (typeof p.odontograma[k] === 'string') {
+                  let st = p.odontograma[k];
+                  if (st === 'tratado') st = 'restaurado';
+                  if (st === 'endo') st = 'endodoncia';
+                  p.odontograma[k] = { estado: st, nota: '' };
+                }
+              });
+            }
             if (p.consultas && Array.isArray(p.consultas)) {
               p.consultas.forEach(c => {
                 if (c.adjuntos && Array.isArray(c.adjuntos)) {
@@ -217,20 +253,34 @@ class ClinikApp {
     window.app = this;
     this.db = LocalDatabase.load();
     this.pacienteActivoId = this.db.pacientes.length > 0 ? this.db.pacientes[0].id : null;
+    this.pacienteEnAtencion = null; // Paciente en consulta activa transversal
     this.adjuntosConsultaEnCola = [];
     this.recognitionInstance = null;
+
+    // Obtener o generar ID de usuario único por instalación
+    this.initInstallationUserId();
 
     this.initElements();
     this.initThemeAndBranding();
     this.initEvents();
     this.renderAll();
     
-    // Iniciar el temporizador de Sincronización Continua cada 1 Minuto (60s)
+    // Iniciar temporizador de sincronización continua cada 60s
     this.iniciarSincronizadorMinuto();
   }
 
+  initInstallationUserId() {
+    let uid = localStorage.getItem('clinik_installation_user_id');
+    if (!uid) {
+      const randomNum = Math.floor(10000 + Math.random() * 90000);
+      uid = `CK-${randomNum}-USR`;
+      localStorage.setItem('clinik_installation_user_id', uid);
+    }
+    this.installationUserId = uid;
+  }
+
   initElements() {
-    // Drawer Hamburguesa
+    // Drawer Hamburguesa y Navegación
     this.btnBurger = document.getElementById('btn-menu-hamburguesa');
     this.sidebarDrawer = document.getElementById('sidebar-drawer');
     this.drawerBackdrop = document.getElementById('drawer-backdrop');
@@ -239,19 +289,32 @@ class ClinikApp {
     this.views = document.querySelectorAll('.view-section');
     this.btnSyncNow = document.getElementById('btn-sync-now');
 
+    // Banner Paciente en Atención
+    this.bannerPacienteAtencion = document.getElementById('banner-paciente-atencion');
+    this.txtPacienteAtencionNombre = document.getElementById('txt-paciente-atencion-nombre');
+    this.btnAtencionIrHistoria = document.getElementById('btn-atencion-ir-historia');
+    this.btnAtencionIrReceta = document.getElementById('btn-atencion-ir-receta');
+    this.btnAtencionFinalizar = document.getElementById('btn-atencion-finalizar');
+
     // Pacientes
     this.listaPacientes = document.getElementById('lista-pacientes');
     this.inputBuscarPaciente = document.getElementById('input-buscar-paciente');
     this.selectOrdenPacientes = document.getElementById('select-orden-pacientes');
     this.lblTotalPacientes = document.getElementById('lbl-total-pacientes');
     this.btnNuevoPaciente = document.getElementById('btn-nuevo-paciente');
-    this.btnNuevoContactoRapido = document.getElementById('btn-nuevo-contacto-rapido');
-    this.btnImportarContacto = document.getElementById('btn-importar-contacto-dispositivo');
     this.modalPaciente = document.getElementById('modal-paciente');
+    this.modalPacienteTitulo = document.getElementById('modal-paciente-titulo');
     this.formPaciente = document.getElementById('form-paciente');
-    this.bloqueDatosClinicos = document.getElementById('bloque-datos-clinicos-paciente');
+    this.pacienteIdInput = document.getElementById('paciente-id');
+    this.pacienteNombreInput = document.getElementById('paciente-nombre');
+    this.pacienteTelefonoInput = document.getElementById('paciente-telefono');
+    this.pacienteEmailInput = document.getElementById('paciente-email');
+    this.pacienteCiInput = document.getElementById('paciente-ci');
+    this.pacienteNacimientoInput = document.getElementById('paciente-nacimiento');
+    this.pacienteAlergiasInput = document.getElementById('paciente-alergias');
+    this.pacienteNotasInput = document.getElementById('paciente-notas');
 
-    // Historia
+    // Historia Clínica
     this.selectPacienteHistoria = document.getElementById('select-paciente-historia');
     this.alertaAlergias = document.getElementById('alerta-alergias');
     this.txtAlergiasPaciente = document.getElementById('txt-alergias-paciente');
@@ -265,20 +328,32 @@ class ClinikApp {
     this.selectOrdenHistoria = document.getElementById('select-orden-historia');
     this.btnNuevaConsulta = document.getElementById('btn-nueva-consulta');
     this.modalConsulta = document.getElementById('modal-consulta');
+    this.modalConsultaTitulo = document.getElementById('modal-consulta-titulo');
     this.formConsulta = document.getElementById('form-consulta');
+    this.consultaIdInput = document.getElementById('consulta-id');
+    this.consultaFechaInput = document.getElementById('consulta-fecha');
     this.consultaServicioSelect = document.getElementById('consulta-servicio-select');
+    this.consultaMotivoInput = document.getElementById('consulta-motivo');
+    this.consultaDiagnosticoInput = document.getElementById('consulta-diagnostico');
+    this.consultaTratamientoInput = document.getElementById('consulta-tratamiento');
 
-    // Multimedia inputs (Cámara directa, archivos y enlaces web/nube)
+    // Multimedia inputs (Solo Foto, Video y PDF)
     this.inputCamaraFoto = document.getElementById('input-camara-foto');
     this.inputAdjuntoFoto = document.getElementById('input-adjunto-foto');
     this.inputCamaraVideo = document.getElementById('input-camara-video');
     this.inputAdjuntoPdf = document.getElementById('input-adjunto-pdf');
     this.inputAdjuntoDesc = document.getElementById('input-adjunto-desc');
-    this.inputEnlaceWebUrl = document.getElementById('input-enlace-web-url');
-    this.inputEnlaceWebTitulo = document.getElementById('input-enlace-web-titulo');
-    this.selectEnlaceWebTipo = document.getElementById('select-enlace-web-tipo');
-    this.btnAgregarEnlaceWeb = document.getElementById('btn-agregar-enlace-web');
     this.colaAdjuntosPreview = document.getElementById('cola-adjuntos-preview');
+
+    // Modal Odontograma Diente
+    this.modalDiente = document.getElementById('modal-diente');
+    this.modalDienteTitulo = document.getElementById('modal-diente-titulo');
+    this.formDiente = document.getElementById('form-diente');
+    this.dienteNumeroInput = document.getElementById('diente-numero');
+    this.dienteNotaInput = document.getElementById('diente-nota-input');
+    this.dienteNotaCounter = document.getElementById('diente-nota-counter');
+    this.btnCancelarModalDiente = document.getElementById('btn-cancelar-modal-diente');
+    this.btnCerrarModalDiente = document.getElementById('btn-cerrar-modal-diente');
 
     // Agenda
     this.listaCitas = document.getElementById('lista-citas');
@@ -289,11 +364,25 @@ class ClinikApp {
     this.formCita = document.getElementById('form-cita');
     this.citaPacienteSelect = document.getElementById('cita-paciente-select');
     this.citaServiciosCheckboxes = document.getElementById('cita-servicios-checkboxes');
+    this.citaDiasAlertaSelect = document.getElementById('cita-dias-alerta');
 
-    // Recetas & OCR
+    // Modal Inasistencia
+    this.modalInasistencia = document.getElementById('modal-inasistencia');
+    this.formInasistencia = document.getElementById('form-inasistencia');
+    this.inasistenciaCitaId = document.getElementById('inasistencia-cita-id');
+    this.inasistenciaPacienteNombre = document.getElementById('inasistencia-paciente-nombre');
+    this.inasistenciaNota = document.getElementById('inasistencia-nota');
+    this.btnCancelarModalInasistencia = document.getElementById('btn-cancelar-modal-inasistencia');
+    this.btnCerrarModalInasistencia = document.getElementById('btn-cerrar-modal-inasistencia');
+
+    // Recetas & PDF
     this.recetaSelectPaciente = document.getElementById('receta-select-paciente');
     this.recetaDiagnostico = document.getElementById('receta-diagnostico');
     this.recetaIndicaciones = document.getElementById('receta-indicaciones');
+    this.recetaEditId = document.getElementById('receta-edit-id');
+    this.btnGuardarReceta = document.getElementById('btn-guardar-receta');
+    this.btnLimpiarReceta = document.getElementById('btn-limpiar-receta');
+    this.listaRecetasGuardadas = document.getElementById('lista-recetas-guardadas');
     this.listaFarmacosInputs = document.getElementById('lista-farmacos-inputs');
     this.btnAgregarFarmaco = document.getElementById('btn-agregar-farmaco');
     this.btnImprimirReceta = document.getElementById('btn-imprimir-receta');
@@ -322,7 +411,7 @@ class ClinikApp {
     this.btnAbrirPagoCloud = document.getElementById('btn-abrir-pago-cloud');
     this.btnVerAuditoriaTop = document.getElementById('btn-ver-auditoria-top');
 
-    // Configuración & Servicios
+    // Configuración, Temas & Servicios
     this.cfgClinicName = document.getElementById('cfg-clinic-name');
     this.cfgClinicIcon = document.getElementById('cfg-clinic-icon');
     this.cfgClinicSub = document.getElementById('cfg-clinic-sub');
@@ -341,6 +430,8 @@ class ClinikApp {
     this.btnGuardarConfig = document.getElementById('btn-guardar-config');
     this.btnProbarCompartir = document.getElementById('btn-probar-compartir-contacto');
     this.btnDrawerCompartir = document.getElementById('btn-drawer-compartir-contacto');
+    this.cfgDeviceUserId = document.getElementById('cfg-device-user-id');
+    this.btnCopiarUserId = document.getElementById('btn-copiar-user-id');
     this.cfgSubBadge = document.getElementById('cfg-sub-badge');
     this.btnPagarPaypal = document.getElementById('btn-pagar-paypal');
     this.btnPagarQr = document.getElementById('btn-pagar-qr');
@@ -369,6 +460,7 @@ class ClinikApp {
   initThemeAndBranding() {
     const cfg = this.db.config;
     document.body.dataset.theme = cfg.theme || 'teal';
+    document.body.dataset.themeMode = cfg.themeMode || 'light';
 
     // Header y Drawer branding
     document.getElementById('header-clinic-title').textContent = cfg.clinicName || 'ClinikLocal';
@@ -396,9 +488,17 @@ class ClinikApp {
     this.cfgClinicPhone.value = cfg.phone;
     this.cfgClinicEmail.value = cfg.email || '';
 
-    // Radio button de tema
-    const radio = document.querySelector(`input[name="cfg-theme"][value="${cfg.theme}"]`);
-    if (radio) radio.checked = true;
+    // ID de Usuario por instalación
+    if (this.cfgDeviceUserId) {
+      this.cfgDeviceUserId.textContent = this.installationUserId;
+    }
+
+    // Radio button de tema y modo oscuro
+    const radioTheme = document.querySelector(`input[name="cfg-theme"][value="${cfg.theme}"]`);
+    if (radioTheme) radioTheme.checked = true;
+
+    const radioMode = document.querySelector(`input[name="cfg-theme-mode"][value="${cfg.themeMode || 'light'}"]`);
+    if (radioMode) radioMode.checked = true;
 
     // Switches de módulos
     this.cfgModuleOdonto.checked = cfg.modules.odontograma !== false;
@@ -414,7 +514,6 @@ class ClinikApp {
     const mods = this.db.config.modules;
     const odontogramaActivo = mods && mods.odontograma !== false;
 
-    // REGLA 3: Si el odontograma está desactivado, NO DEBE SER MOSTRADO EN ABSOLUTO
     if (!odontogramaActivo) {
       if (this.toggleOdontoWrapper) {
         this.toggleOdontoWrapper.style.setProperty('display', 'none', 'important');
@@ -463,34 +562,45 @@ class ClinikApp {
       });
     });
 
+    // Barra de Paciente en Atención
+    if (this.btnAtencionIrHistoria) {
+      this.btnAtencionIrHistoria.addEventListener('click', () => {
+        if (this.pacienteEnAtencion) {
+          this.seleccionarPacienteYVerHistoria(this.pacienteEnAtencion);
+        }
+      });
+    }
+    if (this.btnAtencionIrReceta) {
+      this.btnAtencionIrReceta.addEventListener('click', () => {
+        if (this.pacienteEnAtencion) {
+          this.seleccionarPacienteYVerRecetas(this.pacienteEnAtencion);
+        }
+      });
+    }
+    if (this.btnAtencionFinalizar) {
+      this.btnAtencionFinalizar.addEventListener('click', () => this.finalizarAtencion());
+    }
+
     // Compartir contacto
     const handlerCompartir = () => this.compartirUbicacionWhatsApp();
-    this.btnProbarCompartir.addEventListener('click', handlerCompartir);
-    this.btnDrawerCompartir.addEventListener('click', handlerCompartir);
+    if (this.btnProbarCompartir) this.btnProbarCompartir.addEventListener('click', handlerCompartir);
+    if (this.btnDrawerCompartir) this.btnDrawerCompartir.addEventListener('click', handlerCompartir);
 
-    // Filtro y Ordenación de Pacientes
+    // Filtro y ordenación de pacientes
     this.inputBuscarPaciente.addEventListener('input', () => this.renderPacientes());
     this.selectOrdenPacientes.addEventListener('change', () => this.renderPacientes());
 
-    // Modales de Paciente y Contacto Rápido
-    this.btnNuevoPaciente.addEventListener('click', () => this.abrirModalPaciente('paciente'));
-    this.btnNuevoContactoRapido.addEventListener('click', () => this.abrirModalPaciente('contacto'));
-    if (this.btnImportarContacto) {
-      this.btnImportarContacto.addEventListener('click', () => this.importarContactoDesdeDispositivo());
-    }
+    // Modal Paciente
+    this.btnNuevoPaciente.addEventListener('click', () => this.abrirModalPaciente());
     document.getElementById('btn-cerrar-modal-paciente').addEventListener('click', () => this.cerrarModalPaciente());
     document.getElementById('btn-cancelar-modal-paciente').addEventListener('click', () => this.cerrarModalPaciente());
     this.formPaciente.addEventListener('submit', (e) => this.guardarPaciente(e));
 
-    // Toggle de tipo en modal paciente
-    document.querySelectorAll('input[name="modal-tipo-registro"]').forEach(radio => {
-      radio.addEventListener('change', (e) => this.cambiarModoRegistroPaciente(e.target.value));
-    });
-
-    // Historia
+    // Historia Clínica
     this.selectPacienteHistoria.addEventListener('change', (e) => {
       this.pacienteActivoId = e.target.value;
       this.renderHistoria();
+      this.renderRecetasGuardadas();
     });
     this.selectOrdenHistoria.addEventListener('change', () => this.renderHistoria());
     this.btnModoMedico.addEventListener('click', () => {
@@ -507,13 +617,12 @@ class ClinikApp {
       this.seccionOdontograma.style.removeProperty('display');
     });
 
-    // Modal Consulta y Multimedia
+    // Modal Consulta y Multimedia (Solo Foto, Video y PDF)
     this.btnNuevaConsulta.addEventListener('click', () => this.abrirModalConsulta());
     document.getElementById('btn-cerrar-modal-consulta').addEventListener('click', () => this.cerrarModalConsulta());
     document.getElementById('btn-cancelar-modal-consulta').addEventListener('click', () => this.cerrarModalConsulta());
     this.formConsulta.addEventListener('submit', (e) => this.guardarConsulta(e));
 
-    // Captura Multimedia (Cámara, Archivos Imagen/Video y Enlaces Web/Nube)
     const procArchivo = (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -534,11 +643,26 @@ class ClinikApp {
       this.procesarArchivoAdjunto(e.target.files[0], 'pdf');
       e.target.value = '';
     });
-    if (this.btnAgregarEnlaceWeb) {
-      this.btnAgregarEnlaceWeb.addEventListener('click', () => this.agregarEnlaceWebCola());
+
+    // Modal Diente (Odontograma)
+    if (this.btnCancelarModalDiente) {
+      this.btnCancelarModalDiente.addEventListener('click', () => this.modalDiente.classList.add('hidden'));
+    }
+    if (this.btnCerrarModalDiente) {
+      this.btnCerrarModalDiente.addEventListener('click', () => this.modalDiente.classList.add('hidden'));
+    }
+    if (this.dienteNotaInput) {
+      this.dienteNotaInput.addEventListener('input', (e) => {
+        if (this.dienteNotaCounter) {
+          this.dienteNotaCounter.textContent = `${e.target.value.length} / 25 car.`;
+        }
+      });
+    }
+    if (this.formDiente) {
+      this.formDiente.addEventListener('submit', (e) => this.guardarPiezaDiente(e));
     }
 
-    // Dictado por Voz (Web Speech API)
+    // Dictado por voz
     this.setupVoiceDictation('btn-voice-motivo', 'consulta-motivo');
     this.setupVoiceDictation('btn-voice-diagnostico', 'consulta-diagnostico');
     this.setupVoiceDictation('btn-voice-tratamiento', 'consulta-tratamiento');
@@ -563,12 +687,33 @@ class ClinikApp {
     document.getElementById('btn-cancelar-modal-cita').addEventListener('click', () => this.cerrarModalCita());
     this.formCita.addEventListener('submit', (e) => this.guardarCita(e));
 
-    // Recetas, OCR y Email
-    this.recetaSelectPaciente.addEventListener('change', () => this.actualizarPreviewReceta());
+    // Modal Inasistencia
+    if (this.btnCancelarModalInasistencia) {
+      this.btnCancelarModalInasistencia.addEventListener('click', () => this.modalInasistencia.classList.add('hidden'));
+    }
+    if (this.btnCerrarModalInasistencia) {
+      this.btnCerrarModalInasistencia.addEventListener('click', () => this.modalInasistencia.classList.add('hidden'));
+    }
+    if (this.formInasistencia) {
+      this.formInasistencia.addEventListener('submit', (e) => this.guardarInasistencia(e));
+    }
+
+    // Recetas, OCR y Generación de PDF
+    this.recetaSelectPaciente.addEventListener('change', () => {
+      this.pacienteActivoId = this.recetaSelectPaciente.value;
+      this.actualizarPreviewReceta();
+      this.renderRecetasGuardadas();
+    });
     this.recetaDiagnostico.addEventListener('input', () => this.actualizarPreviewReceta());
     this.recetaIndicaciones.addEventListener('input', () => this.actualizarPreviewReceta());
     this.btnAgregarFarmaco.addEventListener('click', () => this.agregarFilaFarmaco());
-    this.btnImprimirReceta.addEventListener('click', () => window.print());
+    this.btnImprimirReceta.addEventListener('click', () => this.generarPdfReceta());
+    if (this.btnGuardarReceta) {
+      this.btnGuardarReceta.addEventListener('click', () => this.guardarReceta());
+    }
+    if (this.btnLimpiarReceta) {
+      this.btnLimpiarReceta.addEventListener('click', () => this.limpiarFormularioReceta());
+    }
     this.btnWaReceta.addEventListener('click', () => this.enviarRecetaWhatsApp());
     this.btnEmailReceta.addEventListener('click', () => this.enviarRecetaEmail());
     this.inputRecetaOcr.addEventListener('change', (e) => this.procesarOcrRecetario(e));
@@ -587,7 +732,35 @@ class ClinikApp {
     this.btnAgregarServicio.addEventListener('click', () => this.agregarNuevoServicio());
     this.btnGuardarConfig.addEventListener('click', () => this.guardarConfiguracion());
 
-    // Switch Reactivo de Módulos (Aplicación inmediata)
+    // Copiar ID de usuario de instalación
+    if (this.btnCopiarUserId) {
+      this.btnCopiarUserId.addEventListener('click', () => {
+        navigator.clipboard.writeText(this.installationUserId);
+        this.showToast(`📋 ID Copiado: ${this.installationUserId}`);
+      });
+    }
+
+    // Switch Reactivo de Temas (Modo Oscuro / Claro)
+    document.querySelectorAll('input[name="cfg-theme-mode"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        this.db.config.themeMode = e.target.value;
+        document.body.dataset.themeMode = e.target.value;
+        LocalDatabase.save(this.db);
+        this.showToast(`🌓 Modo ${e.target.value === 'dark' ? 'Oscuro' : 'Claro'} activado`);
+      });
+    });
+
+    // Switch Reactivo de Color de Acento
+    document.querySelectorAll('input[name="cfg-theme"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        this.db.config.theme = e.target.value;
+        document.body.dataset.theme = e.target.value;
+        LocalDatabase.save(this.db);
+        this.showToast(`🎨 Color ${e.target.value} aplicado`);
+      });
+    });
+
+    // Switch Reactivo de Módulos
     this.cfgModuleOdonto.addEventListener('change', () => {
       this.db.config.modules.odontograma = this.cfgModuleOdonto.checked;
       LocalDatabase.save(this.db);
@@ -625,6 +798,34 @@ class ClinikApp {
     document.getElementById('btn-cerrar-auditoria-footer').addEventListener('click', () => this.modalAuditoria.classList.add('hidden'));
   }
 
+  // ==================== GESTIÓN DE PACIENTE EN ATENCIÓN (CONTEXTO ACTIVO) ====================
+  fijarPacienteEnAtencion(pacienteId) {
+    const paciente = this.db.pacientes.find(p => p.id === pacienteId);
+    if (!paciente) return;
+    this.pacienteEnAtencion = pacienteId;
+    this.pacienteActivoId = pacienteId;
+
+    if (this.bannerPacienteAtencion) {
+      this.txtPacienteAtencionNombre.textContent = paciente.nombre;
+      this.bannerPacienteAtencion.classList.remove('hidden');
+    }
+
+    // Sincronizar todos los selectores de pacientes
+    if (this.selectPacienteHistoria) this.selectPacienteHistoria.value = pacienteId;
+    if (this.recetaSelectPaciente) this.recetaSelectPaciente.value = pacienteId;
+    if (this.citaPacienteSelect) this.citaPacienteSelect.value = pacienteId;
+
+    this.showToast(`🩺 Paciente en Atención activa: ${paciente.nombre}`);
+  }
+
+  finalizarAtencion() {
+    this.pacienteEnAtencion = null;
+    if (this.bannerPacienteAtencion) {
+      this.bannerPacienteAtencion.classList.add('hidden');
+    }
+    this.showToast('🏁 Atención concluida.');
+  }
+
   abrirDrawer() {
     this.sidebarDrawer.classList.add('open');
     this.drawerBackdrop.classList.remove('hidden');
@@ -645,9 +846,21 @@ class ClinikApp {
     const viewSection = document.getElementById(tabId);
     if (viewSection) viewSection.classList.add('active');
 
+    // Auto-alinear paciente activo si hay paciente en atención
+    if (this.pacienteEnAtencion) {
+      this.pacienteActivoId = this.pacienteEnAtencion;
+      if (this.selectPacienteHistoria) this.selectPacienteHistoria.value = this.pacienteEnAtencion;
+      if (this.recetaSelectPaciente) this.recetaSelectPaciente.value = this.pacienteEnAtencion;
+    }
+
     if (tabId === 'tab-historia') {
       this.aplicarVisibilidadModulos();
       this.renderHistoria();
+    } else if (tabId === 'tab-recetas') {
+      this.actualizarPreviewReceta();
+      this.renderRecetasGuardadas();
+    } else if (tabId === 'tab-agenda') {
+      this.renderAgenda();
     }
   }
 
@@ -699,8 +912,7 @@ class ClinikApp {
           }
         };
 
-        recognition.onerror = (e) => {
-          console.warn('Error en dictado de voz:', e);
+        recognition.onerror = () => {
           btn.classList.remove('listening');
           btn.innerHTML = '🎙️ Dictar';
         };
@@ -732,10 +944,8 @@ class ClinikApp {
         const ret = await worker.recognize(file);
         const text = ret.data.text;
         await worker.terminate();
-
         this.aplicarTextoOcrEnReceta(text);
       } else {
-        // Fallback simulación limpia de OCR si no hay internet para Tesseract
         setTimeout(() => {
           const textoExtraido = "Amoxicilina 870mg 1 cada 12 horas por 7 dias\nIbuprofeno 400mg 1 tableta cada 8 horas";
           this.aplicarTextoOcrEnReceta(textoExtraido);
@@ -767,36 +977,17 @@ class ClinikApp {
     const servicios = this.db.config.servicios || DEFAULT_SERVICIOS;
     this.cfgServiciosBadgesList.innerHTML = '';
 
-    servicios.forEach((s, idx) => {
-      const chip = document.createElement('span');
-      chip.className = 'service-chip';
-      chip.innerHTML = `
-        <span>${s}</span>
-        <button type="button" class="service-chip-delete" onclick="app.eliminarServicio(${idx})">&times;</button>
+    servicios.forEach((serv, idx) => {
+      const badge = document.createElement('div');
+      badge.className = 'service-chip';
+      badge.innerHTML = `
+        <span>🔬 ${serv}</span>
+        <button type="button" class="btn-remove-chip" onclick="app.eliminarServicio(${idx})">&times;</button>
       `;
-      this.cfgServiciosBadgesList.appendChild(chip);
+      this.cfgServiciosBadgesList.appendChild(badge);
     });
 
-    // Poblar select en Historia Clínica
-    this.consultaServicioSelect.innerHTML = '';
-    servicios.forEach(s => {
-      const opt = document.createElement('option');
-      opt.value = s;
-      opt.textContent = s;
-      this.consultaServicioSelect.appendChild(opt);
-    });
-
-    // Poblar checkboxes en Modal de Citas
-    this.citaServiciosCheckboxes.innerHTML = '';
-    servicios.forEach((s, idx) => {
-      const label = document.createElement('label');
-      label.className = 'service-check-item';
-      label.innerHTML = `
-        <input type="checkbox" name="cita-servicio-item" value="${s}" ${idx === 0 ? 'checked' : ''}>
-        <span>${s}</span>
-      `;
-      this.citaServiciosCheckboxes.appendChild(label);
-    });
+    this.poblarServiciosSelectores();
   }
 
   agregarNuevoServicio() {
@@ -804,196 +995,169 @@ class ClinikApp {
     if (!nuevo) return;
 
     if (!this.db.config.servicios) this.db.config.servicios = [...DEFAULT_SERVICIOS];
+    if (this.db.config.servicios.includes(nuevo)) {
+      alert('Ese servicio o análisis ya existe en el catálogo.');
+      return;
+    }
+
     this.db.config.servicios.push(nuevo);
     this.cfgNuevoServicioInput.value = '';
-
     LocalDatabase.save(this.db);
     this.renderServiciosConfiguracion();
     this.showToast(`✅ Servicio "${nuevo}" agregado al catálogo.`);
   }
 
-  eliminarServicio(idx) {
-    if (confirm('¿Eliminar este servicio del catálogo?')) {
-      this.db.config.servicios.splice(idx, 1);
-      LocalDatabase.save(this.db);
-      this.renderServiciosConfiguracion();
+  eliminarServicio(index) {
+    if (this.db.config.servicios.length <= 1) {
+      alert('Debe existir al menos un servicio registrado en el catálogo.');
+      return;
+    }
+    const borrado = this.db.config.servicios.splice(index, 1);
+    LocalDatabase.save(this.db);
+    this.renderServiciosConfiguracion();
+    this.showToast(`Servicio "${borrado[0]}" eliminado.`);
+  }
+
+  poblarServiciosSelectores() {
+    const servicios = this.db.config.servicios || DEFAULT_SERVICIOS;
+
+    if (this.consultaServicioSelect) {
+      this.consultaServicioSelect.innerHTML = '';
+      servicios.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s;
+        opt.textContent = s;
+        this.consultaServicioSelect.appendChild(opt);
+      });
+    }
+
+    if (this.citaServiciosCheckboxes) {
+      this.citaServiciosCheckboxes.innerHTML = '';
+      servicios.forEach((s, idx) => {
+        const label = document.createElement('label');
+        label.className = 'service-checkbox-label';
+        label.innerHTML = `
+          <input type="checkbox" name="cita-servicio-item" value="${s}" ${idx === 0 ? 'checked' : ''}>
+          <span>${s}</span>
+        `;
+        this.citaServiciosCheckboxes.appendChild(label);
+      });
     }
   }
 
   guardarConfiguracion() {
-    const selectedTheme = document.querySelector('input[name="cfg-theme"]:checked')?.value || 'teal';
-    
-    this.db.config = {
-      clinicName: this.cfgClinicName.value.trim() || 'Consultorio Particular',
-      clinicIcon: this.cfgClinicIcon.value,
-      clinicSub: this.cfgClinicSub.value.trim() || 'Gestión Clínica',
-      doctorName: this.cfgDoctorName.value.trim() || 'Dr(a). Profesional',
-      doctorReg: this.cfgDoctorReg.value.trim(),
-      address: this.cfgClinicAddress.value.trim(),
-      mapsUrl: this.cfgClinicMaps.value.trim(),
-      phone: this.cfgClinicPhone.value.trim(),
-      email: this.cfgClinicEmail.value.trim(),
-      theme: selectedTheme,
-      servicios: this.db.config.servicios || DEFAULT_SERVICIOS,
-      modules: {
-        odontograma: this.cfgModuleOdonto.checked,
-        recetas: this.cfgModuleRecetas.checked,
-        agenda: this.cfgModuleAgenda.checked
-      }
-    };
+    const cfg = this.db.config;
+    cfg.clinicName = this.cfgClinicName.value.trim();
+    cfg.clinicIcon = this.cfgClinicIcon.value.trim() || '🩺';
+    cfg.clinicSub = this.cfgClinicSub.value.trim();
+    cfg.doctorName = this.cfgDoctorName.value.trim();
+    cfg.doctorReg = this.cfgDoctorReg.value.trim();
+    cfg.address = this.cfgClinicAddress.value.trim();
+    cfg.mapsUrl = this.cfgClinicMaps.value.trim();
+    cfg.phone = this.cfgClinicPhone.value.trim();
+    cfg.email = this.cfgClinicEmail.value.trim();
+
+    const selectedTheme = document.querySelector('input[name="cfg-theme"]:checked');
+    if (selectedTheme) cfg.theme = selectedTheme.value;
+
+    const selectedMode = document.querySelector('input[name="cfg-theme-mode"]:checked');
+    if (selectedMode) cfg.themeMode = selectedMode.value;
 
     LocalDatabase.save(this.db);
     this.initThemeAndBranding();
-    this.aplicarVisibilidadModulos();
-    this.renderHistoria();
-    this.registrarAuditoria('Configuracion', 'cfg-general', 'EDITAR', 'Actualización de preferencias y datos del consultorio');
-    this.showToast('✅ Configuración guardada correctamente.');
+    this.registrarAuditoria('Configuración', 'cfg-1', 'ACTUALIZAR', 'Actualización de datos generales del consultorio');
+    this.showToast('✅ Configuración guardada exitosamente.');
   }
 
   compartirUbicacionWhatsApp() {
     const cfg = this.db.config;
-    let texto = `*${cfg.clinicName.toUpperCase()}*\n`;
-    texto += `👨‍⚕️ *Atención:* ${cfg.doctorName} (${cfg.doctorReg})\n`;
-    texto += `📍 *Dirección:* ${cfg.address}\n`;
-    if (cfg.mapsUrl) texto += `🗺️ *Ver en Google Maps:* ${cfg.mapsUrl}\n`;
-    texto += `📞 *Teléfono / WhatsApp de Citas:* ${cfg.phone}\n`;
-    if (cfg.email) texto += `✉️ *Correo Electrónico:* ${cfg.email}\n`;
-    texto += `\n_Estamos a su entera disposición para su atención de salud._`;
-
-    const url = `https://wa.me/?text=${encodeURIComponent(texto)}`;
-    window.open(url, '_blank');
+    const serviciosList = (cfg.servicios || []).slice(0, 4).join('\n• ');
+    const mensaje = `Hola, te comparto los datos de atención de *${cfg.clinicName}*:\n\n👨‍⚕️ *Profesional:* ${cfg.doctorName}\n📍 *Dirección:* ${cfg.address}\n🗺️ *Ubicación Maps:* ${cfg.mapsUrl}\n📱 *Teléfono:* ${cfg.phone}\n${cfg.email ? `✉️ *Correo:* ${cfg.email}\n` : ''}\n🔬 *Servicios principales:*\n• ${serviciosList}\n\n¡Escríbenos para agendar tu consulta!`;
+    this.abrirChatWhatsApp(cfg.phone, mensaje);
   }
 
-  // ==================== PACIENTES & CONTACTOS ====================
-  cambiarModoRegistroPaciente(modo) {
-    if (modo === 'contacto') {
-      this.bloqueDatosClinicos.style.display = 'none';
-      document.getElementById('modal-paciente-titulo').textContent = '⚡ Registro de Contacto Rápido';
-      document.getElementById('lbl-notas-paciente').textContent = 'Motivo de consulta preliminar o cotización:';
-      document.getElementById('btn-submit-paciente').textContent = 'Guardar Contacto';
-    } else {
-      this.bloqueDatosClinicos.style.display = 'block';
-      document.getElementById('modal-paciente-titulo').textContent = '👤 Ficha de Paciente Formal';
-      document.getElementById('lbl-notas-paciente').textContent = 'Notas Clínicas y Antecedentes:';
-      document.getElementById('btn-submit-paciente').textContent = 'Guardar Paciente';
-    }
-  }
-
-  abrirModalPaciente(modo = 'paciente', prefill = null) {
+  // ==================== GESTIÓN DE PACIENTES (CREAR & EDITAR) ====================
+  abrirModalPaciente(pacienteId = null) {
     this.formPaciente.reset();
-    document.getElementById('paciente-id').value = prefill ? prefill.id : '';
-
-    const radio = document.querySelector(`input[name="modal-tipo-registro"][value="${modo}"]`);
-    if (radio) radio.checked = true;
-    this.cambiarModoRegistroPaciente(modo);
-
-    if (prefill) {
-      document.getElementById('paciente-nombre').value = prefill.nombre || '';
-      document.getElementById('paciente-telefono').value = prefill.telefono || '';
-      document.getElementById('paciente-email').value = prefill.email || '';
-      document.getElementById('paciente-ci').value = prefill.ci || '';
-      document.getElementById('paciente-nacimiento').value = prefill.nacimiento || '';
-      document.getElementById('paciente-alergias').value = prefill.alergias || '';
-      document.getElementById('paciente-notas').value = prefill.notas || '';
+    if (pacienteId) {
+      const p = this.db.pacientes.find(item => item.id === pacienteId);
+      if (p) {
+        this.modalPacienteTitulo.textContent = 'Editar Paciente';
+        this.pacienteIdInput.value = p.id;
+        this.pacienteNombreInput.value = p.nombre || '';
+        this.pacienteTelefonoInput.value = p.telefono || '';
+        this.pacienteEmailInput.value = p.email || '';
+        this.pacienteCiInput.value = p.ci || '';
+        this.pacienteNacimientoInput.value = p.nacimiento || '';
+        this.pacienteAlergiasInput.value = p.alergias || '';
+        this.pacienteNotasInput.value = p.notas || '';
+      }
+    } else {
+      this.modalPacienteTitulo.textContent = 'Registrar Nuevo Paciente';
+      this.pacienteIdInput.value = '';
     }
-
     this.modalPaciente.classList.remove('hidden');
+  }
+
+  abrirModalEditarPaciente(pacienteId) {
+    this.abrirModalPaciente(pacienteId);
   }
 
   cerrarModalPaciente() {
     this.modalPaciente.classList.add('hidden');
   }
 
-  async importarContactoDesdeDispositivo() {
-    // Contact Picker API para navegadores móviles compatibles (Android Chrome / Web PWA)
-    if ('contacts' in navigator && 'ContactsManager' in window) {
-      try {
-        const props = ['name', 'tel', 'email'];
-        const contacts = await navigator.contacts.select(props, { multiple: false });
-        if (contacts && contacts.length > 0) {
-          const c = contacts[0];
-          if (c.name && c.name.length > 0) {
-            document.getElementById('paciente-nombre').value = c.name[0];
-          }
-          if (c.tel && c.tel.length > 0) {
-            document.getElementById('paciente-telefono').value = c.tel[0];
-          }
-          if (c.email && c.email.length > 0) {
-            document.getElementById('paciente-email').value = c.email[0];
-          }
-          this.showToast(`✅ Contacto "${c.name ? c.name[0] : 'del dispositivo'}" importado exitosamente.`);
-          return;
-        }
-      } catch (err) {
-        console.warn('Acceso a contactos cancelado por el usuario o error:', err);
-      }
-    } else {
-      // Explicación guiada en entornos de escritorio o navegadores sin soporte directo
-      alert(
-        '📲 Importación de Contactos desde el Dispositivo:\n\n' +
-        '1. En teléfonos móviles con Google Chrome / Android (y navegadores con soporte de Contact Picker API), al presionar este botón se abre la lista de contactos de tu celular y rellena automáticamente el Nombre, Teléfono/WhatsApp y Correo.\n\n' +
-        '2. En computadoras de escritorio (Mac, Windows, Linux) el sistema operativo protege la agenda por seguridad. Puedes ingresar o pegar los datos directamente en el formulario.\n\n' +
-        '3. Además, si una persona te escribió primero por WhatsApp solicitando informes, puedes registrarla con 1 clic en "+ Contacto Rápido" y posteriormente convertirla a Paciente formal con el botón "⚡ Convertir a Paciente".'
-      );
-    }
-  }
-
   guardarPaciente(e) {
     e.preventDefault();
-    const idExistente = document.getElementById('paciente-id').value;
-    const modo = document.querySelector('input[name="modal-tipo-registro"]:checked').value;
-    const nombre = document.getElementById('paciente-nombre').value.trim();
-    const telefono = document.getElementById('paciente-telefono').value.trim();
-    const email = document.getElementById('paciente-email').value.trim();
-    const ci = document.getElementById('paciente-ci').value.trim();
-    const nacimiento = document.getElementById('paciente-nacimiento').value;
-    const alergias = document.getElementById('paciente-alergias').value.trim();
-    const notas = document.getElementById('paciente-notas').value.trim();
+    const id = this.pacienteIdInput.value.trim();
+    const nombre = this.pacienteNombreInput.value.trim();
+    const telefono = this.pacienteTelefonoInput.value.trim();
+    const email = this.pacienteEmailInput.value.trim();
+    const ci = this.pacienteCiInput.value.trim();
+    const nacimiento = this.pacienteNacimientoInput.value;
+    const alergias = this.pacienteAlergiasInput.value.trim() || 'Ninguna';
+    const notas = this.pacienteNotasInput.value.trim();
 
-    if (idExistente) {
-      // Editar o transformar
-      const idx = this.db.pacientes.findIndex(p => p.id === idExistente);
-      if (idx !== -1) {
-        this.db.pacientes[idx].tipo = modo;
-        this.db.pacientes[idx].nombre = nombre;
-        this.db.pacientes[idx].telefono = telefono;
-        this.db.pacientes[idx].email = email;
-        this.db.pacientes[idx].ci = ci;
-        this.db.pacientes[idx].nacimiento = nacimiento;
-        this.db.pacientes[idx].alergias = alergias || 'Ninguna';
-        this.db.pacientes[idx].notas = notas;
-        this.registrarAuditoria('Paciente', idExistente, 'EDITAR', `Actualización/Conversión de ${nombre} a ${modo}`);
+    if (id) {
+      // EDITAR PACIENTE EXISTENTE
+      const index = this.db.pacientes.findIndex(p => p.id === id);
+      if (index !== -1) {
+        this.db.pacientes[index].nombre = nombre;
+        this.db.pacientes[index].telefono = telefono;
+        this.db.pacientes[index].email = email;
+        this.db.pacientes[index].ci = ci;
+        this.db.pacientes[index].nacimiento = nacimiento;
+        this.db.pacientes[index].alergias = alergias;
+        this.db.pacientes[index].notas = notas;
+
+        this.registrarAuditoria('Paciente', id, 'ACTUALIZAR', `Datos modificados de ${nombre}`);
+        this.showToast('✅ Paciente actualizado exitosamente.');
       }
     } else {
-      // Nuevo registro
+      // CREAR NUEVO PACIENTE
       const nuevo = {
         id: 'p-' + Date.now(),
-        tipo: modo,
+        tipo: 'paciente',
         nombre,
         telefono,
         email,
         ci,
         nacimiento,
-        alergias: alergias || 'Ninguna',
+        alergias,
         notas,
-        ultimaAtencion: new Date().toISOString().split('T')[0],
+        ultimaAtencion: 'Sin consultas aún',
         odontograma: {},
         consultas: []
       };
       this.db.pacientes.unshift(nuevo);
-      this.registrarAuditoria('Paciente', nuevo.id, 'CREAR', `Nuevo ${modo}: ${nombre}`);
+      this.pacienteActivoId = nuevo.id;
+      this.registrarAuditoria('Paciente', nuevo.id, 'CREAR', `Nuevo paciente registrado: ${nombre}`);
+      this.showToast('✅ Nuevo paciente registrado exitosamente.');
     }
 
     LocalDatabase.save(this.db);
     this.cerrarModalPaciente();
     this.renderAll();
-    this.showToast(`✅ ${modo === 'contacto' ? 'Contacto' : 'Paciente'} guardado.`);
-  }
-
-  convertirContactoAPaciente(id) {
-    const contacto = this.db.pacientes.find(p => p.id === id);
-    if (!contacto) return;
-    this.abrirModalPaciente('paciente', contacto);
   }
 
   renderPacientes() {
@@ -1008,7 +1172,6 @@ class ClinikApp {
       (p.email && p.email.toLowerCase().includes(q))
     );
 
-    // ORDENACIÓN
     filtrados.sort((a, b) => {
       if (orden === 'recientes') {
         const atA = a.ultimaAtencion || (a.consultas && a.consultas[0] ? a.consultas[0].fecha : '1970-01-01');
@@ -1041,7 +1204,7 @@ class ClinikApp {
     this.listaPacientes.innerHTML = '';
 
     if (filtrados.length === 0) {
-      this.listaPacientes.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #94a3b8; padding: 3rem;">No se encontraron personas con ese criterio.</div>`;
+      this.listaPacientes.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 3rem;">No se encontraron personas con ese criterio.</div>`;
       return;
     }
 
@@ -1049,26 +1212,20 @@ class ClinikApp {
       const card = document.createElement('div');
       card.className = 'patient-card';
       const inicial = p.nombre.charAt(0).toUpperCase();
-      const esContacto = p.tipo === 'contacto';
 
       card.innerHTML = `
         <div>
           <div class="patient-card-header">
-            <div class="patient-avatar ${esContacto ? 'is-contact' : ''}">${inicial}</div>
+            <div class="patient-avatar">${inicial}</div>
             <div>
-              <div class="patient-name">
-                ${p.nombre}
-                <span class="badge-tipo-tag ${esContacto ? 'contacto' : 'paciente'}">
-                  ${esContacto ? 'Contacto' : 'Paciente'}
-                </span>
-              </div>
-              <div class="patient-ci">${esContacto ? 'Contacto preliminar' : (p.ci ? 'Doc: ' + p.ci : 'Sin documento')}</div>
+              <div class="patient-name">${p.nombre}</div>
+              <div class="patient-ci">${p.ci ? 'Doc: ' + p.ci : 'Sin documento'}</div>
             </div>
           </div>
           <div class="patient-meta">
             <div>📱 <strong>WhatsApp:</strong> ${p.telefono}</div>
             ${p.email ? `<div>✉️ <strong>Email:</strong> ${p.email}</div>` : ''}
-            ${!esContacto && p.nacimiento ? `<div>🎂 <strong>Nacimiento:</strong> ${p.nacimiento}</div>` : ''}
+            ${p.nacimiento ? `<div>🎂 <strong>Nacimiento:</strong> ${p.nacimiento}</div>` : ''}
             <div class="last-visit-tag">🕒 Última atención: ${p.ultimaAtencion || 'Sin consultas previas'}</div>
             ${p.alergias && p.alergias !== 'Ninguna' ? `<div class="allergy-pill">⚠️ Alergia: ${p.alergias}</div>` : ''}
           </div>
@@ -1077,15 +1234,12 @@ class ClinikApp {
           <button class="btn btn-whatsapp" style="font-size: 0.8rem; padding: 0.4rem 0.65rem;" onclick="app.saludarPacienteWhatsApp('${p.id}')">
             💬 WhatsApp
           </button>
-          ${esContacto ? `
-            <button class="btn-convertir" onclick="app.convertirContactoAPaciente('${p.id}')">
-              ⚡ Convertir a Paciente
-            </button>
-          ` : `
-            <button class="btn btn-subtle" style="font-size: 0.8rem; padding: 0.4rem 0.65rem;" onclick="app.seleccionarPacienteYVerHistoria('${p.id}')">
-              Ver Ficha →
-            </button>
-          `}
+          <button class="btn btn-subtle" style="font-size: 0.8rem; padding: 0.4rem 0.65rem;" onclick="app.abrirModalEditarPaciente('${p.id}')">
+            ✏️ Editar
+          </button>
+          <button class="btn btn-primary" style="font-size: 0.8rem; padding: 0.4rem 0.65rem;" onclick="app.seleccionarPacienteYVerHistoria('${p.id}')">
+            Ver Ficha →
+          </button>
         </div>
       `;
       this.listaPacientes.appendChild(card);
@@ -1103,35 +1257,45 @@ class ClinikApp {
   poblarSelectsPacientes() {
     const selects = [this.selectPacienteHistoria, this.citaPacienteSelect, this.recetaSelectPaciente];
     selects.forEach(sel => {
+      if (!sel) return;
       sel.innerHTML = '';
       this.db.pacientes.forEach(p => {
         const opt = document.createElement('option');
         opt.value = p.id;
-        opt.textContent = `${p.nombre} (${p.tipo === 'contacto' ? 'Contacto' : 'Paciente'})`;
+        opt.textContent = `${p.nombre}`;
         sel.appendChild(opt);
       });
     });
 
     if (this.pacienteActivoId) {
-      this.selectPacienteHistoria.value = this.pacienteActivoId;
-      this.recetaSelectPaciente.value = this.pacienteActivoId;
+      if (this.selectPacienteHistoria) this.selectPacienteHistoria.value = this.pacienteActivoId;
+      if (this.recetaSelectPaciente) this.recetaSelectPaciente.value = this.pacienteActivoId;
     }
   }
 
   seleccionarPacienteYVerHistoria(id) {
     this.pacienteActivoId = id;
-    this.selectPacienteHistoria.value = id;
-    this.recetaSelectPaciente.value = id;
+    if (this.selectPacienteHistoria) this.selectPacienteHistoria.value = id;
+    if (this.recetaSelectPaciente) this.recetaSelectPaciente.value = id;
     this.renderHistoria();
+    this.renderRecetasGuardadas();
     this.cambiarPestana('tab-historia');
     this.aplicarVisibilidadModulos();
   }
 
-  // ==================== HISTORIA CLÍNICA & MULTIMEDIA ====================
+  seleccionarPacienteYVerRecetas(id) {
+    this.pacienteActivoId = id;
+    if (this.recetaSelectPaciente) this.recetaSelectPaciente.value = id;
+    this.actualizarPreviewReceta();
+    this.renderRecetasGuardadas();
+    this.cambiarPestana('tab-recetas');
+  }
+
+  // ==================== HISTORIA CLÍNICA (EDICIÓN SOLO MISMO DÍA) ====================
   renderHistoria() {
     const paciente = this.db.pacientes.find(p => p.id === this.pacienteActivoId);
     if (!paciente) {
-      this.timelineConsultas.innerHTML = '<p style="color: #94a3b8;">Selecciona un paciente para ver su historia.</p>';
+      this.timelineConsultas.innerHTML = '<p style="color: var(--text-muted);">Selecciona un paciente para ver su historia.</p>';
       return;
     }
 
@@ -1178,16 +1342,19 @@ class ClinikApp {
       return orden === 'reciente_primero' ? b.fecha.localeCompare(a.fecha) : a.fecha.localeCompare(b.fecha);
     });
 
+    const hoyStr = new Date().toISOString().split('T')[0];
     this.timelineConsultas.innerHTML = '';
+
     if (consultas.length === 0) {
-      this.timelineConsultas.innerHTML = '<p style="color: #94a3b8; padding: 1.5rem 0;">No hay consultas registradas. Presiona "+ Registrar Consulta".</p>';
+      this.timelineConsultas.innerHTML = '<p style="color: var(--text-muted); padding: 1.5rem 0;">No hay consultas registradas. Presiona "+ Registrar Consulta".</p>';
       return;
     }
 
     consultas.forEach(c => {
       const card = document.createElement('div');
       card.className = 'timeline-card';
-      
+      const esMismoDia = c.fecha === hoyStr;
+
       let mediaHtml = '';
       if (c.adjuntos && c.adjuntos.length > 0) {
         mediaHtml += `<div class="timeline-media-gallery">`;
@@ -1208,28 +1375,12 @@ class ClinikApp {
               </a>
             `;
           } else if (adj.tipo === 'video') {
-            const isWeb = adj.url && adj.url.startsWith('http');
-            if (isWeb) {
-              mediaHtml += `
-                <a href="${adj.url}" target="_blank" rel="noopener noreferrer" class="media-video-badge">
-                  🎥 Video Web: ${adj.titulo} ${adj.descripcion ? `(${adj.descripcion})` : ''} ↗
-                </a>
-              `;
-            } else {
-              mediaHtml += `
-                <div class="media-thumbnail-card" style="max-width: 200px;">
-                  <video src="${adj.url}" controls style="width:100%; border-radius:4px;"></video>
-                  <span class="media-thumb-label">🎥 ${adj.titulo}</span>
-                  ${adj.descripcion ? `<span class="media-thumb-desc">${adj.descripcion}</span>` : ''}
-                </div>
-              `;
-            }
-          } else {
-            // Documento / Enlace en la nube
             mediaHtml += `
-              <a href="${adj.url}" target="_blank" rel="noopener noreferrer" class="media-doc-badge">
-                🌐 Documento / Nube: ${adj.titulo} ${adj.descripcion ? `(${adj.descripcion})` : ''} ↗
-              </a>
+              <div class="media-thumbnail-card" style="max-width: 200px;">
+                <video src="${adj.url}" controls style="width:100%; border-radius:4px;"></video>
+                <span class="media-thumb-label">🎥 ${adj.titulo}</span>
+                ${adj.descripcion ? `<span class="media-thumb-desc">${adj.descripcion}</span>` : ''}
+              </div>
             `;
           }
         });
@@ -1237,9 +1388,20 @@ class ClinikApp {
       }
 
       card.innerHTML = `
-        <div class="timeline-meta">
-          <span>📅 ${c.fecha}</span>
-          <span class="service-badge-timeline">🔬 ${c.servicio || 'Consulta Médica'}</span>
+        <div class="timeline-meta" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <span>📅 ${c.fecha}</span>
+            <span class="service-badge-timeline">🔬 ${c.servicio || 'Consulta Médica'}</span>
+          </div>
+          <div>
+            ${esMismoDia ? `
+              <button class="btn btn-subtle" style="font-size:0.75rem; padding:0.25rem 0.5rem;" onclick="app.abrirModalEditarConsulta('${c.id}')">
+                ✏️ Editar (Hoy)
+              </button>
+            ` : `
+              <span class="badge-lock">🔒 Cerrado</span>
+            `}
+          </div>
         </div>
         <div class="timeline-dx">🔬 Diagnóstico: ${c.diagnostico}</div>
         <div class="timeline-tx"><strong>Tratamiento y evolución:</strong> ${c.tratamiento}</div>
@@ -1269,7 +1431,7 @@ class ClinikApp {
       this.adjuntosConsultaEnCola.push({
         tipo: finalTipo,
         titulo: file.name,
-        descripcion: desc || (finalTipo === 'video' ? 'Video adjunto' : finalTipo === 'foto' ? 'Imagen adjunta' : 'Documento PDF'),
+        descripcion: desc || (finalTipo === 'video' ? 'Video adjunto' : finalTipo === 'foto' ? 'Foto/Rx adjunta' : 'Documento PDF'),
         url: event.target.result
       });
       if (this.inputAdjuntoDesc) this.inputAdjuntoDesc.value = '';
@@ -1279,47 +1441,12 @@ class ClinikApp {
     reader.readAsDataURL(file);
   }
 
-  agregarEnlaceWebCola() {
-    const url = this.inputEnlaceWebUrl ? this.inputEnlaceWebUrl.value.trim() : '';
-    if (!url) {
-      alert('Ingresa una URL válida (ej. https://drive.google.com/...)');
-      return;
-    }
-    const titulo = (this.inputEnlaceWebTitulo && this.inputEnlaceWebTitulo.value.trim()) || 'Enlace Web';
-    let tipo = this.selectEnlaceWebTipo ? this.selectEnlaceWebTipo.value : 'auto';
-
-    if (tipo === 'auto') {
-      const lower = url.toLowerCase();
-      if (lower.endsWith('.pdf') || lower.includes('/pdf')) {
-        tipo = 'pdf';
-      } else if (lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png') || lower.endsWith('.webp') || lower.endsWith('.svg')) {
-        tipo = 'foto';
-      } else if (lower.endsWith('.mp4') || lower.endsWith('.webm') || lower.includes('youtube.com') || lower.includes('youtu.be') || lower.includes('vimeo.com')) {
-        tipo = 'video';
-      } else {
-        tipo = 'documento';
-      }
-    }
-
-    this.adjuntosConsultaEnCola.push({
-      tipo,
-      titulo,
-      descripcion: `Enlace en la nube: ${url}`,
-      url
-    });
-
-    if (this.inputEnlaceWebUrl) this.inputEnlaceWebUrl.value = '';
-    if (this.inputEnlaceWebTitulo) this.inputEnlaceWebTitulo.value = '';
-    this.renderColaAdjuntos();
-    this.showToast(`✅ Enlace "${titulo}" agregado.`);
-  }
-
   renderColaAdjuntos() {
     this.colaAdjuntosPreview.innerHTML = '';
     this.adjuntosConsultaEnCola.forEach((item, idx) => {
       const badge = document.createElement('span');
       badge.className = 'preview-badge-item';
-      const icon = item.tipo === 'foto' ? '📷' : item.tipo === 'pdf' ? '📑' : item.tipo === 'video' ? '🎥' : '🌐';
+      const icon = item.tipo === 'foto' ? '📷' : item.tipo === 'pdf' ? '📑' : '🎥';
       badge.innerHTML = `
         <span>${icon} ${item.tipo.toUpperCase()}: ${item.titulo} ${item.descripcion ? `("${item.descripcion}")` : ''}</span>
         <button type="button" class="btn-remove-attach" onclick="app.eliminarAdjuntoCola(${idx})">&times;</button>
@@ -1333,19 +1460,41 @@ class ClinikApp {
     this.renderColaAdjuntos();
   }
 
-  abrirModalConsulta() {
+  abrirModalConsulta(consultaId = null) {
     if (!this.pacienteActivoId) {
       alert('Seleccione un paciente primero.');
       return;
     }
     this.formConsulta.reset();
-    if (this.inputEnlaceWebUrl) this.inputEnlaceWebUrl.value = '';
-    if (this.inputEnlaceWebTitulo) this.inputEnlaceWebTitulo.value = '';
-    if (this.inputAdjuntoDesc) this.inputAdjuntoDesc.value = '';
     this.adjuntosConsultaEnCola = [];
+    if (this.inputAdjuntoDesc) this.inputAdjuntoDesc.value = '';
+
+    if (consultaId) {
+      // EDITAR CONSULTA EXISTENTE DEL MISMO DÍA
+      const paciente = this.db.pacientes.find(p => p.id === this.pacienteActivoId);
+      const c = paciente && paciente.consultas ? paciente.consultas.find(x => x.id === consultaId) : null;
+      if (c) {
+        this.modalConsultaTitulo.textContent = 'Editar Consulta Clínica (Mismo Día)';
+        this.consultaIdInput.value = c.id;
+        this.consultaFechaInput.value = c.fecha;
+        this.consultaServicioSelect.value = c.servicio;
+        this.consultaMotivoInput.value = c.motivo || '';
+        this.consultaDiagnosticoInput.value = c.diagnostico || '';
+        this.consultaTratamientoInput.value = c.tratamiento || '';
+        this.adjuntosConsultaEnCola = [...(c.adjuntos || [])];
+      }
+    } else {
+      this.modalConsultaTitulo.textContent = 'Registrar Consulta Clínica';
+      this.consultaIdInput.value = '';
+      this.consultaFechaInput.value = new Date().toISOString().split('T')[0];
+    }
+
     this.renderColaAdjuntos();
-    document.getElementById('consulta-fecha').value = new Date().toISOString().split('T')[0];
     this.modalConsulta.classList.remove('hidden');
+  }
+
+  abrirModalEditarConsulta(consultaId) {
+    this.abrirModalConsulta(consultaId);
   }
 
   cerrarModalConsulta() {
@@ -1357,58 +1506,52 @@ class ClinikApp {
     const paciente = this.db.pacientes.find(p => p.id === this.pacienteActivoId);
     if (!paciente) return;
 
-    const fecha = document.getElementById('consulta-fecha').value;
+    const id = this.consultaIdInput.value.trim();
+    const fecha = this.consultaFechaInput.value;
     const servicio = this.consultaServicioSelect.value;
-    const motivo = document.getElementById('consulta-motivo').value.trim();
-    const diagnostico = document.getElementById('consulta-diagnostico').value.trim();
-    const tratamiento = document.getElementById('consulta-tratamiento').value.trim();
-
-    // Si quedó un enlace escrito en el input sin pulsar el botón
-    const enlaceUrl = this.inputEnlaceWebUrl ? this.inputEnlaceWebUrl.value.trim() : '';
-    if (enlaceUrl) {
-      const titulo = (this.inputEnlaceWebTitulo && this.inputEnlaceWebTitulo.value.trim()) || 'Enlace Externo';
-      let tipo = this.selectEnlaceWebTipo ? this.selectEnlaceWebTipo.value : 'auto';
-      if (tipo === 'auto') {
-        const lower = enlaceUrl.toLowerCase();
-        if (lower.endsWith('.pdf') || lower.includes('/pdf')) tipo = 'pdf';
-        else if (lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png') || lower.endsWith('.webp') || lower.endsWith('.svg')) tipo = 'foto';
-        else if (lower.endsWith('.mp4') || lower.endsWith('.webm') || lower.includes('youtube.com') || lower.includes('youtu.be') || lower.includes('vimeo.com')) tipo = 'video';
-        else tipo = 'documento';
-      }
-      this.adjuntosConsultaEnCola.push({
-        tipo,
-        titulo,
-        descripcion: `Enlace en la nube: ${enlaceUrl}`,
-        url: enlaceUrl
-      });
-      this.inputEnlaceWebUrl.value = '';
-    }
-
+    const motivo = this.consultaMotivoInput.value.trim();
+    const diagnostico = this.consultaDiagnosticoInput.value.trim();
+    const tratamiento = this.consultaTratamientoInput.value.trim();
     const adjuntos = [...this.adjuntosConsultaEnCola];
 
     if (!paciente.consultas) paciente.consultas = [];
-    const nuevaConsulta = {
-      id: 'c-' + Date.now(),
-      fecha,
-      servicio,
-      motivo,
-      diagnostico,
-      tratamiento,
-      adjuntos
-    };
-    paciente.consultas.unshift(nuevaConsulta);
-    paciente.ultimaAtencion = fecha;
 
-    this.registrarAuditoria('Historia', nuevaConsulta.id, 'CREAR', `Consulta ${servicio} para ${paciente.nombre}: ${diagnostico}`);
+    if (id) {
+      // ACTUALIZAR CONSULTA EXISTENTE
+      const idx = paciente.consultas.findIndex(c => c.id === id);
+      if (idx !== -1) {
+        paciente.consultas[idx].servicio = servicio;
+        paciente.consultas[idx].motivo = motivo;
+        paciente.consultas[idx].diagnostico = diagnostico;
+        paciente.consultas[idx].tratamiento = tratamiento;
+        paciente.consultas[idx].adjuntos = adjuntos;
+        this.registrarAuditoria('Historia', id, 'ACTUALIZAR', `Consulta actualizada el mismo día para ${paciente.nombre}`);
+        this.showToast('✅ Consulta modificada exitosamente.');
+      }
+    } else {
+      // REGISTRAR NUEVA CONSULTA
+      const nuevaConsulta = {
+        id: 'c-' + Date.now(),
+        fecha,
+        servicio,
+        motivo,
+        diagnostico,
+        tratamiento,
+        adjuntos
+      };
+      paciente.consultas.unshift(nuevaConsulta);
+      paciente.ultimaAtencion = fecha;
+      this.registrarAuditoria('Historia', nuevaConsulta.id, 'CREAR', `Consulta ${servicio} para ${paciente.nombre}: ${diagnostico}`);
+      this.showToast('✅ Consulta guardada en historia clínica.');
+    }
 
     LocalDatabase.save(this.db);
     this.cerrarModalConsulta();
     this.renderHistoria();
     this.renderRespaldoMetricas();
-    this.showToast('✅ Consulta guardada en historia clínica.');
   }
 
-  // ODONTOGRAMA FDI RESPONSIVO
+  // ==================== ODONTOGRAMA (LETRAS DE ESTADO & NOTAS HASTA 25 CAR.) ====================
   renderOdontograma(paciente) {
     if (!paciente.odontograma) paciente.odontograma = {};
 
@@ -1424,40 +1567,84 @@ class ClinikApp {
 
   crearBotonDiente(num, paciente) {
     const btn = document.createElement('button');
-    const estado = paciente.odontograma[num] || 'sano';
+    const piezaData = paciente.odontograma[num] || { estado: 'sano', nota: '' };
+    const estado = piezaData.estado || 'sano';
+    const nota = piezaData.nota || '';
+
+    // Mapeo de siglas/letras
+    const letterMap = {
+      sano: { letter: 'S', badge: 'badge-s' },
+      caries: { letter: 'C', badge: 'badge-c' },
+      restaurado: { letter: 'R', badge: 'badge-r' },
+      endodoncia: { letter: 'E', badge: 'badge-e' },
+      ausente: { letter: 'X', badge: 'badge-x' },
+      corona: { letter: 'Cr', badge: 'badge-cr' }
+    };
+    const info = letterMap[estado] || letterMap.sano;
+
     btn.className = `tooth-btn tooth-${estado}`;
     btn.innerHTML = `
-      <span>${num}</span>
-      <span class="tooth-icon">🦷</span>
+      <span style="font-weight:700;">${num}</span>
+      <span class="tooth-letter-badge ${info.badge}">${info.letter}</span>
+      ${nota ? `<span class="tooth-note-preview" title="${nota}">${nota}</span>` : ''}
     `;
-    btn.title = `Pieza ${num}: Estado ${estado}. Haz clic para alternar.`;
+    btn.title = `Pieza ${num}: ${estado.toUpperCase()}${nota ? ` - "${nota}"` : ''}. Clic para editar estado y notas.`;
 
     btn.addEventListener('click', () => {
-      const estados = ['sano', 'caries', 'tratado', 'endo', 'ausente'];
-      const nextIdx = (estados.indexOf(estado) + 1) % estados.length;
-      paciente.odontograma[num] = estados[nextIdx];
-      
-      this.registrarAuditoria('Odontograma', `diente-${num}`, 'ACTUALIZAR', `Pieza ${num} a ${estados[nextIdx]} (${paciente.nombre})`);
-      LocalDatabase.save(this.db);
-      this.renderOdontograma(paciente);
-      this.showToast(`Pieza ${num}: ${estados[nextIdx].toUpperCase()}`);
+      this.abrirModalDiente(num, estado, nota);
     });
 
     return btn;
   }
 
-  // ==================== AGENDA & CITAS CON SERVICIOS ====================
+  abrirModalDiente(num, estado, nota) {
+    this.dienteNumeroInput.value = num;
+    this.modalDienteTitulo.textContent = `Pieza Dental #${num}`;
+    this.dienteNotaInput.value = nota || '';
+    if (this.dienteNotaCounter) {
+      this.dienteNotaCounter.textContent = `${(nota || '').length} / 25 car.`;
+    }
+
+    const radio = document.querySelector(`input[name="diente-estado-radio"][value="${estado}"]`);
+    if (radio) radio.checked = true;
+
+    this.modalDiente.classList.remove('hidden');
+  }
+
+  guardarPiezaDiente(e) {
+    e.preventDefault();
+    const paciente = this.db.pacientes.find(p => p.id === this.pacienteActivoId);
+    if (!paciente) return;
+
+    const num = this.dienteNumeroInput.value;
+    const estadoRadio = document.querySelector('input[name="diente-estado-radio"]:checked');
+    const estado = estadoRadio ? estadoRadio.value : 'sano';
+    const nota = this.dienteNotaInput.value.trim().substring(0, 25);
+
+    if (!paciente.odontograma) paciente.odontograma = {};
+    paciente.odontograma[num] = { estado, nota };
+
+    this.registrarAuditoria('Odontograma', `diente-${num}`, 'ACTUALIZAR', `Pieza ${num} a ${estado.toUpperCase()} (${nota ? `"${nota}"` : 'Sin nota'})`);
+    LocalDatabase.save(this.db);
+    this.modalDiente.classList.add('hidden');
+    this.renderOdontograma(paciente);
+    this.showToast(`🦷 Pieza ${num}: ${estado.toUpperCase()} guardada`);
+  }
+
+  // ==================== AGENDA & CITAS (ALERTAS 1-5 DÍAS, ASISTENCIA Y CONTEXTO) ====================
   renderAgenda() {
     const fechaFiltro = this.inputFechaAgenda.value;
     const citas = this.db.citas.filter(c => c.fecha === fechaFiltro);
     this.listaCitas.innerHTML = '';
 
     if (citas.length === 0) {
-      this.listaCitas.innerHTML = `<div style="text-align: center; color: #94a3b8; padding: 2.5rem; background: #ffffff; border-radius: 10px; border: 1px solid #e2e8f0;">No hay citas para el día ${fechaFiltro}.</div>`;
+      this.listaCitas.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 2.5rem; background: var(--bg-surface); border-radius: 10px; border: 1px solid var(--border-color);">No hay citas para el día ${fechaFiltro}.</div>`;
       return;
     }
 
     citas.sort((a, b) => a.hora.localeCompare(b.hora));
+    const hoyDate = new Date();
+    hoyDate.setHours(0, 0, 0, 0);
 
     citas.forEach(c => {
       const paciente = this.db.pacientes.find(p => p.id === c.pacienteId) || { nombre: 'Paciente no identificado', telefono: '', email: '' };
@@ -1466,23 +1653,87 @@ class ClinikApp {
 
       const serviciosBadges = (c.servicios || []).map(s => `<span class="service-pill-mini">🔬 ${s}</span>`).join(' ');
 
+      // Cálculo de alerta de días (1 a 5 días)
+      const citaDate = new Date(c.fecha + 'T00:00:00');
+      const diffTime = citaDate.getTime() - hoyDate.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      const diasAlerta = c.diasAlerta || 2;
+
+      let alertaBadgeHtml = '';
+      if (c.estado === 'Reservada') {
+        if (diffDays >= 0 && diffDays <= diasAlerta) {
+          alertaBadgeHtml = `<span class="badge-alerta-cita" style="background:#fef3c7; color:#b45309; padding:0.2rem 0.5rem; border-radius:12px; font-size:0.75rem; font-weight:600;">🔔 Confirmar pronto (Faltan ${diffDays} días)</span>`;
+        } else {
+          alertaBadgeHtml = `<span style="color:var(--text-muted); font-size:0.75rem;">Alerta: ${diasAlerta} días antes</span>`;
+        }
+      }
+
+      // Badge de estado
+      let estadoBadgeHtml = '';
+      if (c.estado === 'Confirmada') {
+        estadoBadgeHtml = `<span class="badge-status badge-confirmada">Confirmada</span>`;
+      } else if (c.estado === 'Asistió') {
+        estadoBadgeHtml = `<span class="badge-status badge-asistio">✅ Asistió</span>`;
+      } else if (c.estado === 'No Asistió') {
+        estadoBadgeHtml = `<span class="badge-status badge-no-asistio">❌ No Asistió</span>`;
+      } else {
+        estadoBadgeHtml = `<span class="badge-status badge-reservada">Reservada</span>`;
+      }
+
+      // Botones de acción según el estado
+      let accionesEstadoHtml = '';
+      if (c.estado === 'Reservada') {
+        accionesEstadoHtml = `
+          <button class="btn btn-primary" style="font-size:0.8rem; padding:0.35rem 0.6rem;" onclick="app.confirmarCita('${c.id}')">
+            ✔️ Confirmar
+          </button>
+        `;
+      } else if (c.estado === 'Confirmada') {
+        accionesEstadoHtml = `
+          <button class="btn btn-primary" style="font-size:0.8rem; padding:0.35rem 0.6rem; background:#10b981;" onclick="app.marcarAsistenciaCita('${c.id}')">
+            ✅ Asistió
+          </button>
+          <button class="btn btn-subtle" style="font-size:0.8rem; padding:0.35rem 0.6rem; color:#ef4444;" onclick="app.abrirModalInasistencia('${c.id}')">
+            ❌ No Asistió
+          </button>
+        `;
+      } else if (c.estado === 'Asistió') {
+        accionesEstadoHtml = `
+          <button class="btn btn-subtle" style="font-size:0.8rem; padding:0.35rem 0.6rem;" onclick="app.seleccionarPacienteYVerHistoria('${c.pacienteId}')">
+            📂 Ver Historia
+          </button>
+        `;
+      }
+
       item.innerHTML = `
         <div class="appointment-time">⏰ ${c.hora}</div>
         <div class="appointment-patient">
-          <div class="appointment-name">${paciente.nombre}</div>
+          <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+            <div class="appointment-name">${paciente.nombre}</div>
+            ${estadoBadgeHtml}
+            ${alertaBadgeHtml}
+          </div>
           <div class="appointment-services-row">${serviciosBadges}</div>
-          <div class="appointment-reason">Nota: ${c.motivo || 'Atención regular'} • Tel: ${paciente.telefono}</div>
+          <div class="appointment-reason">
+            ${c.motivo ? `Nota: ${c.motivo} • ` : ''}Tel: ${paciente.telefono}
+          </div>
+          ${c.estado === 'No Asistió' && c.notaInasistencia ? `
+            <div style="font-size:0.8rem; color:#ef4444; margin-top:0.35rem; font-style:italic;">
+              Nota inasistencia: "${c.notaInasistencia}"
+            </div>
+          ` : ''}
         </div>
         <div class="appointment-actions">
-          <button class="btn btn-whatsapp" style="font-size:0.8rem; padding:0.4rem 0.65rem;" onclick="app.enviarRecordatorioCitaWhatsApp('${c.id}')">
-            💬 WhatsApp
+          ${accionesEstadoHtml}
+          <button class="btn btn-whatsapp" style="font-size:0.8rem; padding:0.35rem 0.55rem;" onclick="app.enviarRecordatorioCitaWhatsApp('${c.id}')" title="Enviar recordatorio WhatsApp">
+            💬
           </button>
           ${paciente.email ? `
-            <button class="btn btn-subtle" style="font-size:0.8rem; padding:0.4rem 0.65rem;" onclick="app.enviarRecordatorioCitaEmail('${c.id}')">
-              ✉️ Email
+            <button class="btn btn-subtle" style="font-size:0.8rem; padding:0.35rem 0.55rem;" onclick="app.enviarRecordatorioCitaEmail('${c.id}')" title="Enviar recordatorio Email">
+              ✉️
             </button>
           ` : ''}
-          <button class="btn btn-subtle" style="font-size:0.8rem; padding:0.4rem 0.65rem;" onclick="app.eliminarCita('${c.id}')" title="Cancelar cita">
+          <button class="btn btn-subtle" style="font-size:0.8rem; padding:0.35rem 0.55rem;" onclick="app.eliminarCita('${c.id}')" title="Cancelar cita">
             ✕
           </button>
         </div>
@@ -1491,10 +1742,66 @@ class ClinikApp {
     });
   }
 
+  confirmarCita(id) {
+    const cita = this.db.citas.find(c => c.id === id);
+    if (!cita) return;
+    cita.estado = 'Confirmada';
+    LocalDatabase.save(this.db);
+    this.renderAgenda();
+    this.showToast('✅ Cita confirmada.');
+  }
+
+  marcarAsistenciaCita(id) {
+    const cita = this.db.citas.find(c => c.id === id);
+    if (!cita) return;
+    cita.estado = 'Asistió';
+    LocalDatabase.save(this.db);
+    this.renderAgenda();
+
+    // Activar automáticamente el paciente en atención y abrir su historia
+    this.fijarPacienteEnAtencion(cita.pacienteId);
+    this.seleccionarPacienteYVerHistoria(cita.pacienteId);
+    this.showToast('✅ Asistencia registrada. Paciente activo en atención.');
+  }
+
+  abrirModalInasistencia(id) {
+    const cita = this.db.citas.find(c => c.id === id);
+    if (!cita) return;
+    const paciente = this.db.pacientes.find(p => p.id === cita.pacienteId);
+
+    this.inasistenciaCitaId.value = id;
+    this.inasistenciaPacienteNombre.textContent = paciente ? paciente.nombre : 'Paciente';
+    this.inasistenciaNota.value = '';
+    this.modalInasistencia.classList.remove('hidden');
+  }
+
+  guardarInasistencia(e) {
+    e.preventDefault();
+    const id = this.inasistenciaCitaId.value;
+    const nota = this.inasistenciaNota.value.trim();
+
+    const cita = this.db.citas.find(c => c.id === id);
+    if (cita) {
+      cita.estado = 'No Asistió';
+      cita.notaInasistencia = nota;
+      LocalDatabase.save(this.db);
+      this.registrarAuditoria('Agenda', id, 'INASISTENCIA', `Inasistencia con nota: ${nota}`);
+      this.modalInasistencia.classList.add('hidden');
+      this.renderAgenda();
+      this.showToast('Nota de inasistencia registrada.');
+    }
+  }
+
   abrirModalCita() {
     this.poblarSelectsPacientes();
     this.formCita.reset();
     document.getElementById('cita-fecha').value = this.inputFechaAgenda.value || new Date().toISOString().split('T')[0];
+
+    // Si hay paciente en atención, auto-seleccionarlo
+    if (this.pacienteEnAtencion && this.citaPacienteSelect) {
+      this.citaPacienteSelect.value = this.pacienteEnAtencion;
+    }
+
     this.modalCita.classList.remove('hidden');
   }
 
@@ -1508,8 +1815,8 @@ class ClinikApp {
     const fecha = document.getElementById('cita-fecha').value;
     const hora = document.getElementById('cita-hora').value;
     const motivo = document.getElementById('cita-motivo').value.trim();
+    const diasAlerta = parseInt(this.citaDiasAlertaSelect ? this.citaDiasAlertaSelect.value : '2') || 2;
 
-    // Obtener servicios marcados
     const checkboxes = document.querySelectorAll('input[name="cita-servicio-item"]:checked');
     const servicios = Array.from(checkboxes).map(cb => cb.value);
 
@@ -1520,18 +1827,20 @@ class ClinikApp {
       hora,
       servicios: servicios.length > 0 ? servicios : ['Consulta Regular'],
       motivo,
-      estado: 'Pendiente'
+      estado: 'Reservada',
+      diasAlerta,
+      notaInasistencia: ''
     };
 
     this.db.citas.push(nueva);
     const p = this.db.pacientes.find(x => x.id === pacienteId);
-    this.registrarAuditoria('Agenda', nueva.id, 'CREAR', `Cita para ${p ? p.nombre : 'Paciente'} el ${fecha} (${servicios.join(', ')})`);
+    this.registrarAuditoria('Agenda', nueva.id, 'CREAR', `Cita reservada para ${p ? p.nombre : 'Paciente'} el ${fecha} (${servicios.join(', ')})`);
 
     LocalDatabase.save(this.db);
     this.cerrarModalCita();
     this.renderAgenda();
     this.renderRespaldoMetricas();
-    this.showToast('✅ Cita agendada correctamente.');
+    this.showToast('✅ Cita reservada correctamente.');
   }
 
   eliminarCita(id) {
@@ -1575,22 +1884,23 @@ class ClinikApp {
     window.location.href = `mailto:${paciente.email}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
   }
 
-  // ==================== RECETAS & EMAIL ====================
+  // ==================== RECETAS: PERSISTENCIA, MISMO DÍA Y GENERACIÓN DE PDF ====================
   renderRecetasDefault() {
     this.listaFarmacosInputs.innerHTML = '';
     this.agregarFilaFarmaco('Amoxicilina 870mg + Ác. Clavulánico 125mg', '1 comp cada 12h', '7 días');
-    this.agregarFilaFarmaco('Ibuprofeno 400mg', '1 tableta cada 8h en dolor', '3 días');
+    this.agregarFilaFarmaco('Ibuprofeno 400mg', '1 tableta cada 8h en caso de dolor', '3 días');
     this.actualizarPreviewReceta();
+    this.renderRecetasGuardadas();
   }
 
   agregarFilaFarmaco(nombre = '', dosis = '', tiempo = '') {
     const row = document.createElement('div');
     row.className = 'med-row';
     row.innerHTML = `
-      <input type="text" class="input-field med-nombre" placeholder="Fármaco (ej. Paracetamol 500mg)" value="${nombre}">
-      <input type="text" class="input-field med-dosis" placeholder="Dosis (ej. 1 c/8h)" value="${dosis}">
-      <input type="text" class="input-field med-tiempo" placeholder="Duración (ej. 5 días)" value="${tiempo}">
-      <button type="button" class="btn btn-subtle" style="padding: 0.5rem;" onclick="this.parentElement.remove(); app.actualizarPreviewReceta();">&times;</button>
+      <input type="text" class="input-field med-nombre" placeholder="Nombre del Fármaco (ej. Paracetamol 500mg)" value="${nombre}">
+      <input type="text" class="input-field med-dosis" placeholder="Posología y Dosis (ej. 1 comp cada 8h)" value="${dosis}">
+      <input type="text" class="input-field med-tiempo" placeholder="Duración del Tratamiento (ej. 5 días)" value="${tiempo}">
+      <button type="button" class="btn btn-subtle" style="padding: 0.5rem;" onclick="this.parentElement.remove(); app.actualizarPreviewReceta();">&times; Quitar</button>
     `;
 
     row.querySelectorAll('input').forEach(inp => {
@@ -1621,6 +1931,265 @@ class ClinikApp {
     });
 
     this.rxPreviewInstrucciones.textContent = this.recetaIndicaciones.value.trim() || 'Seguir la posología indicada. En caso de presentar efectos adversos, consultar de inmediato.';
+  }
+
+  guardarReceta() {
+    const pacienteId = this.recetaSelectPaciente.value;
+    if (!pacienteId) {
+      alert('Seleccione un paciente para emitir la receta.');
+      return;
+    }
+
+    const diagnostico = this.recetaDiagnostico.value.trim() || 'Evaluación clínica';
+    const indicaciones = this.recetaIndicaciones.value.trim();
+    const rows = this.listaFarmacosInputs.querySelectorAll('.med-row');
+    const medicamentos = [];
+
+    rows.forEach(r => {
+      const n = r.querySelector('.med-nombre').value.trim();
+      const d = r.querySelector('.med-dosis').value.trim();
+      const t = r.querySelector('.med-tiempo').value.trim();
+      if (n) medicamentos.push({ nombre: n, dosis: d, tiempo: t });
+    });
+
+    if (medicamentos.length === 0) {
+      alert('Agrega al menos un medicamento a la receta antes de guardarla.');
+      return;
+    }
+
+    const hoyStr = new Date().toISOString().split('T')[0];
+    const editId = this.recetaEditId ? this.recetaEditId.value.trim() : '';
+
+    if (!this.db.recetas) this.db.recetas = [];
+
+    if (editId) {
+      // EDITAR RECETA EXISTENTE DEL MISMO DÍA
+      const idx = this.db.recetas.findIndex(r => r.id === editId);
+      if (idx !== -1) {
+        this.db.recetas[idx].diagnostico = diagnostico;
+        this.db.recetas[idx].indicaciones = indicaciones;
+        this.db.recetas[idx].medicamentos = medicamentos;
+        this.showToast('✅ Receta actualizada exitosamente.');
+      }
+    } else {
+      // GUARDAR NUEVA RECETA
+      const nuevaReceta = {
+        id: 'rx-' + Date.now(),
+        pacienteId,
+        fecha: hoyStr,
+        diagnostico,
+        indicaciones,
+        medicamentos
+      };
+      this.db.recetas.unshift(nuevaReceta);
+      this.showToast('✅ Receta guardada en la base de datos.');
+    }
+
+    LocalDatabase.save(this.db);
+    this.renderRecetasGuardadas();
+  }
+
+  limpiarFormularioReceta() {
+    if (this.recetaEditId) this.recetaEditId.value = '';
+    this.recetaDiagnostico.value = '';
+    this.recetaIndicaciones.value = '';
+    this.listaFarmacosInputs.innerHTML = '';
+    this.agregarFilaFarmaco();
+    this.actualizarPreviewReceta();
+  }
+
+  renderRecetasGuardadas() {
+    if (!this.listaRecetasGuardadas) return;
+    const pacienteId = this.recetaSelectPaciente ? this.recetaSelectPaciente.value : this.pacienteActivoId;
+    const recetas = (this.db.recetas || []).filter(r => r.pacienteId === pacienteId);
+    const hoyStr = new Date().toISOString().split('T')[0];
+
+    this.listaRecetasGuardadas.innerHTML = '';
+
+    if (recetas.length === 0) {
+      this.listaRecetasGuardadas.innerHTML = `<div style="color:var(--text-muted); font-size:0.85rem; padding:0.5rem 0;">No hay recetas emitidas guardadas para este paciente.</div>`;
+      return;
+    }
+
+    recetas.forEach(r => {
+      const item = document.createElement('div');
+      item.className = 'saved-prescription-item';
+      const esMismoDia = r.fecha === hoyStr;
+
+      const medSummary = (r.medicamentos || []).map(m => `• ${m.nombre} (${m.dosis})`).join('<br>');
+
+      item.innerHTML = `
+        <div style="flex:1;">
+          <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.25rem;">
+            <strong>📅 ${r.fecha}</strong>
+            <span style="font-weight:600; color:var(--color-primary-dark);">Dx: ${r.diagnostico}</span>
+            ${esMismoDia ? '<span class="badge-status badge-confirmada" style="font-size:0.7rem;">Emitida Hoy</span>' : '<span class="badge-lock" style="font-size:0.7rem;">🔒 Cerrada</span>'}
+          </div>
+          <div style="font-size:0.85rem; color:var(--text-main); margin-bottom:0.25rem;">
+            ${medSummary}
+          </div>
+          ${r.indicaciones ? `<div style="font-size:0.75rem; color:var(--text-muted);"><em>Indicaciones: ${r.indicaciones}</em></div>` : ''}
+        </div>
+        <div style="display:flex; gap:0.4rem; align-items:center;">
+          ${esMismoDia ? `
+            <button class="btn btn-subtle" style="font-size:0.75rem; padding:0.3rem 0.5rem;" onclick="app.cargarRecetaParaEditar('${r.id}')">
+              ✏️ Editar
+            </button>
+          ` : ''}
+          <button class="btn btn-primary" style="font-size:0.75rem; padding:0.3rem 0.5rem;" onclick="app.generarPdfRecetaGuardada('${r.id}')">
+            📄 PDF
+          </button>
+        </div>
+      `;
+      this.listaRecetasGuardadas.appendChild(item);
+    });
+  }
+
+  cargarRecetaParaEditar(recetaId) {
+    const r = (this.db.recetas || []).find(x => x.id === recetaId);
+    if (!r) return;
+
+    if (this.recetaEditId) this.recetaEditId.value = r.id;
+    this.recetaDiagnostico.value = r.diagnostico || '';
+    this.recetaIndicaciones.value = r.indicaciones || '';
+    this.listaFarmacosInputs.innerHTML = '';
+
+    (r.medicamentos || []).forEach(m => {
+      this.agregarFilaFarmaco(m.nombre, m.dosis, m.tiempo);
+    });
+
+    this.actualizarPreviewReceta();
+    this.showToast('📝 Receta cargada en el formulario para edición.');
+  }
+
+  generarPdfRecetaGuardada(recetaId) {
+    const r = (this.db.recetas || []).find(x => x.id === recetaId);
+    if (!r) return;
+    this.generarPdfReceta(r);
+  }
+
+  // GENERACIÓN OFFLINE DE PDF CON JSPDF
+  generarPdfReceta(recetaData = null) {
+    const paciente = this.db.pacientes.find(p => p.id === (recetaData ? recetaData.pacienteId : this.recetaSelectPaciente.value));
+    if (!paciente) {
+      alert('Seleccione un paciente válido para emitir el PDF.');
+      return;
+    }
+
+    const cfg = this.db.config;
+    const fecha = recetaData ? recetaData.fecha : new Date().toLocaleDateString('es-ES');
+    const dx = recetaData ? recetaData.diagnostico : (this.recetaDiagnostico.value.trim() || 'Consulta clínica');
+    const indicaciones = recetaData ? recetaData.indicaciones : (this.recetaIndicaciones.value.trim() || 'Seguir la posología indicada.');
+
+    let meds = [];
+    if (recetaData && recetaData.medicamentos) {
+      meds = recetaData.medicamentos;
+    } else {
+      const rows = this.listaFarmacosInputs.querySelectorAll('.med-row');
+      rows.forEach(r => {
+        const n = r.querySelector('.med-nombre').value.trim();
+        const d = r.querySelector('.med-dosis').value.trim();
+        const t = r.querySelector('.med-tiempo').value.trim();
+        if (n) meds.push({ nombre: n, dosis: d, tiempo: t });
+      });
+    }
+
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+      // Fallback nativo de impresión si no cargó jsPDF
+      window.print();
+      return;
+    }
+
+    try {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      // Encabezado
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.setTextColor(15, 23, 42);
+      doc.text(cfg.clinicName || 'CLÍNICA MÉDICA', 105, 20, { align: 'center' });
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(11);
+      doc.setTextColor(71, 85, 105);
+      doc.text(`${cfg.doctorName} • ${cfg.doctorReg}`, 105, 27, { align: 'center' });
+      doc.setFontSize(9);
+      doc.text(`${cfg.address} • Tel: ${cfg.phone} ${cfg.email ? '• ' + cfg.email : ''}`, 105, 33, { align: 'center' });
+
+      // Línea divisoria
+      doc.setDrawColor(203, 213, 225);
+      doc.setLineWidth(0.5);
+      doc.line(20, 38, 190, 38);
+
+      // Datos del paciente
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(15, 23, 42);
+      doc.text('PACIENTE:', 20, 47);
+      doc.setFont('helvetica', 'normal');
+      doc.text(paciente.nombre, 43, 47);
+
+      doc.setFont('helvetica', 'bold');
+      doc.text('FECHA:', 140, 47);
+      doc.setFont('helvetica', 'normal');
+      doc.text(fecha, 157, 47);
+
+      doc.setFont('helvetica', 'bold');
+      doc.text('DIAGNÓSTICO:', 20, 54);
+      doc.setFont('helvetica', 'normal');
+      doc.text(dx, 50, 54);
+
+      // Rp. Título
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.setTextColor(14, 116, 144);
+      doc.text('Rp. (Prescripción Médica):', 20, 66);
+
+      // Lista de medicamentos
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(15, 23, 42);
+      let curY = 74;
+
+      meds.forEach((m, idx) => {
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${idx + 1}. ${m.nombre}`, 22, curY);
+        curY += 5;
+        doc.setFont('helvetica', 'normal');
+        doc.text(`    Posología: ${m.dosis} ${m.tiempo ? `(Durante ${m.tiempo})` : ''}`, 22, curY);
+        curY += 7;
+      });
+
+      // Indicaciones generales
+      curY += 4;
+      doc.setFont('helvetica', 'bold');
+      doc.text('INDICACIONES Y CUIDADOS GENERALES:', 20, curY);
+      curY += 6;
+      doc.setFont('helvetica', 'normal');
+      const splitIndicaciones = doc.splitTextToSize(indicaciones, 170);
+      doc.text(splitIndicaciones, 20, curY);
+
+      // Pie de firma y sello
+      doc.setLineWidth(0.4);
+      doc.line(70, 240, 140, 240);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(100, 116, 139);
+      doc.text('Firma y Sello del Profesional', 105, 246, { align: 'center' });
+
+      // Guardar archivo PDF directamente
+      const filename = `Receta-${paciente.nombre.replace(/\s+/g, '_')}-${fecha.replace(/\//g, '-')}.pdf`;
+      doc.save(filename);
+      this.showToast(`✅ PDF generado: ${filename}`);
+    } catch (e) {
+      console.error('Error generando PDF:', e);
+      window.print();
+    }
   }
 
   enviarRecetaWhatsApp() {
@@ -1878,6 +2447,7 @@ class ClinikApp {
       const snapshot = {
         pacientes: this.db.pacientes,
         citas: this.db.citas,
+        recetas: this.db.recetas || [],
         config: this.db.config
       };
 

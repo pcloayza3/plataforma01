@@ -212,8 +212,11 @@ def main():
             print("  ", line)
             
     final_size_mb = os.path.getsize(FINAL_APK) / (1024 * 1024)
+    v26_apk = os.path.join(DOWNLOADS_DIR, "ClinikLocal-Android-v2.6.apk")
+    shutil.copy2(FINAL_APK, v26_apk)
     print(f"\n★ APK OFICIAL GENERADO EXITOSAMENTE:")
     print(f"  Ruta: {FINAL_APK}")
+    print(f"  Ruta v2.6: {v26_apk}")
     print(f"  Tamaño final: {final_size_mb:.2f} MB")
     print("=== Fin de la compilación ===")
 

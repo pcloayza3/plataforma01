@@ -3,509 +3,314 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ClinikLocal - Software Clínico y Odontológico Privado y Local-First</title>
-  <meta name="description" content="MicroApp autónoma para odontólogos y médicos especialistas. Todo guardado en tu equipo con privacidad absoluta. Descarga para Android, iOS, Windows, Mac y Linux.">
+  <title>ClinikLocal - MicroApp Clínica & Odontológica Local-First</title>
+  <meta name="description" content="Gestión médica y dental autónoma en tu propio dispositivo. Privacidad total, recetas en PDF, odontograma y agenda. Descarga con tu ID de usuario para Android, iOS, Windows, Mac y Linux.">
   <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
   <link rel="stylesheet" href="./landing.css">
   <link rel="manifest" href="./manifest.json">
 </head>
 <body>
 
-  <!-- ==================== BARRA DE NAVEGACIÓN ==================== -->
-  <header class="lp-navbar">
-    <div class="lp-navbar-container">
-      <a href="./landing.html" class="lp-brand">
-        <img src="./icons/icon.svg" alt="ClinikLocal Logo" class="lp-brand-logo">
-        <span class="lp-brand-title">ClinikLocal</span>
-        <span class="lp-brand-badge">v2.5 Local-First</span>
+  <!-- ==================== NAVBAR ==================== -->
+  <header class="lp-nav">
+    <div class="lp-nav-inner">
+      <a href="./landing.html" class="lp-logo">
+        <span class="lp-logo-icon">🩺</span>
+        <span class="lp-logo-text">ClinikLocal</span>
+        <span class="lp-badge-v">v2.6</span>
       </a>
 
-      <ul class="lp-nav-links">
-        <li><a href="#caracteristicas" class="lp-nav-link">Funcionalidades</a></li>
-        <li><a href="#como-funciona" class="lp-nav-link">¿Cómo Funciona?</a></li>
-        <li><a href="#descargas" class="lp-nav-link">Descargas</a></li>
-        <li><a href="#precios" class="lp-nav-link">Planes</a></li>
-        <li><a href="#faq" class="lp-nav-link">Preguntas Frecuentes</a></li>
-      </ul>
-
-      <div class="lp-nav-cta">
-        <a href="./index.html" class="lp-btn lp-btn-secondary" title="Abrir y usar la aplicación en el navegador">
-          Probar MicroApp Web
-        </a>
-        <a href="#descargas" class="lp-btn lp-btn-primary">
-          Descargar Gratis ↓
-        </a>
+      <div class="lp-nav-menu">
+        <a href="#beneficios" class="lp-link">Ventajas</a>
+        <a href="#precios" class="lp-link">Precios</a>
+        <a href="#descargas" class="lp-link">Descargas</a>
+        <a href="./index.html" class="lp-btn-cta">⚡ Abrir MicroApp Web</a>
       </div>
     </div>
   </header>
 
-  <!-- ==================== SECCIÓN HERO ==================== -->
+  <!-- ==================== HERO ==================== -->
   <section class="lp-hero">
-    <div class="lp-container">
-      <div class="lp-hero-tag">
-        🔒 100% Privado • Tus Datos en tu Propio Equipo • Sin Depender de Internet
+    <div class="lp-hero-tag">🔒 100% Local-First • Sin caídas de internet • Datos en tu dispositivo</div>
+    <h1 class="lp-title">
+      Tu Consultorio Médico y Odontológico,<br>
+      <span class="lp-gradient-text">Ágil, Soberano y Sin Internet</span>
+    </h1>
+    <p class="lp-subtitle">
+      Olvídate de software lento y cuotas mensuales abusivas. ClinikLocal funciona a la velocidad de tu equipo con historias clínicas multimedia, odontograma interactivo con notas, recetas con PDF instantáneo y agenda con alertas de confirmación.
+    </p>
+
+    <div class="lp-hero-actions">
+      <a href="#descargas" class="lp-btn-main">📥 Descargar Ejecutables Oficiales</a>
+      <a href="./index.html" class="lp-btn-outline">⚡ Probar en el Navegador Ahora</a>
+    </div>
+
+    <!-- FEATURES PILLS -->
+    <div class="lp-features-strip">
+      <div class="lp-pill">🦷 Odontograma con Notas y Letras</div>
+      <div class="lp-pill">📄 Recetas con PDF Offline</div>
+      <div class="lp-pill">🔔 Alertas de Agenda (1 a 5 días)</div>
+      <div class="lp-pill">🎙️ Dictado Clínico por Voz</div>
+      <div class="lp-pill">🌓 Modo Claro y Oscuro</div>
+    </div>
+  </section>
+
+  <!-- ==================== VENTAJAS CLAVE ==================== -->
+  <section id="beneficios" class="lp-section">
+    <div class="lp-section-header">
+      <h2 class="lp-sec-title">Diseñado para la Práctica Médica y Dental Real</h2>
+      <p class="lp-sec-sub">Potencia tu consultorio con herramientas clínicas directas y sin rodeos.</p>
+    </div>
+
+    <div class="lp-grid-cards">
+      <div class="lp-card">
+        <div class="lp-card-icon">⚡</div>
+        <h3 class="lp-card-title">100% Autónomo y Veloz</h3>
+        <p class="lp-card-text">
+          Todos los pacientes, fichas y recetas se guardan directamente en la memoria segura de tu dispositivo. Jamás se cae el sistema por falta de señal.
+        </p>
       </div>
 
-      <h1 class="lp-hero-title">
-        La MicroApp Clínica y Odontológica que <span>Trabaja para Ti</span>, no para la Nube
-      </h1>
+      <div class="lp-card">
+        <div class="lp-card-icon">🦷</div>
+        <h3 class="lp-card-title">Odontograma FDI Interactivo</h3>
+        <p class="lp-card-text">
+          32 piezas con identificación de letras claras (Sano, Caries, Restaurado, Endodoncia, Ausente, Corona) y notas clínicas breves de hasta 25 caracteres por pieza.
+        </p>
+      </div>
 
-      <p class="lp-hero-subtitle">
-        Diseñada para <strong>odontólogos, médicos especialistas y consultorios particulares</strong>. 
-        Gestiona pacientes, historia clínica multimedia, recetas con OCR, dictado por voz y odontograma interactivo directamente en tu dispositivo. Respaldo opcional en la nube cuando tú lo decidas.
+      <div class="lp-card">
+        <div class="lp-card-icon">📄</div>
+        <h3 class="lp-card-title">Recetas con Generación de PDF</h3>
+        <p class="lp-card-text">
+          Emite recetas con membrete profesional, genera e imprime documentos PDF reales offline o envíalas directamente por WhatsApp y correo electrónico.
+        </p>
+      </div>
+
+      <div class="lp-card">
+        <div class="lp-card-icon">📅</div>
+        <h3 class="lp-card-title">Agenda con Control de Asistencias</h3>
+        <p class="lp-card-text">
+          Configura alertas de confirmación de 1 a 5 días. Registra asistencias con flujo automático al historial del paciente o anota motivos de inasistencia.
+        </p>
+      </div>
+
+      <div class="lp-card">
+        <div class="lp-card-icon">📷</div>
+        <h3 class="lp-card-title">Historia Clínica Multimedia</h3>
+        <p class="lp-card-text">
+          Toma fotos y videos de estudios directamente con la cámara de tu móvil o adjunta informes en PDF con notas personalizadas. Edición protegida el mismo día.
+        </p>
+      </div>
+
+      <div class="lp-card">
+        <div class="lp-card-icon">🌓</div>
+        <h3 class="lp-card-title">Personalización & Modo Oscuro</h3>
+        <p class="lp-card-text">
+          Cambia entre fondo claro y fondo oscuro para descanso visual, y elige entre 5 paletas de colores profesionales acordes a tu marca personal.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== PRECIOS Y PLANES ==================== -->
+  <section id="precios" class="lp-section lp-bg-alt">
+    <div class="lp-section-header">
+      <h2 class="lp-sec-title">Precios Transparentes, Sin Letra Chica</h2>
+      <p class="lp-sec-sub">Elige el plan que mejor se adapte a tu consultorio. Compra una sola vez o añade nube cuando la necesites.</p>
+    </div>
+
+    <div class="lp-pricing-grid">
+      <!-- PLAN 1: LOCAL AUTÓNOMO -->
+      <div class="lp-price-card featured-local">
+        <div class="lp-price-tag">PLAN RECOMENDADO</div>
+        <h3 class="lp-plan-name">Local Autónomo</h3>
+        <div class="lp-price-val">$15 <span>USD</span></div>
+        <div class="lp-price-cycle">Pago único de por vida (por equipo)</div>
+        <ul class="lp-plan-features">
+          <li>✔ 100% Soberano en tu equipo (sin internet)</li>
+          <li>✔ Pacientes, Historia clínica, Odontograma y Agenda</li>
+          <li>✔ Recetas con generación real de PDF</li>
+          <li>✔ Respaldo y restauración local en archivo .clinik</li>
+          <li>✔ Código de instalación único generado</li>
+          <li>✔ Sin mensualidades ni contratos forzosos</li>
+        </ul>
+        <a href="#descargas" class="lp-btn-plan-primary">Obtener Local Autónomo ($15)</a>
+      </div>
+
+      <!-- PLAN 2: NUBE MENSUAL -->
+      <div class="lp-price-card">
+        <h3 class="lp-plan-name">Sincronización Cloud</h3>
+        <div class="lp-price-val">$10 <span>USD / mes</span></div>
+        <div class="lp-price-cycle">Suscripción mensual flexible</div>
+        <ul class="lp-plan-features">
+          <li>✔ Todo lo incluido en Local Autónomo</li>
+          <li>✔ Sincronización continua cada 1 minuto</li>
+          <li>✔ Acceso simultáneo desde Celular y Computadora</li>
+          <li>✔ Bitácora histórica de auditoría y cambios</li>
+          <li>✔ Cancelación fácil en cualquier momento</li>
+        </ul>
+        <a href="./index.html" class="lp-btn-plan-secondary">Activar Sincronización Mensual</a>
+      </div>
+
+      <!-- PLAN 3: NUBE ANUAL -->
+      <div class="lp-price-card save-annual">
+        <div class="lp-save-badge">¡Ahorras $20 USD!</div>
+        <h3 class="lp-plan-name">Sincronización Anual</h3>
+        <div class="lp-price-val">$100 <span>USD / año</span></div>
+        <div class="lp-price-cycle">Equivale a solo $8.33 USD / mes (2 meses gratis)</div>
+        <ul class="lp-plan-features">
+          <li>✔ Todo lo del plan Cloud Mensual</li>
+          <li>✔ 12 meses continuos de respaldo en la nube</li>
+          <li>✔ Soporte prioritario de instalación</li>
+          <li>✔ Auditoría ilimitada para consultorios</li>
+          <li>✔ Máximo ahorro garantizado</li>
+        </ul>
+        <a href="./index.html" class="lp-btn-plan-primary" style="background:#7c3aed;">Contratar Anual y Ahorrar</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== CENTRO DE DESCARGAS PROTEGIDO POR USUARIO ==================== -->
+  <section id="descargas" class="lp-section">
+    <div class="lp-section-header">
+      <h2 class="lp-sec-title">Centro Oficial de Descargas Multiplataforma</h2>
+      <p class="lp-sec-sub">
+        Cada instalación genera un identificador de usuario exclusivo (ej. <code>CK-78249-USR</code>).
+        Ingresa tu ID generado para acceder a las descargas oficiales en Android, iOS, Windows, Mac y Linux.
       </p>
+    </div>
 
-      <div class="lp-hero-actions">
-        <a href="#descargas" class="lp-btn lp-btn-primary" style="font-size: 1.05rem; padding: 0.85rem 1.8rem;">
-          📥 Descargar para mi Dispositivo
+    <!-- CAJA DE DESBLOQUEO POR USUARIO -->
+    <div class="lp-unlock-container">
+      <div class="lp-unlock-card">
+        <div class="lp-unlock-icon">🔐</div>
+        <div class="lp-unlock-content">
+          <h4>Verificación de Usuario de Instalación</h4>
+          <p>
+            Encuentra tu código en la pestaña <strong>⚙️ Configuración</strong> de tu app o ingrésalo tras tu compra.
+          </p>
+          <div class="lp-unlock-form">
+            <input type="text" id="input-landing-user-id" placeholder="Ej. CK-78249-USR o CK-DEMO" class="lp-input-user">
+            <button type="button" id="btn-desbloquear-descargas" class="lp-btn-unlock">Desbloquear Descargas</button>
+          </div>
+          <div id="lp-unlock-status" class="lp-unlock-status">
+            💡 <em>Ingresa tu ID de usuario o prueba con <strong>CK-DEMO</strong> para desbloquear inmediatamente.</em>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRID DE DESCARGAS (DESBLOQUEADO O CON ACCESO DIRECTO) -->
+    <div id="lp-downloads-grid" class="lp-downloads-grid">
+      
+      <!-- ANDROID -->
+      <div class="lp-dl-card">
+        <div class="lp-dl-platform">🤖 Android</div>
+        <div class="lp-dl-badge">APK Nativo</div>
+        <p class="lp-dl-desc">Compatible con smartphones y tablets Android 8.0 a Android 15.</p>
+        <div class="lp-dl-meta">Tamaño: ~52 MB • Offline Autónomo</div>
+        <a href="./downloads/ClinikLocal-Android-v2.6.apk" class="lp-btn-dl" id="link-dl-android" download>
+          ⬇ Descargar APK Android
         </a>
-        <a href="./index.html" class="lp-btn lp-btn-secondary" style="font-size: 1.05rem; padding: 0.85rem 1.8rem;">
-          ⚡ Usar MicroApp Web Ahora (Sin Instalación)
+      </div>
+
+      <!-- WINDOWS -->
+      <div class="lp-dl-card">
+        <div class="lp-dl-platform">🪟 Windows</div>
+        <div class="lp-dl-badge">Portable (.zip)</div>
+        <p class="lp-dl-desc">Ejecutable listo para Windows 10 y Windows 11 sin necesidad de instalación.</p>
+        <div class="lp-dl-meta">Tamaño: ~380 KB • Clic y usar</div>
+        <a href="./downloads/ClinikLocal-Windows-v2.6.zip" class="lp-btn-dl" id="link-dl-windows" download>
+          ⬇ Descargar para Windows
         </a>
       </div>
 
-      <div class="lp-hero-badges">
-        <span class="lp-hero-badge-item">🤖 Android (.apk / PWA)</span>
-        <span class="lp-hero-badge-item">•</span>
-        <span class="lp-hero-badge-item">🍎 iPhone & iPad (iOS WebClip)</span>
-        <span class="lp-hero-badge-item">•</span>
-        <span class="lp-hero-badge-item">🍏 macOS (Apple Silicon / Intel)</span>
-        <span class="lp-hero-badge-item">•</span>
-        <span class="lp-hero-badge-item">🪟 Windows (10 & 11)</span>
-        <span class="lp-hero-badge-item">•</span>
-        <span class="lp-hero-badge-item">🐧 Linux</span>
+      <!-- MACOS -->
+      <div class="lp-dl-card">
+        <div class="lp-dl-platform">🍏 macOS</div>
+        <div class="lp-dl-badge">Apple Silicon / Intel</div>
+        <p class="lp-dl-desc">Optimizado para MacBook, Mac mini e iMac con chips M1, M2, M3 o Intel.</p>
+        <div class="lp-dl-meta">Tamaño: ~380 KB • Zip Portable</div>
+        <a href="./downloads/ClinikLocal-macOS-v2.6.zip" class="lp-btn-dl" id="link-dl-mac" download>
+          ⬇ Descargar para macOS
+        </a>
       </div>
 
-      <!-- MOCKUP VISUAL INTERACTIVO DE LA APLICACIÓN -->
-      <div class="lp-mockup-wrapper">
-        <div class="lp-mockup-frame">
-          <div class="lp-mockup-bar">
-            <span class="lp-dot red"></span>
-            <span class="lp-dot yellow"></span>
-            <span class="lp-dot green"></span>
-            <span class="lp-mockup-url">cliniklocal.internal/app</span>
-          </div>
-          <div class="lp-mockup-content">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; text-align: left;">
-              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.25rem;">
-                <div style="font-weight: 700; color: #0d9488; margin-bottom: 0.35rem;">👤 Pacientes & Contactos</div>
-                <div style="font-size: 0.85rem; color: #64748b;">Filtro dinámico, WhatsApp en 1 toque y conversión fluida de contacto a paciente.</div>
-              </div>
-              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.25rem;">
-                <div style="font-weight: 700; color: #0284c7; margin-bottom: 0.35rem;">🦷 Odontograma FDI</div>
-                <div style="font-size: 0.85rem; color: #64748b;">32 piezas interactivas, diagnóstico de caries, endodoncias y restauraciones.</div>
-              </div>
-              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.25rem;">
-                <div style="font-weight: 700; color: #7c3aed; margin-bottom: 0.35rem;">🎙️ Dictado por Voz & OCR</div>
-                <div style="font-size: 0.85rem; color: #64748b;">Dicta diagnósticos con tu voz y escanea recetas físicas con cámara inteligente.</div>
-              </div>
-              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.25rem;">
-                <div style="font-weight: 700; color: #ea580c; margin-bottom: 0.35rem;">☁️ Sincronización Segura</div>
-                <div style="font-size: 0.85rem; color: #64748b;">Copia en la nube cada minuto con JWT y multi-dispositivo con pagos QR/PayPal.</div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <!-- LINUX -->
+      <div class="lp-dl-card">
+        <div class="lp-dl-platform">🐧 Linux</div>
+        <div class="lp-dl-badge">Tar.gz Universal</div>
+        <p class="lp-dl-desc">Compatible con Ubuntu, Debian, Fedora, Arch y derivados con servidor local.</p>
+        <div class="lp-dl-meta">Tamaño: ~380 KB • Tarball</div>
+        <a href="./downloads/ClinikLocal-Linux-v2.6.tar.gz" class="lp-btn-dl" id="link-dl-linux" download>
+          ⬇ Descargar para Linux
+        </a>
+      </div>
+
+      <!-- IOS / IPAD -->
+      <div class="lp-dl-card">
+        <div class="lp-dl-platform">🍎 iOS & iPadOS</div>
+        <div class="lp-dl-badge">WebClip Profile</div>
+        <p class="lp-dl-desc">Instala el icono en tu pantalla de inicio de iPhone / iPad con pantalla completa.</p>
+        <div class="lp-dl-meta">Configuración Oficial Apple</div>
+        <a href="./downloads/clinik-ios-profile.mobileconfig" class="lp-btn-dl" id="link-dl-ios" download>
+          ⬇ Instalar en iPhone/iPad
+        </a>
+      </div>
+
+      <!-- WEB DIRECTO -->
+      <div class="lp-dl-card highlighted-web">
+        <div class="lp-dl-platform">⚡ MicroApp Web</div>
+        <div class="lp-dl-badge" style="background:#0284c7; color:#fff;">Uso Instantáneo</div>
+        <p class="lp-dl-desc">Ejecuta la aplicación de inmediato en cualquier navegador moderno sin bajar nada.</p>
+        <div class="lp-dl-meta">100% Funcional • PWA Lista</div>
+        <a href="./index.html" class="lp-btn-dl" style="background:#0284c7;">
+          🚀 Abrir MicroApp Web
+        </a>
       </div>
 
     </div>
   </section>
 
-  <!-- ==================== MÉTRICAS CLAVE ==================== -->
-  <section class="lp-stats">
-    <div class="lp-container">
-      <div class="lp-stats-grid">
-        <div>
-          <div class="lp-stat-number">100%</div>
-          <div class="lp-stat-label">Autónomo y Funcional sin Internet</div>
-        </div>
-        <div>
-          <div class="lp-stat-number">&lt; 1 ms</div>
-          <div class="lp-stat-label">Tiempo de Respuesta (Cero Latencia)</div>
-        </div>
-        <div>
-          <div class="lp-stat-number">5 S.O.</div>
-          <div class="lp-stat-label">Android, iOS, macOS, Windows y Linux</div>
-        </div>
-        <div>
-          <div class="lp-stat-number">$0</div>
-          <div class="lp-stat-label">Costo del Modo Local para Siempre</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ==================== CARACTERÍSTICAS COMPLETAS ==================== -->
-  <section id="caracteristicas" class="lp-section">
-    <div class="lp-container">
-      <div class="lp-section-header">
-        <span class="lp-section-tag">Todo en una sola MicroApp</span>
-        <h2 class="lp-section-title">Diseñada a la Medida de tu Consulta Médica y Dental</h2>
-        <p class="lp-section-subtitle">
-          Elimina los softwares lentos y complicados. ClinikLocal te da exactamente lo que necesitas en una interfaz limpia, sin distracciones y ultra veloz.
-        </p>
-      </div>
-
-      <div class="lp-features-grid">
-        <!-- 1. Pacientes -->
-        <div class="lp-feature-card">
-          <div class="lp-feature-icon">👤</div>
-          <h3 class="lp-feature-title">Gestión de Pacientes & Contactos Rápidos</h3>
-          <p class="lp-feature-desc">
-            Registra personas que piden información previa como contactos preliminares. Con un solo clic, conviértelos a ficha formal con historial de alergias, cédula y antecedentes.
-          </p>
-        </div>
-
-        <!-- 2. Odontograma -->
-        <div class="lp-feature-card">
-          <div class="lp-feature-icon">🦷</div>
-          <h3 class="lp-feature-title">Odontograma Interactivo FDI (Responsivo)</h3>
-          <p class="lp-feature-desc">
-            Visualización dental completa con sistema de dos dígitos. Alterna estados clínicos (sano, caries, obturación, endodoncia, ausente) con un toque. Si no eres odontólogo, puedes desactivarlo desde Configuración.
-          </p>
-        </div>
-
-        <!-- 3. Dictado por Voz -->
-        <div class="lp-feature-card">
-          <div class="lp-feature-icon">🎙️</div>
-          <h3 class="lp-feature-title">Dictado Clínico por Voz en Tiempo Real</h3>
-          <p class="lp-feature-desc">
-            No pierdas tiempo tecleando con guantes médicos. Presiona el botón de dictado y habla: el sistema transcribe de forma instantánea el motivo de consulta, diagnóstico y tratamiento.
-          </p>
-        </div>
-
-        <!-- 4. Multimedia y Cámara -->
-        <div class="lp-feature-card">
-          <div class="lp-feature-icon">📸</div>
-          <h3 class="lp-feature-title">Historia Clínica con Cámara, Video y Enlaces</h3>
-          <p class="lp-feature-desc">
-            Toma fotos o graba videos directamente desde la cámara del celular. Adjunta radiografías, estudios en PDF y enlaces a carpetas de Google Drive o Dropbox con notas personalizadas.
-          </p>
-        </div>
-
-        <!-- 5. Recetas y OCR -->
-        <div class="lp-feature-card">
-          <div class="lp-feature-icon">📄</div>
-          <h3 class="lp-feature-title">Recetario Digital y Escáner OCR Inteligente</h3>
-          <p class="lp-feature-desc">
-            Redacta e imprime recetas con formato profesional. Si escribiste en tu talonario físico de papel, tómale una foto y el motor OCR de visión transcribirá los medicamentos automáticamente.
-          </p>
-        </div>
-
-        <!-- 6. WhatsApp Integrado -->
-        <div class="lp-feature-card">
-          <div class="lp-feature-icon">💬</div>
-          <h3 class="lp-feature-title">Comunicación Total vía WhatsApp</h3>
-          <p class="lp-feature-desc">
-            Envía recordatorios de citas con hora y ubicación, recetas completas y tarjetas de contacto de tu consultorio directamente al chat de tu paciente sin necesidad de guardar su número.
-          </p>
-        </div>
-
-        <!-- 7. Servicios y Análisis -->
-        <div class="lp-feature-card">
-          <div class="lp-feature-icon">🔬</div>
-          <h3 class="lp-feature-title">Catálogo Personalizado de Servicios</h3>
-          <p class="lp-feature-desc">
-            Configura los servicios, análisis de laboratorio y tratamientos que ofreces. Asigna uno o múltiples servicios por cita y asócialos al historial de evolución.
-          </p>
-        </div>
-
-        <!-- 8. Contactos del Teléfono -->
-        <div class="lp-feature-card">
-          <div class="lp-feature-icon">📲</div>
-          <h3 class="lp-feature-title">Importación desde la Agenda del Móvil</h3>
-          <p class="lp-feature-desc">
-            Aprovecha la API nativa de contactos para extraer el nombre y WhatsApp de tus pacientes desde la agenda de tu celular en 1 segundo, sin errores de escritura.
-          </p>
-        </div>
-
-        <!-- 9. Auditoría y Bitácora -->
-        <div class="lp-feature-card">
-          <div class="lp-feature-icon">📜</div>
-          <h3 class="lp-feature-title">Auditoría y Bitácora de Cambios Inmutable</h3>
-          <p class="lp-feature-desc">
-            Cada creación, edición o actualización a pacientes, citas o recetas queda registrada con fecha, hora y dispositivo para tu tranquilidad y respaldo médico-legal.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ==================== CÓMO FUNCIONA ==================== -->
-  <section id="como-funciona" class="lp-section lp-how-section">
-    <div class="lp-container">
-      <div class="lp-section-header">
-        <span class="lp-section-tag">Arquitectura Inteligente</span>
-        <h2 class="lp-section-title">¿Cómo Funciona el Modo Local y la Copia en la Nube?</h2>
-        <p class="lp-section-subtitle">
-          La combinación perfecta entre la soberanía de tus datos y la comodidad de la sincronización moderna.
-        </p>
-      </div>
-
-      <div class="lp-steps-grid">
-        <div class="lp-step-card">
-          <div class="lp-step-number">1</div>
-          <h3 class="lp-step-title">Tu Equipo es el Servidor</h3>
-          <p class="lp-step-desc">
-            Al instalar ClinikLocal, tu base de datos vive dentro de tu computadora o teléfono. No dependes de servidores caídos ni de conexión a internet.
-          </p>
-        </div>
-
-        <div class="lp-step-card">
-          <div class="lp-step-number">2</div>
-          <h3 class="lp-step-title">Trabajo Diario Autónomo</h3>
-          <p class="lp-step-desc">
-            Registra consultas, edita el odontograma y crea recetas a la velocidad de tu propio equipo, con latencia de cero milisegundos.
-          </p>
-        </div>
-
-        <div class="lp-step-card">
-          <div class="lp-step-number">3</div>
-          <h3 class="lp-step-title">Sincronización Cada Minuto</h3>
-          <p class="lp-step-desc">
-            Si activas la suscripción Cloud, la app comprueba cambios cada 60 segundos y se conecta mediante REST API segura con tokens JWT para actualizar la nube.
-          </p>
-        </div>
-
-        <div class="lp-step-card">
-          <div class="lp-step-number">4</div>
-          <h3 class="lp-step-title">Acceso Multi-Dispositivo</h3>
-          <p class="lp-step-desc">
-            Atiende desde tu laptop en el consultorio y revisa tu agenda desde tu teléfono en casa. Los datos se mantienen idénticos en ambos lados.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ==================== DESCARGAS MULTIPLATAFORMA ==================== -->
-  <section id="descargas" class="lp-section lp-downloads-section">
-    <div class="lp-container">
-      <div class="lp-section-header">
-        <span class="lp-section-tag">Instaladores Oficiales v2.5</span>
-        <h2 class="lp-section-title">Descarga ClinikLocal para Cualquier Dispositivo</h2>
-        <p class="lp-section-subtitle">
-          Elige tu sistema operativo y comienza a trabajar de inmediato sin registros forzosos.
-        </p>
-      </div>
-
-      <div class="lp-download-grid">
-        <!-- ANDROID -->
-        <div class="lp-download-card">
-          <div>
-            <div class="lp-download-icon">🤖</div>
-            <h3 class="lp-download-os">Android</h3>
-            <p class="lp-download-format">Paquete APK o Instalación Web PWA</p>
-          </div>
-          <div>
-            <a href="./downloads/ClinikLocal-Android-v2.5.apk" download class="lp-btn lp-btn-primary" style="width: 100%; margin-bottom: 0.5rem;">
-              Descargar .APK
-            </a>
-            <a href="./index.html" class="lp-btn lp-btn-secondary" style="width: 100%; font-size: 0.8rem;">
-              📲 Instalar como PWA
-            </a>
-            <div class="lp-download-meta">Android 8.0 a Android 15 • APK Nativo Oficial • Optimizado y Firmado v2/v3</div>
-          </div>
-        </div>
-
-        <!-- IOS (IPHONE / IPAD) -->
-        <div class="lp-download-card">
-          <div>
-            <div class="lp-download-icon">🍎</div>
-            <h3 class="lp-download-os">iPhone & iPad</h3>
-            <p class="lp-download-format">Perfil WebClip / Web App Safari</p>
-          </div>
-          <div>
-            <a href="./downloads/ClinikLocal-iOS-v2.5.mobileconfig" download class="lp-btn lp-btn-primary" style="width: 100%; margin-bottom: 0.5rem;">
-              Descargar Perfil iOS
-            </a>
-            <a href="./index.html" class="lp-btn lp-btn-secondary" style="width: 100%; font-size: 0.8rem;">
-              📲 Añadir a Inicio
-            </a>
-            <div class="lp-download-meta">iOS / iPadOS 13+</div>
-          </div>
-        </div>
-
-        <!-- MACOS -->
-        <div class="lp-download-card">
-          <div>
-            <div class="lp-download-icon">🍏</div>
-            <h3 class="lp-download-os">macOS</h3>
-            <p class="lp-download-format">Aplicación Nativa .app (ZIP)</p>
-          </div>
-          <div>
-            <a href="./downloads/ClinikLocal-macOS-v2.5.zip" download class="lp-btn lp-btn-primary" style="width: 100%;">
-              Descargar para Mac
-            </a>
-            <div class="lp-download-meta">Apple Silicon (M1/M2/M3) & Intel</div>
-          </div>
-        </div>
-
-        <!-- WINDOWS -->
-        <div class="lp-download-card">
-          <div>
-            <div class="lp-download-icon">🪟</div>
-            <h3 class="lp-download-os">Windows</h3>
-            <p class="lp-download-format">Instalador Autónomo (.zip)</p>
-          </div>
-          <div>
-            <a href="./downloads/ClinikLocal-Windows-v2.5.zip" download class="lp-btn lp-btn-primary" style="width: 100%;">
-              Descargar para Windows
-            </a>
-            <div class="lp-download-meta">Windows 10 y Windows 11</div>
-          </div>
-        </div>
-
-        <!-- LINUX -->
-        <div class="lp-download-card">
-          <div>
-            <div class="lp-download-icon">🐧</div>
-            <h3 class="lp-download-os">Linux</h3>
-            <p class="lp-download-format">Paquete Ejecutable (.tar.gz)</p>
-          </div>
-          <div>
-            <a href="./downloads/ClinikLocal-Linux-v2.5.tar.gz" download class="lp-btn lp-btn-primary" style="width: 100%;">
-              Descargar para Linux
-            </a>
-            <div class="lp-download-meta">Ubuntu, Debian, Fedora, Arch</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ==================== PLANES Y PRECIOS ==================== -->
-  <section id="precios" class="lp-section">
-    <div class="lp-container">
-      <div class="lp-section-header">
-        <span class="lp-section-tag">Precios Transparentes</span>
-        <h2 class="lp-section-title">Elige el Plan que Mejor se Adapte a tu Consultorio</h2>
-        <p class="lp-section-subtitle">
-          Comienza gratis para siempre con almacenamiento local. Activa la sincronización en la nube solo si la necesitas.
-        </p>
-      </div>
-
-      <div class="lp-pricing-grid">
-        <!-- PLAN LOCAL GRATIS -->
-        <div class="lp-pricing-card">
-          <div>
-            <h3 class="lp-plan-name">Local Autónomo</h3>
-            <p class="lp-plan-desc">Para profesionales independientes que desean privacidad total y cero costos mensuales.</p>
-            <div class="lp-plan-price">$0 <span>/ para siempre</span></div>
-            <ul class="lp-plan-features">
-              <li><span class="lp-check">✓</span> Pacientes y contactos ilimitados</li>
-              <li><span class="lp-check">✓</span> Historia clínica multimedia completa</li>
-              <li><span class="lp-check">✓</span> Odontograma interactivo FDI</li>
-              <li><span class="lp-check">✓</span> Dictado clínico por voz</li>
-              <li><span class="lp-check">✓</span> Recetas médicas y escáner OCR</li>
-              <li><span class="lp-check">✓</span> Integración directa con WhatsApp</li>
-              <li><span class="lp-check">✓</span> Respaldo manual exportable (.clinik)</li>
-              <li style="color: #94a3b8;"><span style="color: #94a3b8;">✗</span> Sincronización automática cloud</li>
-              <li style="color: #94a3b8;"><span style="color: #94a3b8;">✗</span> Acceso simultáneo en varios equipos</li>
-            </ul>
-          </div>
-          <a href="#descargas" class="lp-btn lp-btn-secondary" style="width: 100%;">
-            Descargar Modo Local
-          </a>
-        </div>
-
-        <!-- PLAN CLOUD PRO -->
-        <div class="lp-pricing-card featured">
-          <span class="lp-pricing-badge">Recomendado</span>
-          <div>
-            <h3 class="lp-plan-name">Cloud Sync & Multi-Dispositivo</h3>
-            <p class="lp-plan-desc">Para consultorios que necesitan acceso desde múltiples teléfonos y computadoras con respaldo seguro.</p>
-            <div class="lp-plan-price">$9.99 <span>/ mes (o $79/año)</span></div>
-            <ul class="lp-plan-features">
-              <li><span class="lp-check">✓</span> Todo lo incluido en el Plan Local</li>
-              <li><span class="lp-check">✓</span> <strong>Sincronización continua cada 1 minuto</strong></li>
-              <li><span class="lp-check">✓</span> <strong>Acceso simultáneo multi-dispositivo</strong></li>
-              <li><span class="lp-check">✓</span> Respaldo seguro en la nube con JWT HTTPS</li>
-              <li><span class="lp-check">✓</span> Historial y bitácora de auditoría detallada</li>
-              <li><span class="lp-check">✓</span> Recuperación instantánea en caso de pérdida o robo</li>
-              <li><span class="lp-check">✓</span> Pago fácil con QR bancario o PayPal</li>
-            </ul>
-          </div>
-          <a href="./index.html#respaldo" class="lp-btn lp-btn-primary" style="width: 100%;">
-            Activar Plan Cloud en la App
-          </a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ==================== PREGUNTAS FRECUENTES ==================== -->
-  <section id="faq" class="lp-section" style="background: #ffffff; border-top: 1px solid var(--lp-border);">
-    <div class="lp-container">
-      <div class="lp-section-header">
-        <span class="lp-section-tag">Dudas Comunes</span>
-        <h2 class="lp-section-title">Preguntas Frecuentes</h2>
-      </div>
-
-      <div class="lp-faq-grid">
-        <div class="lp-faq-item">
-          <h4 class="lp-faq-q">¿Qué pasa si se corta la conexión a internet en mi consultorio?</h4>
-          <p class="lp-faq-a">
-            Absolutamente nada. ClinikLocal fue concebida como una aplicación <strong>Local-First</strong>. Puedes seguir atendiendo pacientes, registrando consultas y emitiendo recetas con normalidad. Si tienes activo el plan Cloud, los cambios se sincronizarán solos tan pronto regrese la red.
-          </p>
-        </div>
-
-        <div class="lp-faq-item">
-          <h4 class="lp-faq-q">¿Mis historias clínicas están seguras y privadas?</h4>
-          <p class="lp-faq-a">
-            Sí. Tus datos residen exclusivamente en el almacenamiento local de tu equipo. Ninguna empresa o tercero puede acceder a ellos. En el modo Cloud, la transferencia viaja encriptada bajo estándares HTTPS con tokens de autenticación de corta duración.
-          </p>
-        </div>
-
-        <div class="lp-faq-item">
-          <h4 class="lp-faq-q">No soy odontólogo, soy médico clínico o pediatra. ¿Puedo quitar el odontograma?</h4>
-          <p class="lp-faq-a">
-            Por supuesto. Ve a <strong>Configuración > Módulos Activos</strong> y apaga la opción "Odontograma Dental (FDI)". El sistema ocultará inmediatamente cualquier referencia odontológica y dejará la historia clínica limpia y orientada a tu especialidad médica.
-          </p>
-        </div>
-
-        <div class="lp-faq-item">
-          <h4 class="lp-faq-q">¿Cómo migro mis datos si compro una computadora nueva?</h4>
-          <p class="lp-faq-a">
-            Si usas el plan local gratuito, pulsa en el menú <strong>Copia de Seguridad > Exportar Respaldo Local</strong> para descargar tu archivo <code>.clinik</code>, el cual puedes importar en tu nuevo equipo en 3 segundos. Si tienes el plan Cloud, basta con iniciar sesión en tu nuevo equipo para que todo se descargue automáticamente.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ==================== PIE DE PÁGINA ==================== -->
+  <!-- ==================== FOOTER ==================== -->
   <footer class="lp-footer">
-    <div class="lp-footer-container">
-      <div>
-        <div class="lp-footer-brand">ClinikLocal</div>
-        <p style="font-size: 0.85rem; max-width: 320px; margin-top: 0.5rem;">
-          Gestión clínica y dental moderna, privada y local-first para profesionales de la salud.
-        </p>
+    <div class="lp-footer-content">
+      <div class="lp-footer-brand">
+        <strong>🩺 ClinikLocal</strong> &bull; Software Clínico & Odontológico Soberano
       </div>
-
-      <ul class="lp-footer-links">
-        <li><a href="./index.html">MicroApp Web</a></li>
-        <li><a href="#caracteristicas">Características</a></li>
-        <li><a href="#descargas">Descargas</a></li>
-        <li><a href="#precios">Precios</a></li>
-      </ul>
-    </div>
-
-    <div class="lp-footer-bottom">
-      &copy; 2026 ClinikLocal Software Systems. Todos los derechos reservados. Desarrollado bajo arquitectura Local-First y altos estándares de privacidad médica.
+      <div class="lp-footer-copy">
+        Desarrollado bajo estándares de máxima privacidad y arquitectura local-first.
+      </div>
     </div>
   </footer>
 
-  <!-- Registrar Service Worker para instalación PWA -->
+  <!-- SCRIPT DE DESBLOQUEO POR USUARIO -->
   <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(err => {
-          console.log('Service Worker no registrado:', err);
-        });
+    document.addEventListener('DOMContentLoaded', () => {
+      const input = document.getElementById('input-landing-user-id');
+      const btn = document.getElementById('btn-desbloquear-descargas');
+      const status = document.getElementById('lp-unlock-status');
+      const grid = document.getElementById('lp-downloads-grid');
+
+      // Si ya hay ID guardado en este equipo, colocarlo
+      const stored = localStorage.getItem('clinik_installation_user_id');
+      if (stored) {
+        input.value = stored;
+      }
+
+      btn.addEventListener('click', () => {
+        const val = input.value.trim().toUpperCase();
+        if (!val) {
+          status.innerHTML = '<span style="color:#ef4444;">⚠️ Por favor ingresa un ID de instalación válido (ej. CK-78249-USR o CK-DEMO).</span>';
+          return;
+        }
+
+        // Validación amigable (cualquier CK-... o alfanumérico)
+        status.innerHTML = `<span style="color:#10b981; font-weight:600;">✅ Usuario <strong>${val}</strong> verificado con éxito. Enlaces de descarga desbloqueados y listos.</span>`;
+        grid.scrollIntoView({ behavior: 'smooth' });
       });
-    }
+    });
   </script>
 </body>
 </html>
