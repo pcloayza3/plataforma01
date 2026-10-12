@@ -107,6 +107,7 @@ wait $SERVER_PID
                 full_path = os.path.join(root, file)
                 rel_path = os.path.relpath(full_path, DOWNLOADS_DIR)
                 zipf.write(full_path, rel_path)
+    shutil.rmtree(app_dir)
     print("  -> Creado:", zip_path)
 
 
@@ -229,48 +230,13 @@ Categories=Office;Medical;
 
 
 def generate_android_apk_bundle():
-    print("-> Generando paquete instalable para Android...")
-    # Creamos un paquete APK empaquetado (ZIP-based APK con AndroidManifest y assets web)
-    apk_path = os.path.join(DOWNLOADS_DIR, 'ClinikLocal-Android-v2.5.apk')
-    
-    # Crear estructura APK
-    with zipfile.ZipFile(apk_path, 'w', zipfile.ZIP_DEFLATED) as apk:
-        # AndroidManifest.xml representativo
-        manifest_xml = """<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.cliniklocal.app"
-    android:versionCode="25"
-    android:versionName="2.5.0">
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.READ_CONTACTS" />
-    <application
-        android:label="ClinikLocal"
-        android:icon="@mipmap/ic_launcher"
-        android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
-        <activity
-            android:name=".MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-    </application>
-</manifest>
-"""
-        apk.writestr('AndroidManifest.xml', manifest_xml)
-        for f in ['index.html', 'landing.html', 'styles.css', 'app.js', 'manifest.json', 'sw.js']:
-            src = os.path.join(BASE_DIR, f)
-            if os.path.exists(src):
-                with open(src, 'rb') as fp:
-                    apk.writestr(f'assets/www/{f}', fp.read())
-        icon_path = os.path.join(BASE_DIR, 'icons', 'icon.svg')
-        if os.path.exists(icon_path):
-            with open(icon_path, 'rb') as fp:
-                apk.writestr('res/drawable/icon.svg', fp.read())
-
-    print("  -> Creado:", apk_path)
+    print("-> Generando paquete oficial instalable para Android (APK nativo ~50 MB)...")
+    try:
+        import compile_android_apk
+        compile_android_apk.main()
+    except Exception as e:
+        print(f"  [!] Advertencia al compilar con Android SDK: {e}")
+        print("  Asegúrese de contar con Java y Android build-tools disponibles.")
 
 
 def generate_ios_profile():
