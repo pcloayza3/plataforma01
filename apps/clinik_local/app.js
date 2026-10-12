@@ -381,6 +381,9 @@ class ClinikApp {
     this.recetaIndicaciones = document.getElementById('receta-indicaciones');
     this.recetaEditId = document.getElementById('receta-edit-id');
     this.btnGuardarReceta = document.getElementById('btn-guardar-receta');
+    this.btnGuardarRecetaBottom = document.getElementById('btn-guardar-receta-bottom');
+    this.btnImprimirReceta = document.getElementById('btn-imprimir-receta');
+    this.btnImprimirRecetaBottom = document.getElementById('btn-imprimir-receta-bottom');
     this.btnLimpiarReceta = document.getElementById('btn-limpiar-receta');
     this.listaRecetasGuardadas = document.getElementById('lista-recetas-guardadas');
     this.listaFarmacosInputs = document.getElementById('lista-farmacos-inputs');
@@ -708,8 +711,14 @@ class ClinikApp {
     this.recetaIndicaciones.addEventListener('input', () => this.actualizarPreviewReceta());
     this.btnAgregarFarmaco.addEventListener('click', () => this.agregarFilaFarmaco());
     this.btnImprimirReceta.addEventListener('click', () => this.generarPdfReceta());
+    if (this.btnImprimirRecetaBottom) {
+      this.btnImprimirRecetaBottom.addEventListener('click', () => this.generarPdfReceta());
+    }
     if (this.btnGuardarReceta) {
       this.btnGuardarReceta.addEventListener('click', () => this.guardarReceta());
+    }
+    if (this.btnGuardarRecetaBottom) {
+      this.btnGuardarRecetaBottom.addEventListener('click', () => this.guardarReceta());
     }
     if (this.btnLimpiarReceta) {
       this.btnLimpiarReceta.addEventListener('click', () => this.limpiarFormularioReceta());
@@ -1474,6 +1483,11 @@ class ClinikApp {
       const paciente = this.db.pacientes.find(p => p.id === this.pacienteActivoId);
       const c = paciente && paciente.consultas ? paciente.consultas.find(x => x.id === consultaId) : null;
       if (c) {
+        const hoyStr = new Date().toISOString().split('T')[0];
+        if (c.fecha !== hoyStr) {
+          alert(`Por seguridad clínica, solo se pueden editar consultas registradas el día de hoy (${hoyStr}). Los registros de fechas anteriores quedan cerrados.`);
+          return;
+        }
         this.modalConsultaTitulo.textContent = 'Editar Consulta Clínica (Mismo Día)';
         this.consultaIdInput.value = c.id;
         this.consultaFechaInput.value = c.fecha;
@@ -1517,9 +1531,14 @@ class ClinikApp {
     if (!paciente.consultas) paciente.consultas = [];
 
     if (id) {
-      // ACTUALIZAR CONSULTA EXISTENTE
+      // ACTUALIZAR CONSULTA EXISTENTE (SOLO SI ES DEL MISMO DÍA)
       const idx = paciente.consultas.findIndex(c => c.id === id);
       if (idx !== -1) {
+        const hoyStr = new Date().toISOString().split('T')[0];
+        if (paciente.consultas[idx].fecha !== hoyStr) {
+          alert('No es posible modificar consultas de fechas pasadas. El historial está bloqueado.');
+          return;
+        }
         paciente.consultas[idx].servicio = servicio;
         paciente.consultas[idx].motivo = motivo;
         paciente.consultas[idx].diagnostico = diagnostico;
@@ -1897,10 +1916,19 @@ class ClinikApp {
     const row = document.createElement('div');
     row.className = 'med-row';
     row.innerHTML = `
-      <input type="text" class="input-field med-nombre" placeholder="Nombre del Fármaco (ej. Paracetamol 500mg)" value="${nombre}">
-      <input type="text" class="input-field med-dosis" placeholder="Posología y Dosis (ej. 1 comp cada 8h)" value="${dosis}">
-      <input type="text" class="input-field med-tiempo" placeholder="Duración del Tratamiento (ej. 5 días)" value="${tiempo}">
-      <button type="button" class="btn btn-subtle" style="padding: 0.5rem;" onclick="this.parentElement.remove(); app.actualizarPreviewReceta();">&times; Quitar</button>
+      <div class="med-field-group">
+        <label class="med-field-label">Fármaco / Medicamento:</label>
+        <input type="text" class="input-field med-nombre" placeholder="Nombre del Fármaco (ej. Paracetamol 500mg)" value="${nombre}">
+      </div>
+      <div class="med-field-group">
+        <label class="med-field-label">Posología y Dosis:</label>
+        <input type="text" class="input-field med-dosis" placeholder="Posología y Dosis (ej. 1 comp cada 8h)" value="${dosis}">
+      </div>
+      <div class="med-field-group">
+        <label class="med-field-label">Duración del Tratamiento:</label>
+        <input type="text" class="input-field med-tiempo" placeholder="Duración (ej. 5 días)" value="${tiempo}">
+      </div>
+      <button type="button" class="btn btn-subtle btn-remove-med" onclick="this.closest('.med-row').remove(); app.actualizarPreviewReceta();">🗑️ Quitar Medicamento</button>
     `;
 
     row.querySelectorAll('input').forEach(inp => {
@@ -2078,7 +2106,7 @@ class ClinikApp {
 
     const cfg = this.db.config;
     const fecha = recetaData ? recetaData.fecha : new Date().toLocaleDateString('es-ES');
-    const dx = recetaData ? recetaData.diagnostico : (this.recetaDiagnostico.value.trim() || 'Consulta clínica');
+    const dx = recetaData ? recetaData.diagnostico : (this.recetaDiagnostico.value.trim() || 'Consulta clínica general');
     const indicaciones = recetaData ? recetaData.indicaciones : (this.recetaIndicaciones.value.trim() || 'Seguir la posología indicada.');
 
     let meds = [];
@@ -2094,15 +2122,18 @@ class ClinikApp {
       });
     }
 
-    if (!window.jspdf || !window.jspdf.jsPDF) {
-      // Fallback nativo de impresión si no cargó jsPDF
+    if (meds.length === 0) {
+      meds.push({ nombre: 'Indicaciones según evaluación médica', dosis: 'Ver indicaciones', tiempo: 'Según prescripción' });
+    }
+
+    const jsPDFClass = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : (window.jsPDF || null);
+    if (!jsPDFClass) {
       window.print();
       return;
     }
 
     try {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({
+      const doc = new jsPDFClass({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4'
@@ -2185,7 +2216,16 @@ class ClinikApp {
       // Guardar archivo PDF directamente
       const filename = `Receta-${paciente.nombre.replace(/\s+/g, '_')}-${fecha.replace(/\//g, '-')}.pdf`;
       doc.save(filename);
-      this.showToast(`✅ PDF generado: ${filename}`);
+
+      // Abrir blob para visualización directa en pantalla
+      try {
+        const blobUrl = doc.output('bloburl');
+        window.open(blobUrl, '_blank');
+      } catch (err) {
+        // Fallback
+      }
+
+      this.showToast(`✅ Receta PDF generada y descargada: ${filename}`);
     } catch (e) {
       console.error('Error generando PDF:', e);
       window.print();

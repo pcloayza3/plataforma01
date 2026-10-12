@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ClinikLocal - Gestión Clínica y Dental Local-First</title>
   <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
   <link rel="manifest" href="./manifest.json">
@@ -312,6 +312,13 @@
               <button type="button" class="btn-voice-mini" id="btn-voice-receta-ind" title="Dictar por voz">🎙️ Dictar</button>
             </div>
             <textarea id="receta-indicaciones" class="input-field" rows="3" placeholder="Ej. Tomar con abundante agua después de las comidas."></textarea>
+          </div>
+
+          <!-- BOTONES DE ACCIÓN DIRECTA DE RECETA (VISIBLES EN CELULARES) -->
+          <div class="prescription-form-actions" style="margin-top: 1.25rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button type="button" class="btn btn-primary" id="btn-guardar-receta-bottom">💾 Guardar Receta</button>
+            <button type="button" class="btn btn-subtle" id="btn-imprimir-receta-bottom">📄 Descargar / Imprimir PDF</button>
+            <button type="button" class="btn btn-subtle" id="btn-limpiar-receta">🔄 Limpiar / Nueva Receta</button>
           </div>
         </div>
 
