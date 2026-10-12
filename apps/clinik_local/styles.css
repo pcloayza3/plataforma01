@@ -69,11 +69,11 @@ body[data-theme="slate"] {
   --border-focus: #334155;
 }
 
-/* ==================== MODO OSCURO (DARK MODE) ==================== */
+/* ==================== MODO OSCURO (DARK MODE) & PALETAS DINÁMICAS ==================== */
 body[data-theme-mode="dark"] {
   --bg-page: #0b1120;
   --bg-surface: #1e293b;
-  --bg-subtle: #334155;
+  --bg-subtle: #0f172a;
   --border-color: #334155;
   --text-main: #f8fafc;
   --text-secondary: #cbd5e1;
@@ -81,15 +81,49 @@ body[data-theme-mode="dark"] {
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6);
+  background-color: var(--bg-page);
+  color: var(--text-main);
+}
+
+body[data-theme-mode="dark"],
+body[data-theme-mode="dark"][data-theme="teal"] {
+  --color-primary-light: rgba(13, 148, 136, 0.18);
+  --color-primary-border: rgba(13, 148, 136, 0.45);
+}
+body[data-theme-mode="dark"][data-theme="sky"] {
+  --color-primary-light: rgba(2, 132, 199, 0.18);
+  --color-primary-border: rgba(2, 132, 199, 0.45);
+}
+body[data-theme-mode="dark"][data-theme="emerald"] {
+  --color-primary-light: rgba(5, 150, 105, 0.18);
+  --color-primary-border: rgba(5, 150, 105, 0.45);
+}
+body[data-theme-mode="dark"][data-theme="purple"] {
+  --color-primary-light: rgba(124, 58, 237, 0.18);
+  --color-primary-border: rgba(124, 58, 237, 0.45);
+}
+body[data-theme-mode="dark"][data-theme="slate"] {
+  --color-primary-light: rgba(100, 116, 139, 0.25);
+  --color-primary-border: rgba(100, 116, 139, 0.5);
 }
 
 body[data-theme-mode="dark"] .input-field,
 body[data-theme-mode="dark"] .select-sort,
 body[data-theme-mode="dark"] .select-patient,
-body[data-theme-mode="dark"] .select-sort-mini {
+body[data-theme-mode="dark"] .select-sort-mini,
+body[data-theme-mode="dark"] textarea {
   background-color: #0f172a;
   color: #f8fafc;
   border-color: #475569;
+}
+
+body[data-theme-mode="dark"] .btn-subtle {
+  background-color: #1e293b;
+  color: #f8fafc;
+  border-color: #475569;
+}
+body[data-theme-mode="dark"] .btn-subtle:hover {
+  background-color: #334155;
 }
 
 body[data-theme-mode="dark"] .app-drawer,
@@ -102,7 +136,9 @@ body[data-theme-mode="dark"] .prescription-preview-card,
 body[data-theme-mode="dark"] .config-card,
 body[data-theme-mode="dark"] .backup-card,
 body[data-theme-mode="dark"] .odontograma-box,
-body[data-theme-mode="dark"] .timeline-box {
+body[data-theme-mode="dark"] .timeline-box,
+body[data-theme-mode="dark"] .filter-sort-bar,
+body[data-theme-mode="dark"] .agenda-filter-bar {
   background-color: #1e293b;
   border-color: #334155;
   color: #f8fafc;
@@ -116,9 +152,19 @@ body[data-theme-mode="dark"] .app-header {
 body[data-theme-mode="dark"] .rx-header,
 body[data-theme-mode="dark"] .rx-body-title,
 body[data-theme-mode="dark"] .rx-patient-info,
-body[data-theme-mode="dark"] .rx-dx,
-body[data-theme-mode="dark"] .rx-instructions {
+body[data-theme-mode="dark"] .rx-dx {
   color: #f8fafc;
+}
+body[data-theme-mode="dark"] .rx-instructions {
+  background: #0f172a;
+  color: #cbd5e1;
+  border-left-color: var(--color-primary);
+}
+body[data-theme-mode="dark"] .rx-doctor-name {
+  color: #f8fafc;
+}
+body[data-theme-mode="dark"] .rx-doctor-subtitle {
+  color: #94a3b8;
 }
 
 body[data-theme-mode="dark"] .tooth-btn {
@@ -126,10 +172,39 @@ body[data-theme-mode="dark"] .tooth-btn {
   border-color: #334155;
   color: #f8fafc;
 }
-
 body[data-theme-mode="dark"] .odontograma-legend-responsive {
   background: #0f172a;
 }
+
+body[data-theme-mode="dark"] .theme-option,
+body[data-theme-mode="dark"] .radio-label,
+body[data-theme-mode="dark"] .saved-prescription-item,
+body[data-theme-mode="dark"] .storage-metrics,
+body[data-theme-mode="dark"] .cloud-status-box,
+body[data-theme-mode="dark"] .med-row {
+  background-color: #0f172a;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+body[data-theme-mode="dark"] .cloud-card {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border-color: var(--color-primary-border);
+}
+
+body[data-theme-mode="dark"] .drawer-nav-item {
+  color: #cbd5e1;
+}
+body[data-theme-mode="dark"] .drawer-nav-item:hover {
+  background-color: #334155;
+  color: #ffffff;
+}
+body[data-theme-mode="dark"] .drawer-nav-item.active {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.swatch-emerald { background-color: #059669; }
 
 * {
   box-sizing: border-box;

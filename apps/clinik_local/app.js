@@ -288,6 +288,7 @@ class ClinikApp {
     this.drawerNavItems = document.querySelectorAll('.drawer-nav-item');
     this.views = document.querySelectorAll('.view-section');
     this.btnSyncNow = document.getElementById('btn-sync-now');
+    this.btnToggleThemeMode = document.getElementById('btn-toggle-theme-mode');
 
     // Banner Paciente en Atención
     this.bannerPacienteAtencion = document.getElementById('banner-paciente-atencion');
@@ -735,6 +736,17 @@ class ClinikApp {
     });
     this.inputImportarLocal.addEventListener('change', (e) => this.manejarImportacion(e));
     this.btnSyncNow.addEventListener('click', () => this.forzarSincronizacionInmediata());
+    if (this.btnToggleThemeMode) {
+      this.btnToggleThemeMode.addEventListener('click', () => {
+        const nuevoModo = this.db.config.themeMode === 'dark' ? 'light' : 'dark';
+        this.db.config.themeMode = nuevoModo;
+        document.body.dataset.themeMode = nuevoModo;
+        const radioMode = document.querySelector(`input[name="cfg-theme-mode"][value="${nuevoModo}"]`);
+        if (radioMode) radioMode.checked = true;
+        LocalDatabase.save(this.db);
+        this.showToast(`🌓 Modo ${nuevoModo === 'dark' ? 'Oscuro' : 'Claro'} activado`);
+      });
+    }
     this.btnSyncCloud.addEventListener('click', () => this.forzarSincronizacionInmediata());
 
     // Configuración & Catálogo de Servicios
