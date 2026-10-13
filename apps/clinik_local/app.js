@@ -31,6 +31,7 @@ const DEFAULT_SERVICIOS = [
 ];
 
 const SAMPLE_RX_VALERIA = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgMjYwIiB3aWR0aD0iNDAwIiBoZWlnaHQ9IjI2MCI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSIyNjAiIGZpbGw9IiMwYjEzMjkiLz48cmVjdCB4PSIxNSIgeT0iMTUiIHdpZHRoPSIzNzAiIGhlaWdodD0iMjMwIiByeD0iNiIgZmlsbD0iIzExMWMzOCIgc3Ryb2tlPSIjMzhiZGY4IiBzdHJva2Utd2lkdGg9IjEuNSIvPjxjaXJjbGUgY3g9IjM1IiBjeT0iMzUiIHI9IjQiIGZpbGw9IiMzOGJkZjgiLz48dGV4dCB4PSIzNjAiIHk9IjM4IiBmaWxsPSIjOTRhM2I4IiBmb250LWZhbWlseT0ic3lzdGVtLXVpLCAtYXBwbGUtc3lzdGVtLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9ImVuZCI+Ui0yNiDigKIgUEVSSUFQSUNBTDwvdGV4dD48cGF0aCBkPSJNIDEyMCAxODAgUSAxNTAgMTQwIDE4MCAxODAgUSAyMDAgMTM1IDIyMCAxODAgUSAyNTAgMTQwIDI4MCAxODAgQyAyODAgMjMwIDEyMCAyMzAgMTIwIDE4MCBaIiBmaWxsPSIjMWUyOTNiIiBzdHJva2U9IiM2NDc0OGIiIHN0cm9rZS13aWR0aD0iMiIvPjxwYXRoIGQ9Ik0gMTcwIDE3MCBDIDE3MCAxMTAgMTgwIDgwIDIwMCA4MCBDIDIyMCA4MCAyMzAgMTEwIDIzMCAxNzAgQyAyMjAgMTc1IDE4MCAxNzUgMTcwIDE3MCBaIiBmaWxsPSIjNDc1NTY5IiBzdHJva2U9IiM5NGEzYjgiIHN0cm9rZS13aWR0aD0iMiIvPjxwYXRoIGQ9Ik0gMTgwIDkwIFEgMjAwIDc1IDIyMCA5MCBRIDIyNSAxMTUgMjAwIDExNSBRIDE3NSAxMTUgMTgwIDkwIFoiIGZpbGw9IiNmOGZhZmMiIHN0cm9rZT0iIzM4YmRmOCIgc3Ryb2tlLXdpZHRoPSIxLjSIvPjxwYXRoIGQ9Ik0gMTgwIDE2NSBRIDE3NSAyMTAgMTg1IDIyMCBRIDE5MCAyMDAgMTkyIDE2NSBaIiBmaWxsPSIjMzM0MTU1Ii8+PHBhdGggZD0iTSAyMjAgMTY1IFEgMjI1IDIxMCAyMTUgMjIwIFEgMjEwIDIwMCAyMDggMTY1IFoiIGZpbGw9IiMzMzQxNTUiLz48bGluZSB4MT0iMjAwIiB5MT0iMTE1IiB4Mj0iMTg1IiB5Mj0iMjE1IiBzdHJva2U9IiMzOGJkZjgiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtZGFzaGFycmF5PSIyLDIiLz48bGluZSB4MT0iMjAwIiB5MT0iMTE1IiB4Mj0iMjE1IiB5Mj0iMjE1IiBzdHJva2U9IiMzOGJkZjgiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtZGFzaGFycmF5PSIyLDIiLz48cmVjdCB4PSIzMCIgeT0iMjAwIiB3aWR0aD0iMTMwIiBoZWlnaHQ9IjMwIiByeD0iNCIgZmlsbD0icmdiYSgxNSwgMjMsIDQyLCAwLjg1KSIgc3Ryb2tlPSIjMzM0MTU1Ii8+PHRleHQgeD0iOTUiIHk9IjIyMCIgZmlsbD0iIzM4YmRmOCIgZm9udC1mYW1pbHk9InN5c3RlbS11aSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+UGllemEgMjYgVHJhdGFkYTwvdGV4dD48dGV4dCB4PSIyMDAiIHk9IjI1MCIgZmlsbD0iIzY0NzQ4YiIgZm9udC1mYW1pbHk9InN5c3RlbS11aSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+UGFjaWVudGU6IFZhbGVyaWEgUXVpc3BlIC0gQ2xpbmlrTG9jYWwgRGlnaXRhbCBSeDwvdGV4dD48L3N2Zz4=';
+window.SAMPLE_RX_VALERIA = SAMPLE_RX_VALERIA;
 
 const DEFAULT_DB = {
   config: {
@@ -191,6 +192,27 @@ class LocalDatabase {
                 }
               });
             }
+            if (p.id === 'p-1' && p.consultas) {
+              const cValeria = p.consultas.find(c => c.id === 'c-101');
+              if (cValeria) {
+                if (!cValeria.adjuntos || cValeria.adjuntos.length === 0) {
+                  cValeria.adjuntos = [
+                    {
+                      tipo: 'foto',
+                      titulo: 'Rx Pieza 26',
+                      descripcion: 'Radiografía de control post-curación',
+                      url: SAMPLE_RX_VALERIA
+                    }
+                  ];
+                } else {
+                  cValeria.adjuntos.forEach(adj => {
+                    if (adj.tipo === 'foto' && (!adj.url || adj.url.length < 50 || adj.url.includes('Radiograf%C3%ADa') || adj.url.includes('Piece 26'))) {
+                      adj.url = SAMPLE_RX_VALERIA;
+                    }
+                  });
+                }
+              }
+            }
             if (p.consultas && Array.isArray(p.consultas)) {
               p.consultas.forEach(c => {
                 if (c.adjuntos && Array.isArray(c.adjuntos)) {
@@ -338,10 +360,8 @@ class ClinikApp {
     this.consultaDiagnosticoInput = document.getElementById('consulta-diagnostico');
     this.consultaTratamientoInput = document.getElementById('consulta-tratamiento');
 
-    // Multimedia inputs (Solo Foto, Video y PDF)
-    this.inputCamaraFoto = document.getElementById('input-camara-foto');
+    // Multimedia inputs (Subir Foto/Video y PDF)
     this.inputAdjuntoFoto = document.getElementById('input-adjunto-foto');
-    this.inputCamaraVideo = document.getElementById('input-camara-video');
     this.inputAdjuntoPdf = document.getElementById('input-adjunto-pdf');
     this.inputAdjuntoDesc = document.getElementById('input-adjunto-desc');
     this.colaAdjuntosPreview = document.getElementById('cola-adjuntos-preview');
@@ -634,19 +654,13 @@ class ClinikApp {
       this.procesarArchivoAdjunto(file, tipo);
       e.target.value = '';
     };
-    this.inputCamaraFoto.addEventListener('change', (e) => {
-      this.procesarArchivoAdjunto(e.target.files[0], 'foto');
-      e.target.value = '';
-    });
-    this.inputAdjuntoFoto.addEventListener('change', procArchivo);
-    this.inputCamaraVideo.addEventListener('change', (e) => {
-      this.procesarArchivoAdjunto(e.target.files[0], 'video');
-      e.target.value = '';
-    });
-    this.inputAdjuntoPdf.addEventListener('change', (e) => {
-      this.procesarArchivoAdjunto(e.target.files[0], 'pdf');
-      e.target.value = '';
-    });
+    if (this.inputAdjuntoFoto) this.inputAdjuntoFoto.addEventListener('change', procArchivo);
+    if (this.inputAdjuntoPdf) {
+      this.inputAdjuntoPdf.addEventListener('change', (e) => {
+        this.procesarArchivoAdjunto(e.target.files[0], 'pdf');
+        e.target.value = '';
+      });
+    }
 
     // Modal Diente (Odontograma)
     if (this.btnCancelarModalDiente) {
@@ -1382,8 +1396,8 @@ class ClinikApp {
         c.adjuntos.forEach(adj => {
           if (adj.tipo === 'foto') {
             mediaHtml += `
-              <div class="media-thumbnail-card" onclick="app.abrirLightbox('${encodeURIComponent(adj.url)}', '${encodeURIComponent(adj.descripcion || adj.titulo)}')">
-                <img src="${adj.url}" class="media-thumb-img" alt="${adj.titulo}">
+              <div class="media-thumbnail-card" data-img-url="${encodeURIComponent(adj.url || '')}" data-caption="${encodeURIComponent(adj.descripcion || adj.titulo || '')}" onclick="app.abrirLightbox(this.dataset.imgUrl, this.dataset.caption)">
+                <img src="${adj.url || window.SAMPLE_RX_VALERIA}" class="media-thumb-img" alt="${adj.titulo}" onerror="this.onerror=null; this.src=window.SAMPLE_RX_VALERIA;">
                 <span class="media-thumb-label">📷 ${adj.titulo}</span>
                 ${adj.descripcion ? `<span class="media-thumb-desc">${adj.descripcion}</span>` : ''}
               </div>
@@ -1433,8 +1447,14 @@ class ClinikApp {
   }
 
   abrirLightbox(urlEncoded, captionEncoded) {
-    this.lightboxImg.src = decodeURIComponent(urlEncoded);
-    this.lightboxCaption.textContent = decodeURIComponent(captionEncoded);
+    try {
+      const decodedUrl = urlEncoded ? decodeURIComponent(urlEncoded) : '';
+      this.lightboxImg.src = decodedUrl || window.SAMPLE_RX_VALERIA;
+      this.lightboxCaption.textContent = captionEncoded ? decodeURIComponent(captionEncoded) : 'Estudio Clínico';
+    } catch (e) {
+      this.lightboxImg.src = window.SAMPLE_RX_VALERIA;
+      this.lightboxCaption.textContent = 'Estudio Clínico';
+    }
     this.lightbox.classList.remove('hidden');
   }
 
