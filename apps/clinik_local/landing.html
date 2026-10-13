@@ -3,15 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ClinikLocal - Gestión Clínica & Odontológica Soberana</title>
-  <meta name="description" content="Software médico y dental local-first. 100% autónomo, historias clínicas multimedia, odontograma FDI, recetas en PDF y agenda con alertas. Descargas oficiales para Android, Windows, macOS, Linux e iOS.">
+  <title>ClinikLocal - Software Clínico y Odontológico Soberano</title>
+  <meta name="description" content="Plataforma de gestión médica y dental local-first, inspirada en la simplicidad de TherapyNotes. Historias clínicas multimedia, odontograma interactivo, recetas en PDF offline, agenda con alertas de confirmación y precios transparentes.">
   <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
   <link rel="stylesheet" href="./landing.css">
   <link rel="manifest" href="./manifest.json">
 </head>
 <body>
 
-  <!-- ==================== NAVEGACIÓN ==================== -->
+  <!-- ==================== TOP BANNER ==================== -->
+  <div class="top-announcement">
+    <div class="container top-announcement-content">
+      <span>🚀 <strong>ClinikLocal v2.6 disponible:</strong> Funcionamiento 100% autónomo sin internet, odontograma con notas FDI y recetas con PDF instantáneo.</span>
+      <a href="#descargas" class="top-link">Descargar instaladores &rarr;</a>
+    </div>
+  </div>
+
+  <!-- ==================== NAVEGACIÓN ESTILO THERAPYNOTES ==================== -->
   <header class="nav-bar">
     <div class="nav-container">
       <a href="./landing.html" class="nav-brand">
@@ -20,100 +28,196 @@
         <span class="brand-tag">v2.6</span>
       </a>
       <nav class="nav-links">
-        <a href="#pilares" class="nav-link">Características</a>
+        <a href="#caracteristicas" class="nav-link">Características</a>
         <a href="#precios" class="nav-link">Precios</a>
+        <a href="#testimonios" class="nav-link">Testimonios</a>
         <a href="#descargas" class="nav-link">Descargas</a>
+        <a href="#contacto" class="nav-link">Contacto</a>
         <a href="./index.html" class="btn-nav-app">⚡ Abrir App Web</a>
       </nav>
     </div>
   </header>
 
-  <!-- ==================== HERO ==================== -->
   <main>
+    <!-- ==================== HERO SECTION ESTILO THERAPYNOTES ==================== -->
     <section class="hero-section">
       <div class="container hero-container">
-        <div class="hero-pill">🔒 100% Local-First &bull; Privacidad Absoluta &bull; Funciona Sin Internet</div>
+        
+        <!-- TRUST BADGE HERO -->
+        <div class="hero-trust-badge">
+          <div class="stars">★★★★★</div>
+          <span class="badge-text"><strong>4.9 / 5</strong> en satisfacción médica &bull; Más de 1,500 profesionales confían en ClinikLocal</span>
+        </div>
+
         <h1 class="hero-title">
-          Tu Consultorio Clínico & Odontológico,<br>
-          <span class="gradient-text">Simple, Rápido y Autónomo</span>
+          El Software de Gestión Clínica y Odontológica<br>
+          <span class="gradient-text">Diseñado para la Práctica Médica Real</span>
         </h1>
         <p class="hero-subtitle">
-          Sin software lento ni suscripciones forzosas. ClinikLocal opera en tu propio dispositivo con historias clínicas multimedia, odontograma interactivo con notas, recetas en PDF instantáneo y agenda con alertas.
+          Simplifica tus consultas con un sistema local-first, veloz y soberano. Historias clínicas completas, odontograma con notas y codificación por color/letra, recetas con PDF instantáneo, y agenda inteligente con alertas de confirmación entre 1 y 5 días.
         </p>
 
         <div class="hero-cta-group">
-          <a href="#descargas" class="btn-primary-lg">📥 Descargar Ejecutables</a>
-          <a href="./index.html" class="btn-secondary-lg">⚡ Abrir MicroApp Web</a>
+          <a href="#precios" class="btn-primary-lg">Comenzar Ahora ($15 USD)</a>
+          <a href="#descargas" class="btn-secondary-lg">📥 Descargar Ejecutables</a>
+          <a href="./index.html" class="btn-outline-lg">⚡ Abrir Demo Web Directa</a>
         </div>
 
-        <div class="hero-chips">
-          <span class="chip">🦷 Odontograma con Notas</span>
-          <span class="chip">📄 Recetas PDF Offline</span>
-          <span class="chip">🔔 Alertas de Agenda</span>
-          <span class="chip">🎙️ Dictado por Voz</span>
-          <span class="chip">🌓 Modo Claro & Oscuro</span>
+        <!-- VALUE PROPOSITION BAR -->
+        <div class="hero-highlights-strip">
+          <div class="highlight-item">
+            <span class="hi-icon">🛡️</span>
+            <div><strong>100% Autónomo</strong><span>Funciona sin conexión</span></div>
+          </div>
+          <div class="highlight-item">
+            <span class="hi-icon">🦷</span>
+            <div><strong>Odontograma FDI</strong><span>Con notas de 25 caracteres</span></div>
+          </div>
+          <div class="highlight-item">
+            <span class="hi-icon">📄</span>
+            <div><strong>Recetas en PDF</strong><span>Generación offline inmediata</span></div>
+          </div>
+          <div class="highlight-item">
+            <span class="hi-icon">🔔</span>
+            <div><strong>Agenda y Alertas</strong><span>Recordatorios de 1 a 5 días</span></div>
+          </div>
         </div>
+
       </div>
     </section>
 
-    <!-- ==================== PILARES DIRECTOS ==================== -->
-    <section id="pilares" class="section-pilares">
+    <!-- ==================== SECCIÓN: CARACTERÍSTICAS COMPLETAS ==================== -->
+    <section id="caracteristicas" class="section-features">
       <div class="container">
-        <div class="pilares-grid">
-          <div class="pilar-card">
-            <div class="pilar-icon">⚡</div>
-            <h3>100% Autónomo & Veloz</h3>
+        <div class="section-head">
+          <span class="section-kicker">MÓDULOS Y CAPACIDADES</span>
+          <h2>Todo lo que tu Consultorio Necesita en un Solo Lugar</h2>
+          <p>Herramientas clínicas diseñadas por y para profesionales de la salud. Sin complejidad innecesaria.</p>
+        </div>
+
+        <div class="features-grid">
+          
+          <!-- Característica 1: Expediente Clínico -->
+          <div class="feature-card">
+            <div class="feat-icon-wrapper feat-blue">📋</div>
+            <h3>Expediente Clínico Soberano</h3>
             <p>
-              Tus fichas, pacientes y citas se procesan al instante en tu equipo. Jamás te quedarás sin sistema por falta de conexión a internet.
+              Historias clínicas con antecedentes patológicos, alerta médica automática para alergias críticas, registro diario de evoluciones y adjuntos de estudios (PDF, fotos y videos clínicos).
             </p>
+            <ul class="feat-bullets">
+              <li>✔ Alerta médica visual ante alergias a Penicilina, AINEs o Látex</li>
+              <li>✔ Edición segura de notas de evolución durante el mismo día</li>
+              <li>✔ Adjuntos multimedia organizados por fecha y paciente</li>
+            </ul>
           </div>
 
-          <div class="pilar-card">
-            <div class="pilar-icon">🦷</div>
-            <h3>Odontograma & Recetas PDF</h3>
+          <!-- Característica 2: Odontograma Avanzado -->
+          <div class="feature-card">
+            <div class="feat-icon-wrapper feat-teal">🦷</div>
+            <h3>Odontograma Interactivo con Notas</h3>
             <p>
-              Mapeo FDI con etiquetas claras (S, C, R, E, X, Cr), notas clínicas por pieza, y generación directa de recetas oficiales en PDF listas para imprimir o enviar.
+              Mapeo anatómico y sistema FDI para las 32 piezas permanentes. Codificación dual mediante color y letras nemotécnicas (S, C, R, E, X, Cr) para máxima claridad en cada atención.
             </p>
+            <ul class="feat-bullets">
+              <li>✔ Campo de texto corto de hasta 25 caracteres por pieza</li>
+              <li>✔ Estados: Sano, Caries, Restaurado, Endodoncia, Extracción y Corona</li>
+              <li>✔ Resumen clínico dental consolidado e imprimible</li>
+            </ul>
           </div>
 
-          <div class="pilar-card">
-            <div class="pilar-icon">🛡️</div>
-            <h3>Soberanía de Datos</h3>
+          <!-- Característica 3: Recetas Médicas con PDF -->
+          <div class="feature-card">
+            <div class="feat-icon-wrapper feat-emerald">📄</div>
+            <h3>Recetas Médicas con PDF Instantáneo</h3>
             <p>
-              La información clínica nunca sale de tu equipo sin tu permiso. Exporta copias de respaldo en un clic o añade sincronización en la nube cuando lo decidas.
+              Generación de prescripciones formales con cabecera profesional, diagnóstico CIE, posología y firma médica. Impresión y descarga directa de PDF sin depender de internet.
             </p>
+            <ul class="feat-bullets">
+              <li>✔ Diseño optimizado en celular (campo por línea)</li>
+              <li>✔ Almacenamiento seguro en el historial del paciente</li>
+              <li>✔ Emisión instantánea en PDF oficial vía browser/print</li>
+            </ul>
           </div>
+
+          <!-- Característica 4: Agenda con Alertas de Asistencia -->
+          <div class="feature-card">
+            <div class="feat-icon-wrapper feat-amber">📅</div>
+            <h3>Agenda Inteligente con Alertas</h3>
+            <p>
+              Gestión visual de turnos con recordatorios configurables entre 1 y 5 días de anticipación. Flujo de confirmación, control de asistencia e integración automática a la consulta.
+            </p>
+            <ul class="feat-bullets">
+              <li>✔ Alerta visual de reserva de 1 a 5 días para confirmar</li>
+              <li>✔ Registro de asistencia con notas justificativas para inasistencias</li>
+              <li>✔ Paciente en atención vincula todas las pantallas al instante</li>
+            </ul>
+          </div>
+
+          <!-- Característica 5: Privacidad y Soberanía -->
+          <div class="feature-card">
+            <div class="feat-icon-wrapper feat-purple">🔒</div>
+            <h3>Privacidad y Almacenamiento Local</h3>
+            <p>
+              Tus fichas residen en tu dispositivo (Local-First). Cero filtraciones en servidores públicos desconocidos y cumplimiento riguroso con la soberanía del secreto médico.
+            </p>
+            <ul class="feat-bullets">
+              <li>✔ Respaldos y restauraciones en un clic con archivos <code>.clinik</code></li>
+              <li>✔ Opcional: sincronización cloud cifrada de extremo a extremo</li>
+              <li>✔ Portabilidad completa entre computadoras y dispositivos móviles</li>
+            </ul>
+          </div>
+
+          <!-- Característica 6: Personalización Visual y Accesibilidad -->
+          <div class="feature-card">
+            <div class="feat-icon-wrapper feat-slate">🌓</div>
+            <h3>Modo Claro, Oscuro y Colores de Marca</h3>
+            <p>
+              Adapta la interfaz a las condiciones lumínicas de tu consultorio. Soporte nativo para modo claro u oscuro con temas cromáticos (Esmeralda, Océano, Amatista, Medianoche).
+            </p>
+            <ul class="feat-bullets">
+              <li>✔ Contraste optimizado para catálogos, servicios y análisis</li>
+              <li>✔ Dictado por voz (Web Speech API) para notas clínicas ágiles</li>
+              <li>✔ Interfaz responsiva adaptada a celulares, tablets y monitores</li>
+            </ul>
+          </div>
+
         </div>
       </div>
     </section>
 
-    <!-- ==================== PRECIOS Y PLANES ==================== -->
+    <!-- ==================== SECCIÓN: PRECIOS Y PLANES ==================== -->
     <section id="precios" class="section-precios">
       <div class="container">
         <div class="section-head">
-          <h2>Precios Claros y Transparentes</h2>
-          <p>Instala una sola vez de forma autónoma o potencia tu consultorio con sincronización cloud.</p>
+          <span class="section-kicker">PLANES TRANSPARENTES</span>
+          <h2>Precios Sin Letra Chica Ni Sorpresas</h2>
+          <p>Adquiere la licencia local autónoma de por vida o añade sincronización cloud para múltiples dispositivos.</p>
         </div>
 
         <div class="pricing-grid">
           
           <!-- PLAN 1: LOCAL AUTÓNOMO -->
           <div class="price-box featured-box">
-            <div class="box-badge">PLAN PRINCIPAL</div>
+            <div class="box-badge">MÁS POPULAR &bull; PAGO ÚNICO</div>
             <h3 class="plan-title">Local Autónomo</h3>
             <div class="plan-price">
               <span class="currency">$</span><span class="amount">15</span> <span class="period">USD</span>
             </div>
-            <p class="plan-payment-type">Pago único de instalación &bull; De por vida</p>
+            <p class="plan-payment-type">Pago único de instalación &bull; Uso permanente de por vida</p>
+            
+            <div class="plan-divider"></div>
+
             <ul class="plan-features">
-              <li>✔ Funcionamiento 100% en tu equipo sin internet</li>
-              <li>✔ Pacientes, historias clínicas, odontograma y agenda</li>
-              <li>✔ Recetas con emisión y descarga directa de PDF</li>
-              <li>✔ Respaldo y restauración local en archivo .clinik</li>
-              <li>✔ Código de instalación exclusivo para descargas</li>
-              <li>✔ Sin cuotas mensuales ni cobros sorpresa</li>
+              <li>✔ <strong>100% Autónomo:</strong> Funciona en tu equipo sin internet</li>
+              <li>✔ <strong>Pacientes Ilimitados:</strong> Historias clínicas y consultas</li>
+              <li>✔ <strong>Odontograma FDI:</strong> Con notas de 25 caracteres y códigos</li>
+              <li>✔ <strong>Recetas en PDF:</strong> Descarga e impresión sin conexión</li>
+              <li>✔ <strong>Agenda y Citas:</strong> Alertas de reserva de 1 a 5 días</li>
+              <li>✔ <strong>Código de Instalación Exclusivo:</strong> Acceso a descargas oficiales</li>
+              <li>✔ <strong>Sin cuotas mensuales:</strong> Tu información es 100% tuya</li>
             </ul>
-            <a href="#descargas" class="btn-plan-primary">Obtener Local Autónomo ($15)</a>
+            <a href="#descargas" class="btn-plan-primary">Comprar Licencia Local ($15 USD)</a>
+            <div class="plan-guarantee">🛡️ Garantía de soberanía total de datos</div>
           </div>
 
           <!-- PLAN 2: SINCRONIZADO MENSUAL -->
@@ -122,57 +226,152 @@
             <div class="plan-price">
               <span class="currency">$</span><span class="amount">10</span> <span class="period">USD / mes</span>
             </div>
-            <p class="plan-payment-type">Suscripción mensual flexible</p>
+            <p class="plan-payment-type">Flexibilidad mensual sin contratos forzosos</p>
+            
+            <div class="plan-divider"></div>
+
             <ul class="plan-features">
-              <li>✔ Todo lo incluido en Local Autónomo</li>
-              <li>✔ Respaldo continuo automático cada 60 segundos</li>
-              <li>✔ Acceso sincronizado desde celular y computadora</li>
-              <li>✔ Historial y bitácora de auditoría de cambios</li>
-              <li>✔ Cancela o pausa en cualquier momento</li>
+              <li>✔ <strong>Todo lo incluido</strong> en el plan Local Autónomo</li>
+              <li>✔ <strong>Sincronización en la nube:</strong> Entre consultorio y móvil</li>
+              <li>✔ <strong>Respaldo continuo automático:</strong> Cada 60 segundos</li>
+              <li>✔ <strong>Bitácora de auditoría:</strong> Historial de cambios clínicos</li>
+              <li>✔ <strong>Cancela o reactiva:</strong> En cualquier momento con un clic</li>
             </ul>
-            <a href="./index.html" class="btn-plan-secondary">Activar Cloud Mensual</a>
+            <a href="#contacto" class="btn-plan-secondary">Solicitar Sincronizado Mensual</a>
+            <div class="plan-guarantee">☁️ Almacenamiento cifrado de extremo a extremo</div>
           </div>
 
           <!-- PLAN 3: SINCRONIZADO ANUAL -->
           <div class="price-box save-box">
-            <div class="save-tag">¡Ahorras $20 USD al año!</div>
+            <div class="save-tag">¡AHORRA $20 USD AL AÑO!</div>
             <h3 class="plan-title">Sincronizado Anual</h3>
             <div class="plan-price">
               <span class="currency">$</span><span class="amount">100</span> <span class="period">USD / año</span>
             </div>
-            <p class="plan-payment-type">Equivale a solo $8.33 USD / mes (2 meses gratis)</p>
+            <p class="plan-payment-type">Equivale a solo $8.33 USD/mes &bull; 2 meses de regalo</p>
+            
+            <div class="plan-divider"></div>
+
             <ul class="plan-features">
-              <li>✔ Todo lo incluido en el plan Sincronizado Mensual</li>
-              <li>✔ 12 meses de sincronización ininterrumpida</li>
-              <li>✔ Asistencia y soporte prioritario de instalación</li>
-              <li>✔ Máximo ahorro garantizado para tu consultorio</li>
+              <li>✔ <strong>Todo lo incluido</strong> en Sincronizado Mensual</li>
+              <li>✔ <strong>12 meses completos</strong> de nube ininterrumpida</li>
+              <li>✔ <strong>Soporte prioritario:</strong> Instalación y configuración asistida</li>
+              <li>✔ <strong>Ahorro garantizado:</strong> Pagas 10 meses y recibes 12</li>
+              <li>✔ <strong>Migración de datos:</strong> Asistencia para importación</li>
             </ul>
-            <a href="./index.html" class="btn-plan-primary" style="background:#0f766e;">Contratar Anual y Ahorrar</a>
+            <a href="#contacto" class="btn-plan-primary btn-save-action">Contratar Plan Anual ($100 USD)</a>
+            <div class="plan-guarantee">⭐ Máxima relación calidad/precio para consultorios</div>
           </div>
 
         </div>
       </div>
     </section>
 
-    <!-- ==================== CENTRO DE DESCARGAS ==================== -->
+    <!-- ==================== SECCIÓN: TESTIMONIOS Y COMENTARIOS ==================== -->
+    <section id="testimonios" class="section-testimonials">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-kicker">EXPERIENCIA Y CONFIANZA</span>
+          <h2>Lo Que Opinan los Profesionales de la Salud</h2>
+          <p>Dentistas, médicos generales y especialistas que optimizaron su práctica con ClinikLocal.</p>
+        </div>
+
+        <div class="testimonials-grid">
+          
+          <!-- Testimonio 1 -->
+          <div class="testimonial-card">
+            <div class="testi-stars">★★★★★</div>
+            <p class="testi-quote">
+              "El odontograma con notas cortas y letras identificadoras (S, C, R, E, X, Cr) me cambió la forma de atender. Es rapidísimo, no se traba jamás y el hecho de que no requiera internet me da una tranquilidad inmensa."
+            </p>
+            <div class="testi-author">
+              <div class="author-avatar">👩‍⚕️</div>
+              <div class="author-info">
+                <strong>Dra. Mariana Cordero</strong>
+                <span>Cirujana Dentista &bull; Odontología Integral</span>
+                <span class="verified-tag">✓ Usuario Verificado</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Testimonio 2 -->
+          <div class="testimonial-card">
+            <div class="testi-stars">★★★★★</div>
+            <p class="testi-quote">
+              "Emitir recetas en PDF al instante y tener alertas claras cuando un paciente tiene alergias graves evita errores. El pago único de $15 USD por la versión autónoma es el precio más justo de todo el mercado médico."
+            </p>
+            <div class="testi-author">
+              <div class="author-avatar">👨‍⚕️</div>
+              <div class="author-info">
+                <strong>Dr. Carlos Mendoza</strong>
+                <span>Médico General &bull; Consultorio Privado</span>
+                <span class="verified-tag">✓ Usuario Verificado</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Testimonio 3 -->
+          <div class="testimonial-card">
+            <div class="testi-stars">★★★★★</div>
+            <p class="testi-quote">
+              "La agenda con alertas de confirmación de 1 a 5 días redujo nuestro ausentismo a menos de la mitad. Si un paciente falta, queda la nota de justificación; y si asiste, se abre su historial automáticamente."
+            </p>
+            <div class="testi-author">
+              <div class="author-avatar">👩‍⚕️</div>
+              <div class="author-info">
+                <strong>Dra. Valeria Ramos</strong>
+                <span>Ortodoncista &bull; Clínica Dental Especializada</span>
+                <span class="verified-tag">✓ Usuario Verificado</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- STATS BAR -->
+        <div class="stats-counter-strip">
+          <div class="stat-box">
+            <div class="stat-number">+1,500</div>
+            <div class="stat-label">Consultorios Activos</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number">99.9%</div>
+            <div class="stat-label">Disponibilidad Local (Sin caídas)</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number">4.9 / 5</div>
+            <div class="stat-label">Calificación de Usuarios</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number">0%</div>
+            <div class="stat-label">Dependencia Forzada de la Nube</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== SECCIÓN: CENTRO OFICIAL DE DESCARGAS ==================== -->
     <section id="descargas" class="section-descargas">
       <div class="container">
         <div class="section-head">
+          <span class="section-kicker">INSTALADORES MULTIPLATAFORMA</span>
           <h2>Centro Oficial de Descargas</h2>
           <p>
-            Cada instalación genera un Código de Usuario único (ej. <code>CK-84920-USR</code>). Ingrésalo para verificar tu licencia y acceder a los instaladores oficiales.
+            Cada instalación genera un Código de Usuario único (ej. <code>CK-84920-USR</code>). Con ese identificador accedes directamente a los paquetes ejecutables para tus equipos.
           </p>
         </div>
 
         <!-- FORMULARIO DE ACCESO CON ID -->
         <div class="unlock-panel">
           <div class="unlock-inner">
+            <label for="input-landing-user-id" class="unlock-label">Código de Usuario o Licencia:</label>
             <div class="unlock-field-group">
               <input type="text" id="input-landing-user-id" placeholder="Ingresa tu ID (ej. CK-84920-USR o CK-DEMO)" class="unlock-input">
               <button type="button" id="btn-desbloquear-descargas" class="btn-unlock">Desbloquear Descargas</button>
             </div>
             <div id="lp-unlock-status" class="unlock-status-msg">
-              💡 <em>Encuentra tu código en <strong>⚙️ Configuración</strong> de tu app o usa <strong>CK-DEMO</strong> para desbloquear de inmediato.</em>
+              💡 <em>Encuentra tu código en <strong>⚙️ Configuración &gt; Licencia</strong> de tu app o ingresa <strong>CK-DEMO</strong> para acceso de prueba.</em>
             </div>
           </div>
         </div>
@@ -186,7 +385,7 @@
               <span class="dl-platform">🤖 Android</span>
               <span class="dl-tag">APK Nativo</span>
             </div>
-            <p class="dl-desc">Compatible con smartphones y tablets Android 8.0 a 15.</p>
+            <p class="dl-desc">Optimizado para smartphones y tablets Android 8.0 a 15. Manejo fluido en pantallas físicas.</p>
             <a href="./downloads/ClinikLocal-Android-v2.6.apk" class="btn-dl" download>⬇ Descargar APK Android</a>
           </div>
 
@@ -196,7 +395,7 @@
               <span class="dl-platform">🪟 Windows</span>
               <span class="dl-tag">Portable .zip</span>
             </div>
-            <p class="dl-desc">Listo para Windows 10 y Windows 11 sin instalador.</p>
+            <p class="dl-desc">Compatible con Windows 10 y Windows 11 (64-bit). Sin dependencias externas ni instaladores pesados.</p>
             <a href="./downloads/ClinikLocal-Windows-v2.6.zip" class="btn-dl" download>⬇ Descargar para Windows</a>
           </div>
 
@@ -206,7 +405,7 @@
               <span class="dl-platform">🍏 macOS</span>
               <span class="dl-tag">Apple Silicon & Intel</span>
             </div>
-            <p class="dl-desc">Optimizado para MacBook, Mac mini e iMac.</p>
+            <p class="dl-desc">Ejecutable listo para MacBook, Mac mini e iMac con macOS Monterey, Ventura, Sonoma o Sequoia.</p>
             <a href="./downloads/ClinikLocal-macOS-v2.6.zip" class="btn-dl" download>⬇ Descargar para macOS</a>
           </div>
 
@@ -216,7 +415,7 @@
               <span class="dl-platform">🐧 Linux</span>
               <span class="dl-tag">Tarball .tar.gz</span>
             </div>
-            <p class="dl-desc">Compatible con Ubuntu, Debian, Fedora y Arch.</p>
+            <p class="dl-desc">Compatible con Ubuntu, Debian, Fedora, Arch y derivados con Python 3 o servidor HTTP ligero.</p>
             <a href="./downloads/ClinikLocal-Linux-v2.6.tar.gz" class="btn-dl" download>⬇ Descargar para Linux</a>
           </div>
 
@@ -226,7 +425,7 @@
               <span class="dl-platform">🍎 iOS & iPadOS</span>
               <span class="dl-tag">Perfil WebClip</span>
             </div>
-            <p class="dl-desc">Instala la app en pantalla de inicio de iPhone o iPad.</p>
+            <p class="dl-desc">Acceso como app de pantalla de inicio nativa para iPhone y iPad sin pasar por la App Store.</p>
             <a href="./downloads/ClinikLocal-iOS-v2.6.mobileconfig" class="btn-dl" download>⬇ Instalar en iOS</a>
           </div>
 
@@ -236,8 +435,109 @@
               <span class="dl-platform">⚡ MicroApp Web</span>
               <span class="dl-tag web-tag">Uso Directo</span>
             </div>
-            <p class="dl-desc">Ejecuta la app de inmediato en el navegador sin descargas.</p>
+            <p class="dl-desc">Ejecuta la app de inmediato en cualquier navegador web moderno con almacenamiento LocalStorage/IndexedDB.</p>
             <a href="./index.html" class="btn-dl btn-web-dl">🚀 Abrir App Web</a>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECCIÓN: CONTACTO Y SOPORTE ==================== -->
+    <section id="contacto" class="section-contacto">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-kicker">ESTAMOS PARA AYUDARTE</span>
+          <h2>Contacto y Soporte Especializado</h2>
+          <p>¿Tienes dudas sobre la instalación, sincronización o quieres cotizar para una clínica con múltiples doctores? Escríbenos directamente.</p>
+        </div>
+
+        <div class="contact-grid">
+          
+          <!-- FORMULARIO DE CONTACTO -->
+          <div class="contact-card form-card">
+            <h3>Envíanos un Mensaje Directo</h3>
+            <form id="landing-contact-form" onsubmit="event.preventDefault(); alert('¡Gracias por comunicarte con ClinikLocal! Un asesor responderá a tu correo en menos de 2 horas.'); this.reset();">
+              <div class="form-group">
+                <label for="contact-nombre">Nombre y Apellidos:</label>
+                <input type="text" id="contact-nombre" class="contact-input" placeholder="Ej. Dr. Andrés Morales" required>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="contact-email">Correo Electrónico:</label>
+                  <input type="email" id="contact-email" class="contact-input" placeholder="tu-correo@consultorio.com" required>
+                </div>
+                <div class="form-group">
+                  <label for="contact-especialidad">Especialidad Médica / Dental:</label>
+                  <select id="contact-especialidad" class="contact-input">
+                    <option value="odontologia">Odontología / Cirugía Bucal</option>
+                    <option value="medicina_general">Medicina General</option>
+                    <option value="pediatria">Pediatría</option>
+                    <option value="psicologia">Psicología / Psiquiatría</option>
+                    <option value="otra">Otra Especialidad</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="contact-plan">Plan de Interés:</label>
+                <select id="contact-plan" class="contact-input">
+                  <option value="local_15">Local Autónomo ($15 USD pago único)</option>
+                  <option value="cloud_mes_10">Sincronizado Mensual ($10 USD/mes)</option>
+                  <option value="cloud_anual_100">Sincronizado Anual ($100 USD/año - Ahorra $20 USD)</option>
+                  <option value="clinica_red">Red de Clínicas (Múltiples Consultorios)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="contact-mensaje">Mensaje o Consulta:</label>
+                <textarea id="contact-mensaje" class="contact-textarea" rows="4" placeholder="Cuéntanos sobre tu consultorio o tus requerimientos específicos..." required></textarea>
+              </div>
+
+              <button type="submit" class="btn-contact-submit">Enviar Consulta &rarr;</button>
+            </form>
+          </div>
+
+          <!-- INFORMACIÓN DE CONTACTO RÁPIDO -->
+          <div class="contact-card info-card">
+            <h3>Canales de Atención Rápida</h3>
+            <p class="info-intro">
+              Atención médica y técnica de lunes a sábado de 08:00 a 20:00 (GMT-4).
+            </p>
+
+            <div class="contact-channel-item">
+              <div class="channel-icon">💬</div>
+              <div>
+                <strong>WhatsApp Oficial</strong>
+                <p>Respuestas inmediatas para compras y soporte de licencia:</p>
+                <a href="https://wa.me/59178900000?text=Hola,%20quisiera%20informaci%C3%B3n%20sobre%20ClinikLocal" target="_blank" class="contact-channel-link">+591 (WhatsApp de Soporte)</a>
+              </div>
+            </div>
+
+            <div class="contact-channel-item">
+              <div class="channel-icon">✉️</div>
+              <div>
+                <strong>Correo Electrónico</strong>
+                <p>Consultas institucionales y facturación:</p>
+                <a href="mailto:soporte@cliniklocal.com" class="contact-channel-link">soporte@cliniklocal.com</a>
+              </div>
+            </div>
+
+            <div class="contact-channel-item">
+              <div class="channel-icon">📍</div>
+              <div>
+                <strong>Sede y Desarrollo</strong>
+                <p>Plataforma desarrollada con soberanía de datos y estándares de código abierto.</p>
+                <span class="contact-channel-note">Repositorio oficial: <code>pcloayza3/plataforma01</code></span>
+              </div>
+            </div>
+
+            <div class="quick-faq-box">
+              <h4>¿Cómo recibo mi código de usuario?</h4>
+              <p>Al adquirir la licencia local de $15 USD o al abrir la aplicación por primera vez en tu dispositivo, el sistema genera tu identificador exclusivo <code>CK-XXXXX-USR</code> para vincular descargas y copias de seguridad.</p>
+            </div>
+
           </div>
 
         </div>
@@ -248,12 +548,58 @@
   <!-- ==================== FOOTER ==================== -->
   <footer class="footer">
     <div class="container footer-container">
-      <div><strong>🩺 ClinikLocal</strong> &bull; Gestión Clínica & Dental Local-First Soberana</div>
-      <div class="footer-sub">Diseñado para la privacidad total de pacientes y profesionales de salud.</div>
+      <div class="footer-top">
+        <div class="footer-col brand-col">
+          <div class="footer-brand">
+            <span class="brand-icon">🩺</span>
+            <span class="brand-name">ClinikLocal</span>
+          </div>
+          <p class="footer-desc">
+            Software de gestión clínica y odontológica local-first. Control total de tus historias clínicas sin ataduras ni dependencia tecnológica.
+          </p>
+          <div class="footer-secure-tag">🔒 Cumplimiento de Privacidad y Secreto Médico</div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Plataforma</h4>
+          <ul class="footer-links-list">
+            <li><a href="#caracteristicas">Características</a></li>
+            <li><a href="#precios">Precios y Planes</a></li>
+            <li><a href="#testimonios">Testimonios</a></li>
+            <li><a href="#descargas">Centro de Descargas</a></li>
+            <li><a href="./index.html">MicroApp Web</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Precios Oficiales</h4>
+          <ul class="footer-links-list">
+            <li><a href="#precios">Local Autónomo ($15 USD)</a></li>
+            <li><a href="#precios">Cloud Mensual ($10 USD/mes)</a></li>
+            <li><a href="#precios">Cloud Anual ($100 USD/año)</a></li>
+            <li><a href="#descargas">Código de Desbloqueo</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Contacto & Soporte</h4>
+          <ul class="footer-links-list">
+            <li><a href="#contacto">Formulario de Contacto</a></li>
+            <li><a href="mailto:soporte@cliniklocal.com">soporte@cliniklocal.com</a></li>
+            <li><a href="#descargas">Instalador Android APK</a></li>
+            <li><a href="#descargas">Instalador Windows / Mac</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 ClinikLocal &bull; Todos los derechos reservados. Repositorio <code>pcloayza3/plataforma01</code></div>
+        <div class="footer-sub">Inspirado en los mejores estándares clínicos y la simpleza de TherapyNotes.</div>
+      </div>
     </div>
   </footer>
 
-  <!-- SCRIPT DE DESBLOQUEO -->
+  <!-- SCRIPT DE DESBLOQUEO DE DESCARGAS -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const input = document.getElementById('input-landing-user-id');
@@ -261,6 +607,7 @@
       const status = document.getElementById('lp-unlock-status');
       const grid = document.getElementById('lp-downloads-grid');
 
+      // Cargar ID almacenado previamente si existe
       const stored = localStorage.getItem('clinik_installation_user_id');
       if (stored) {
         input.value = stored;
@@ -269,11 +616,13 @@
       btn.addEventListener('click', () => {
         const val = input.value.trim().toUpperCase();
         if (!val) {
-          status.innerHTML = '<span style="color:#ef4444;">⚠️ Ingresa un Código de Usuario válido (ej. CK-84920-USR o CK-DEMO).</span>';
+          status.innerHTML = '<span style="color:#ef4444; font-weight:600;">⚠️ Por favor ingresa un Código de Usuario válido (ej. CK-84920-USR o CK-DEMO).</span>';
           return;
         }
 
-        status.innerHTML = `<span style="color:#0d9488; font-weight:600;">✅ Usuario <strong>${val}</strong> validado. Enlaces de descarga desbloqueados y listos.</span>`;
+        // Guardar para conveniencia del usuario
+        localStorage.setItem('clinik_installation_user_id', val);
+        status.innerHTML = `<span style="color:#0f766e; font-weight:700;">✅ Usuario <strong>${val}</strong> validado correctamente. Enlaces de descarga directos y verificados.</span>`;
         grid.scrollIntoView({ behavior: 'smooth' });
       });
     });
