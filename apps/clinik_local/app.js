@@ -415,11 +415,62 @@ class ClinikApp {
     this.inputRecetaOcr = document.getElementById('input-receta-ocr');
     this.ocrLoadingStatus = document.getElementById('ocr-loading-status');
     this.ocrStatusText = document.getElementById('ocr-status-text');
+    this.recetaScannedPreview = document.getElementById('receta-scanned-preview');
+    this.btnVerRecetaEscaneada = document.getElementById('btn-ver-receta-escaneada');
+    this.btnQuitarRecetaEscaneada = document.getElementById('btn-quitar-receta-escaneada');
+    this.btnVoiceRecetaDx = document.getElementById('btn-voice-receta-dx');
+    this.btnVoiceRecetaInd = document.getElementById('btn-voice-receta-ind');
     this.rxPreviewPaciente = document.getElementById('rx-preview-paciente');
     this.rxPreviewFecha = document.getElementById('rx-preview-fecha');
     this.rxPreviewDx = document.getElementById('rx-preview-dx');
     this.rxPreviewMeds = document.getElementById('rx-preview-meds');
     this.rxPreviewInstrucciones = document.getElementById('rx-preview-instrucciones');
+    this.imagenRecetarioEscaneada = null;
+
+    // Módulo: Solicitud de Análisis Clínicos & Laboratorio
+    this.analisisSelectPaciente = document.getElementById('analisis-select-paciente');
+    this.analisisDiagnostico = document.getElementById('analisis-diagnostico');
+    this.analisisIndicaciones = document.getElementById('analisis-indicaciones');
+    this.analisisEditId = document.getElementById('analisis-edit-id');
+    this.listaEstudiosInputs = document.getElementById('lista-estudios-inputs');
+    this.btnAgregarEstudio = document.getElementById('btn-agregar-estudio');
+    this.btnGuardarAnalisis = document.getElementById('btn-guardar-analisis');
+    this.btnGuardarAnalisisBottom = document.getElementById('btn-guardar-analisis-bottom');
+    this.btnImprimirAnalisis = document.getElementById('btn-imprimir-analisis');
+    this.btnImprimirAnalisisBottom = document.getElementById('btn-imprimir-analisis-bottom');
+    this.btnWaAnalisis = document.getElementById('btn-wa-analisis');
+    this.btnEmailAnalisis = document.getElementById('btn-email-analisis');
+    this.btnLimpiarAnalisis = document.getElementById('btn-limpiar-analisis');
+    this.inputAnalisisOcr = document.getElementById('input-analisis-ocr');
+    this.analisisOcrLoadingStatus = document.getElementById('analisis-ocr-loading-status');
+    this.analisisOcrStatusText = document.getElementById('analisis-ocr-status-text');
+    this.analisisScannedPreview = document.getElementById('analisis-scanned-preview');
+    this.btnVerAnalisisEscaneado = document.getElementById('btn-ver-analisis-escaneado');
+    this.btnQuitarAnalisisEscaneado = document.getElementById('btn-quitar-analisis-escaneado');
+    this.btnVoiceAnalisisDx = document.getElementById('btn-voice-analisis-dx');
+    this.btnVoiceAnalisisInd = document.getElementById('btn-voice-analisis-ind');
+    this.listaAnalisisGuardados = document.getElementById('lista-analisis-guardados');
+    this.anHeaderDoctor = document.getElementById('an-header-doctor');
+    this.anHeaderClinic = document.getElementById('an-header-clinic');
+    this.anHeaderContact = document.getElementById('an-header-contact');
+    this.anPreviewPaciente = document.getElementById('an-preview-paciente');
+    this.anPreviewFecha = document.getElementById('an-preview-fecha');
+    this.anPreviewDx = document.getElementById('an-preview-dx');
+    this.anPreviewEstudios = document.getElementById('an-preview-estudios');
+    this.anPreviewInstrucciones = document.getElementById('an-preview-instrucciones');
+    this.imagenAnalisisEscaneada = null;
+
+    // Visualizador de PDF en Modal
+    this.modalPreviewPdf = document.getElementById('modal-preview-pdf');
+    this.iframePreviewPdf = document.getElementById('iframe-preview-pdf');
+    this.btnDescargarPdfModal = document.getElementById('btn-descargar-pdf-modal');
+    this.btnCerrarModalPdf = document.getElementById('btn-cerrar-modal-pdf');
+    this.btnCerrarModalPdfFooter = document.getElementById('btn-cerrar-modal-pdf-footer');
+    this.modalPreviewPdfTitulo = document.getElementById('modal-preview-pdf-titulo');
+    this.modalPreviewPdfSub = document.getElementById('modal-preview-pdf-sub');
+
+    // Botón de mantenimiento de caché PWA
+    this.btnLimpiarCachePwa = document.getElementById('btn-limpiar-cache-pwa');
 
     // Respaldo
     this.bkMetricPacientes = document.getElementById('bk-metric-pacientes');
@@ -717,15 +768,17 @@ class ClinikApp {
     }
 
     // Recetas, OCR y Generación de PDF
-    this.recetaSelectPaciente.addEventListener('change', () => {
-      this.pacienteActivoId = this.recetaSelectPaciente.value;
-      this.actualizarPreviewReceta();
-      this.renderRecetasGuardadas();
-    });
-    this.recetaDiagnostico.addEventListener('input', () => this.actualizarPreviewReceta());
-    this.recetaIndicaciones.addEventListener('input', () => this.actualizarPreviewReceta());
-    this.btnAgregarFarmaco.addEventListener('click', () => this.agregarFilaFarmaco());
-    this.btnImprimirReceta.addEventListener('click', () => this.generarPdfReceta());
+    if (this.recetaSelectPaciente) {
+      this.recetaSelectPaciente.addEventListener('change', () => {
+        this.pacienteActivoId = this.recetaSelectPaciente.value;
+        this.actualizarPreviewReceta();
+        this.renderRecetasGuardadas();
+      });
+    }
+    if (this.recetaDiagnostico) this.recetaDiagnostico.addEventListener('input', () => this.actualizarPreviewReceta());
+    if (this.recetaIndicaciones) this.recetaIndicaciones.addEventListener('input', () => this.actualizarPreviewReceta());
+    if (this.btnAgregarFarmaco) this.btnAgregarFarmaco.addEventListener('click', () => this.agregarFilaFarmaco());
+    if (this.btnImprimirReceta) this.btnImprimirReceta.addEventListener('click', () => this.generarPdfReceta());
     if (this.btnImprimirRecetaBottom) {
       this.btnImprimirRecetaBottom.addEventListener('click', () => this.generarPdfReceta());
     }
@@ -738,9 +791,73 @@ class ClinikApp {
     if (this.btnLimpiarReceta) {
       this.btnLimpiarReceta.addEventListener('click', () => this.limpiarFormularioReceta());
     }
-    this.btnWaReceta.addEventListener('click', () => this.enviarRecetaWhatsApp());
-    this.btnEmailReceta.addEventListener('click', () => this.enviarRecetaEmail());
-    this.inputRecetaOcr.addEventListener('change', (e) => this.procesarOcrRecetario(e));
+    if (this.btnWaReceta) this.btnWaReceta.addEventListener('click', () => this.enviarRecetaWhatsApp());
+    if (this.btnEmailReceta) this.btnEmailReceta.addEventListener('click', () => this.enviarRecetaEmail());
+    if (this.inputRecetaOcr) this.inputRecetaOcr.addEventListener('change', (e) => this.procesarOcrRecetario(e));
+    if (this.btnVerRecetaEscaneada) {
+      this.btnVerRecetaEscaneada.addEventListener('click', () => {
+        if (this.imagenRecetarioEscaneada) this.abrirLightbox(encodeURIComponent(this.imagenRecetarioEscaneada), 'Recetario Escaneado');
+      });
+    }
+    if (this.btnQuitarRecetaEscaneada) {
+      this.btnQuitarRecetaEscaneada.addEventListener('click', () => {
+        this.imagenRecetarioEscaneada = null;
+        if (this.recetaScannedPreview) this.recetaScannedPreview.classList.add('hidden');
+      });
+    }
+    if (this.btnVoiceRecetaDx) this.setupVoiceDictation(this.btnVoiceRecetaDx, this.recetaDiagnostico);
+    if (this.btnVoiceRecetaInd) this.setupVoiceDictation(this.btnVoiceRecetaInd, this.recetaIndicaciones);
+
+    // Módulo: Solicitud de Análisis Clínicos
+    if (this.analisisSelectPaciente) {
+      this.analisisSelectPaciente.addEventListener('change', () => {
+        this.pacienteActivoId = this.analisisSelectPaciente.value;
+        this.actualizarPreviewAnalisis();
+        this.renderAnalisisGuardados();
+      });
+    }
+    if (this.analisisDiagnostico) this.analisisDiagnostico.addEventListener('input', () => this.actualizarPreviewAnalisis());
+    if (this.analisisIndicaciones) this.analisisIndicaciones.addEventListener('input', () => this.actualizarPreviewAnalisis());
+    if (this.btnAgregarEstudio) this.btnAgregarEstudio.addEventListener('click', () => this.agregarFilaEstudio());
+    if (this.btnGuardarAnalisis) this.btnGuardarAnalisis.addEventListener('click', () => this.guardarAnalisis());
+    if (this.btnGuardarAnalisisBottom) this.btnGuardarAnalisisBottom.addEventListener('click', () => this.guardarAnalisis());
+    if (this.btnImprimirAnalisis) this.btnImprimirAnalisis.addEventListener('click', () => this.generarPdfAnalisis());
+    if (this.btnImprimirAnalisisBottom) this.btnImprimirAnalisisBottom.addEventListener('click', () => this.generarPdfAnalisis());
+    if (this.btnWaAnalisis) this.btnWaAnalisis.addEventListener('click', () => this.enviarAnalisisWhatsApp());
+    if (this.btnEmailAnalisis) this.btnEmailAnalisis.addEventListener('click', () => this.enviarAnalisisEmail());
+    if (this.btnLimpiarAnalisis) this.btnLimpiarAnalisis.addEventListener('click', () => this.limpiarFormularioAnalisis());
+    if (this.inputAnalisisOcr) this.inputAnalisisOcr.addEventListener('change', (e) => this.procesarOcrAnalisis(e));
+    if (this.btnVerAnalisisEscaneado) {
+      this.btnVerAnalisisEscaneado.addEventListener('click', () => {
+        if (this.imagenAnalisisEscaneada) this.abrirLightbox(encodeURIComponent(this.imagenAnalisisEscaneada), 'Orden de Análisis Escaneada');
+      });
+    }
+    if (this.btnQuitarAnalisisEscaneado) {
+      this.btnQuitarAnalisisEscaneado.addEventListener('click', () => {
+        this.imagenAnalisisEscaneada = null;
+        if (this.analisisScannedPreview) this.analisisScannedPreview.classList.add('hidden');
+      });
+    }
+    if (this.btnVoiceAnalisisDx) this.setupVoiceDictation(this.btnVoiceAnalisisDx, this.analisisDiagnostico);
+    if (this.btnVoiceAnalisisInd) this.setupVoiceDictation(this.btnVoiceAnalisisInd, this.analisisIndicaciones);
+
+    // Modal Visualizador de PDF
+    if (this.btnCerrarModalPdf) {
+      this.btnCerrarModalPdf.addEventListener('click', () => this.cerrarModalPreviewPdf());
+    }
+    if (this.btnCerrarModalPdfFooter) {
+      this.btnCerrarModalPdfFooter.addEventListener('click', () => this.cerrarModalPreviewPdf());
+    }
+    if (this.modalPreviewPdf) {
+      this.modalPreviewPdf.addEventListener('click', (e) => {
+        if (e.target === this.modalPreviewPdf) this.cerrarModalPreviewPdf();
+      });
+    }
+
+    // Mantenimiento de Caché PWA
+    if (this.btnLimpiarCachePwa) {
+      this.btnLimpiarCachePwa.addEventListener('click', () => this.limpiarCacheYRecargar());
+    }
 
     // Respaldo y Sincronización
     this.btnExportarLocal.addEventListener('click', () => {
@@ -848,6 +965,7 @@ class ClinikApp {
     // Sincronizar todos los selectores de pacientes
     if (this.selectPacienteHistoria) this.selectPacienteHistoria.value = pacienteId;
     if (this.recetaSelectPaciente) this.recetaSelectPaciente.value = pacienteId;
+    if (this.analisisSelectPaciente) this.analisisSelectPaciente.value = pacienteId;
     if (this.citaPacienteSelect) this.citaPacienteSelect.value = pacienteId;
 
     this.showToast(`🩺 Paciente en Atención activa: ${paciente.nombre}`);
@@ -886,6 +1004,7 @@ class ClinikApp {
       this.pacienteActivoId = this.pacienteEnAtencion;
       if (this.selectPacienteHistoria) this.selectPacienteHistoria.value = this.pacienteEnAtencion;
       if (this.recetaSelectPaciente) this.recetaSelectPaciente.value = this.pacienteEnAtencion;
+      if (this.analisisSelectPaciente) this.analisisSelectPaciente.value = this.pacienteEnAtencion;
     }
 
     if (tabId === 'tab-historia') {
@@ -894,6 +1013,9 @@ class ClinikApp {
     } else if (tabId === 'tab-recetas') {
       this.actualizarPreviewReceta();
       this.renderRecetasGuardadas();
+    } else if (tabId === 'tab-analisis') {
+      this.actualizarPreviewAnalisis();
+      this.renderAnalisisGuardados();
     } else if (tabId === 'tab-agenda') {
       this.renderAgenda();
     }
@@ -908,9 +1030,9 @@ class ClinikApp {
   }
 
   // ==================== DICTADO POR VOZ (WEB SPEECH API) ====================
-  setupVoiceDictation(buttonId, targetInputId) {
-    const btn = document.getElementById(buttonId);
-    const input = document.getElementById(targetInputId);
+  setupVoiceDictation(buttonOrId, targetInputOrId) {
+    const btn = typeof buttonOrId === 'string' ? document.getElementById(buttonOrId) : buttonOrId;
+    const input = typeof targetInputOrId === 'string' ? document.getElementById(targetInputOrId) : targetInputOrId;
     if (!btn || !input) return;
 
     const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -970,28 +1092,45 @@ class ClinikApp {
     const file = e.target.files[0];
     if (!file) return;
 
-    this.ocrLoadingStatus.classList.remove('hidden');
-    this.ocrStatusText.textContent = 'Analizando texto manuscrito o impreso con OCR...';
-
-    try {
-      if (window.Tesseract) {
-        const worker = await Tesseract.createWorker('spa');
-        const ret = await worker.recognize(file);
-        const text = ret.data.text;
-        await worker.terminate();
-        this.aplicarTextoOcrEnReceta(text);
-      } else {
-        setTimeout(() => {
-          const textoExtraido = "Amoxicilina 870mg 1 cada 12 horas por 7 dias\nIbuprofeno 400mg 1 tableta cada 8 horas";
-          this.aplicarTextoOcrEnReceta(textoExtraido);
-        }, 1200);
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      this.imagenRecetarioEscaneada = evt.target.result;
+      if (this.recetaScannedPreview) {
+        this.recetaScannedPreview.classList.remove('hidden');
       }
-    } catch (err) {
-      console.error('Error procesando OCR:', err);
-      this.showToast('⚠️ No se pudo reconocer el texto del recetario.');
-    } finally {
-      this.ocrLoadingStatus.classList.add('hidden');
-    }
+
+      this.ocrLoadingStatus.classList.remove('hidden');
+      this.ocrStatusText.textContent = 'Analizando texto manuscrito o impreso con OCR...';
+
+      try {
+        let textoExtraido = '';
+        if (window.Tesseract) {
+          const worker = await Tesseract.createWorker('spa');
+          const ret = await worker.recognize(file);
+          textoExtraido = ret.data.text;
+          await worker.terminate();
+        }
+
+        if (textoExtraido && textoExtraido.trim()) {
+          this.aplicarTextoOcrEnReceta(textoExtraido);
+        } else {
+          // Si no se pudo obtener texto, los medicamentos se ponen vacíos pero la imagen queda almacenada
+          this.listaFarmacosInputs.innerHTML = '';
+          this.agregarFilaFarmaco('', '', '');
+          this.actualizarPreviewReceta();
+          this.showToast('📷 Imagen del recetario capturada y almacenada.');
+        }
+      } catch (err) {
+        console.error('Error procesando OCR:', err);
+        this.listaFarmacosInputs.innerHTML = '';
+        this.agregarFilaFarmaco('', '', '');
+        this.actualizarPreviewReceta();
+        this.showToast('📷 Imagen del recetario capturada y almacenada (sin texto OCR).');
+      } finally {
+        this.ocrLoadingStatus.classList.add('hidden');
+      }
+    };
+    reader.readAsDataURL(file);
   }
 
   aplicarTextoOcrEnReceta(rawText) {
@@ -1016,7 +1155,7 @@ class ClinikApp {
       const badge = document.createElement('div');
       badge.className = 'service-chip';
       badge.innerHTML = `
-        <span>🔬 ${serv}</span>
+        <span>${serv}</span>
         <button type="button" class="btn-remove-chip" onclick="app.eliminarServicio(${idx})">&times;</button>
       `;
       this.cfgServiciosBadgesList.appendChild(badge);
@@ -1290,7 +1429,7 @@ class ClinikApp {
   }
 
   poblarSelectsPacientes() {
-    const selects = [this.selectPacienteHistoria, this.citaPacienteSelect, this.recetaSelectPaciente];
+    const selects = [this.selectPacienteHistoria, this.citaPacienteSelect, this.recetaSelectPaciente, this.analisisSelectPaciente];
     selects.forEach(sel => {
       if (!sel) return;
       sel.innerHTML = '';
@@ -1305,6 +1444,7 @@ class ClinikApp {
     if (this.pacienteActivoId) {
       if (this.selectPacienteHistoria) this.selectPacienteHistoria.value = this.pacienteActivoId;
       if (this.recetaSelectPaciente) this.recetaSelectPaciente.value = this.pacienteActivoId;
+      if (this.analisisSelectPaciente) this.analisisSelectPaciente.value = this.pacienteActivoId;
     }
   }
 
@@ -1312,8 +1452,10 @@ class ClinikApp {
     this.pacienteActivoId = id;
     if (this.selectPacienteHistoria) this.selectPacienteHistoria.value = id;
     if (this.recetaSelectPaciente) this.recetaSelectPaciente.value = id;
+    if (this.analisisSelectPaciente) this.analisisSelectPaciente.value = id;
     this.renderHistoria();
     this.renderRecetasGuardadas();
+    this.renderAnalisisGuardados();
     this.cambiarPestana('tab-historia');
     this.aplicarVisibilidadModulos();
   }
@@ -1326,6 +1468,14 @@ class ClinikApp {
     this.cambiarPestana('tab-recetas');
   }
 
+  seleccionarPacienteYVerAnalisis(id) {
+    this.pacienteActivoId = id;
+    if (this.analisisSelectPaciente) this.analisisSelectPaciente.value = id;
+    this.actualizarPreviewAnalisis();
+    this.renderAnalisisGuardados();
+    this.cambiarPestana('tab-analisis');
+  }
+
   // ==================== HISTORIA CLÍNICA (EDICIÓN SOLO MISMO DÍA) ====================
   renderHistoria() {
     const paciente = this.db.pacientes.find(p => p.id === this.pacienteActivoId);
@@ -1334,11 +1484,13 @@ class ClinikApp {
       return;
     }
 
-    if (paciente.alergias && paciente.alergias !== 'Ninguna') {
-      this.alertaAlergias.classList.remove('hidden');
-      this.txtAlergiasPaciente.textContent = paciente.alergias;
-    } else {
-      this.alertaAlergias.classList.add('hidden');
+    if (this.alertaAlergias) {
+      if (paciente.alergias && paciente.alergias !== 'Ninguna') {
+        this.alertaAlergias.classList.remove('hidden');
+        if (this.txtAlergiasPaciente) this.txtAlergiasPaciente.textContent = paciente.alergias;
+      } else {
+        this.alertaAlergias.classList.add('hidden');
+      }
     }
 
     // Odontograma FDI (Solo si está activo en config)
@@ -1426,7 +1578,7 @@ class ClinikApp {
         <div class="timeline-meta" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
           <div style="display:flex; align-items:center; gap:0.5rem;">
             <span>📅 ${c.fecha}</span>
-            <span class="service-badge-timeline">🔬 ${c.servicio || 'Consulta Médica'}</span>
+            <span class="service-badge-timeline">${c.servicio || 'Consulta Médica'}</span>
           </div>
           <div>
             ${esMismoDia ? `
@@ -1438,8 +1590,9 @@ class ClinikApp {
             `}
           </div>
         </div>
-        <div class="timeline-dx">🔬 Diagnóstico: ${c.diagnostico}</div>
-        <div class="timeline-tx"><strong>Tratamiento y evolución:</strong> ${c.tratamiento}</div>
+        ${c.motivo ? `<div class="timeline-sintomas" style="margin-top:0.4rem; font-size:0.9rem; color:var(--text-primary);"><strong>Síntomas / Motivo:</strong> ${c.motivo}</div>` : ''}
+        <div class="timeline-dx" style="margin-top:0.35rem;"><strong>Diagnóstico:</strong> ${c.diagnostico}</div>
+        <div class="timeline-tx" style="margin-top:0.35rem;"><strong>Tratamiento y evolución:</strong> ${c.tratamiento}</div>
         ${mediaHtml}
       `;
       this.timelineConsultas.appendChild(card);
@@ -1702,7 +1855,7 @@ class ClinikApp {
       const item = document.createElement('div');
       item.className = 'appointment-card';
 
-      const serviciosBadges = (c.servicios || []).map(s => `<span class="service-pill-mini">🔬 ${s}</span>`).join(' ');
+      const serviciosBadges = (c.servicios || []).map(s => `<span class="service-pill-mini">${s}</span>`).join(' ');
 
       // Cálculo de alerta de días (1 a 5 días)
       const citaDate = new Date(c.fecha + 'T00:00:00');
@@ -1949,19 +2102,40 @@ class ClinikApp {
     row.className = 'med-row';
     row.innerHTML = `
       <div class="med-field-group">
-        <label class="med-field-label">Fármaco / Medicamento:</label>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label class="med-field-label">Fármaco / Medicamento:</label>
+          <button type="button" class="btn-voice-mini btn-dictar-nombre" title="Dictar fármaco por voz">🎙️ Dictar</button>
+        </div>
         <input type="text" class="input-field med-nombre" placeholder="Nombre del Fármaco (ej. Paracetamol 500mg)" value="${nombre}">
       </div>
       <div class="med-field-group">
-        <label class="med-field-label">Posología y Dosis:</label>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label class="med-field-label">Posología y Dosis:</label>
+          <button type="button" class="btn-voice-mini btn-dictar-dosis" title="Dictar dosis por voz">🎙️ Dictar</button>
+        </div>
         <input type="text" class="input-field med-dosis" placeholder="Posología y Dosis (ej. 1 comp cada 8h)" value="${dosis}">
       </div>
       <div class="med-field-group">
-        <label class="med-field-label">Duración del Tratamiento:</label>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label class="med-field-label">Duración del Tratamiento:</label>
+          <button type="button" class="btn-voice-mini btn-dictar-tiempo" title="Dictar duración por voz">🎙️ Dictar</button>
+        </div>
         <input type="text" class="input-field med-tiempo" placeholder="Duración (ej. 5 días)" value="${tiempo}">
       </div>
       <button type="button" class="btn btn-subtle btn-remove-med" onclick="this.closest('.med-row').remove(); app.actualizarPreviewReceta();">🗑️ Quitar Medicamento</button>
     `;
+
+    const inpNombre = row.querySelector('.med-nombre');
+    const inpDosis = row.querySelector('.med-dosis');
+    const inpTiempo = row.querySelector('.med-tiempo');
+
+    const btnDictarNombre = row.querySelector('.btn-dictar-nombre');
+    const btnDictarDosis = row.querySelector('.btn-dictar-dosis');
+    const btnDictarTiempo = row.querySelector('.btn-dictar-tiempo');
+
+    this.setupVoiceDictation(btnDictarNombre, inpNombre);
+    this.setupVoiceDictation(btnDictarDosis, inpDosis);
+    this.setupVoiceDictation(btnDictarTiempo, inpTiempo);
 
     row.querySelectorAll('input').forEach(inp => {
       inp.addEventListener('input', () => this.actualizarPreviewReceta());
@@ -2012,8 +2186,8 @@ class ClinikApp {
       if (n) medicamentos.push({ nombre: n, dosis: d, tiempo: t });
     });
 
-    if (medicamentos.length === 0) {
-      alert('Agrega al menos un medicamento a la receta antes de guardarla.');
+    if (medicamentos.length === 0 && !this.imagenRecetarioEscaneada) {
+      alert('Agrega al menos un medicamento o adjunta la imagen del recetario escaneado antes de guardar.');
       return;
     }
 
@@ -2029,6 +2203,9 @@ class ClinikApp {
         this.db.recetas[idx].diagnostico = diagnostico;
         this.db.recetas[idx].indicaciones = indicaciones;
         this.db.recetas[idx].medicamentos = medicamentos;
+        if (this.imagenRecetarioEscaneada) {
+          this.db.recetas[idx].imagenEscaneada = this.imagenRecetarioEscaneada;
+        }
         this.showToast('✅ Receta actualizada exitosamente.');
       }
     } else {
@@ -2039,7 +2216,8 @@ class ClinikApp {
         fecha: hoyStr,
         diagnostico,
         indicaciones,
-        medicamentos
+        medicamentos,
+        imagenEscaneada: this.imagenRecetarioEscaneada || null
       };
       this.db.recetas.unshift(nuevaReceta);
       this.showToast('✅ Receta guardada en la base de datos.');
@@ -2053,6 +2231,8 @@ class ClinikApp {
     if (this.recetaEditId) this.recetaEditId.value = '';
     this.recetaDiagnostico.value = '';
     this.recetaIndicaciones.value = '';
+    this.imagenRecetarioEscaneada = null;
+    if (this.recetaScannedPreview) this.recetaScannedPreview.classList.add('hidden');
     this.listaFarmacosInputs.innerHTML = '';
     this.agregarFilaFarmaco();
     this.actualizarPreviewReceta();
@@ -2076,21 +2256,30 @@ class ClinikApp {
       item.className = 'saved-prescription-item';
       const esMismoDia = r.fecha === hoyStr;
 
-      const medSummary = (r.medicamentos || []).map(m => `• ${m.nombre} (${m.dosis})`).join('<br>');
+      let medSummary = (r.medicamentos || []).map(m => `• ${m.nombre} (${m.dosis})`).join('<br>');
+      if (!medSummary && r.imagenEscaneada) {
+        medSummary = `<em>[Recetario físico digitalizado con imagen capturada]</em>`;
+      }
 
       item.innerHTML = `
         <div style="flex:1;">
-          <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.25rem;">
+          <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.25rem; flex-wrap:wrap;">
             <strong>📅 ${r.fecha}</strong>
             <span style="font-weight:600; color:var(--color-primary-dark);">Dx: ${r.diagnostico}</span>
             ${esMismoDia ? '<span class="badge-status badge-confirmada" style="font-size:0.7rem;">Emitida Hoy</span>' : '<span class="badge-lock" style="font-size:0.7rem;">🔒 Cerrada</span>'}
+            ${r.imagenEscaneada ? '<span class="badge-active" style="font-size:0.7rem;">📷 Imagen Adjunta</span>' : ''}
           </div>
           <div style="font-size:0.85rem; color:var(--text-main); margin-bottom:0.25rem;">
             ${medSummary}
           </div>
           ${r.indicaciones ? `<div style="font-size:0.75rem; color:var(--text-muted);"><em>Indicaciones: ${r.indicaciones}</em></div>` : ''}
         </div>
-        <div style="display:flex; gap:0.4rem; align-items:center;">
+        <div style="display:flex; gap:0.4rem; align-items:center; flex-wrap:wrap;">
+          ${r.imagenEscaneada ? `
+            <button class="btn btn-subtle" style="font-size:0.75rem; padding:0.3rem 0.5rem;" onclick="app.abrirLightbox('${encodeURIComponent(r.imagenEscaneada)}', 'Recetario Escaneado')">
+              📷 Ver Foto
+            </button>
+          ` : ''}
           ${esMismoDia ? `
             <button class="btn btn-subtle" style="font-size:0.75rem; padding:0.3rem 0.5rem;" onclick="app.cargarRecetaParaEditar('${r.id}')">
               ✏️ Editar
@@ -2114,9 +2303,21 @@ class ClinikApp {
     this.recetaIndicaciones.value = r.indicaciones || '';
     this.listaFarmacosInputs.innerHTML = '';
 
-    (r.medicamentos || []).forEach(m => {
-      this.agregarFilaFarmaco(m.nombre, m.dosis, m.tiempo);
-    });
+    if (r.imagenEscaneada) {
+      this.imagenRecetarioEscaneada = r.imagenEscaneada;
+      if (this.recetaScannedPreview) this.recetaScannedPreview.classList.remove('hidden');
+    } else {
+      this.imagenRecetarioEscaneada = null;
+      if (this.recetaScannedPreview) this.recetaScannedPreview.classList.add('hidden');
+    }
+
+    if (r.medicamentos && r.medicamentos.length > 0) {
+      r.medicamentos.forEach(m => {
+        this.agregarFilaFarmaco(m.nombre, m.dosis, m.tiempo);
+      });
+    } else {
+      this.agregarFilaFarmaco();
+    }
 
     this.actualizarPreviewReceta();
     this.showToast('📝 Receta cargada en el formulario para edición.');
@@ -2245,22 +2446,64 @@ class ClinikApp {
       doc.setTextColor(100, 116, 139);
       doc.text('Firma y Sello del Profesional', 105, 246, { align: 'center' });
 
-      // Guardar archivo PDF directamente
+      // Visualizar documento PDF en pantalla dentro del modal
       const filename = `Receta-${paciente.nombre.replace(/\s+/g, '_')}-${fecha.replace(/\//g, '-')}.pdf`;
-      doc.save(filename);
-
-      // Abrir blob para visualización directa en pantalla
-      try {
-        const blobUrl = doc.output('bloburl');
-        window.open(blobUrl, '_blank');
-      } catch (err) {
-        // Fallback
-      }
-
-      this.showToast(`✅ Receta PDF generada y descargada: ${filename}`);
+      this.mostrarPdfEnModal(doc, filename, `Receta Médica - ${paciente.nombre}`);
     } catch (e) {
       console.error('Error generando PDF:', e);
-      window.print();
+      this.showToast('⚠️ No se pudo generar la vista del documento PDF.');
+    }
+  }
+
+  mostrarPdfEnModal(doc, filename, titulo = 'Documento Clínico PDF') {
+    try {
+      const blob = doc.output('blob');
+      const blobUrl = URL.createObjectURL(blob);
+
+      if (this.iframePreviewPdf) {
+        this.iframePreviewPdf.src = blobUrl;
+      }
+      if (this.btnDescargarPdfModal) {
+        this.btnDescargarPdfModal.href = blobUrl;
+        this.btnDescargarPdfModal.download = filename;
+      }
+      if (this.modalPreviewPdfTitulo) {
+        this.modalPreviewPdfTitulo.textContent = `📄 ${titulo}`;
+      }
+      if (this.modalPreviewPdf) {
+        this.modalPreviewPdf.classList.remove('hidden');
+      }
+      this.showToast(`✅ ${titulo} generado exitosamente.`);
+    } catch (err) {
+      console.error('Error mostrando PDF en modal:', err);
+      doc.save(filename);
+      this.showToast(`✅ Archivo PDF generado y descargado: ${filename}`);
+    }
+  }
+
+  cerrarModalPreviewPdf() {
+    if (this.modalPreviewPdf) {
+      this.modalPreviewPdf.classList.add('hidden');
+    }
+    if (this.iframePreviewPdf) {
+      this.iframePreviewPdf.src = '';
+    }
+  }
+
+  async limpiarCacheYRecargar() {
+    try {
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      }
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        for (let r of regs) await r.unregister();
+      }
+      this.showToast('✅ Caché limpiada y Service Worker actualizado. Recargando aplicación...');
+      setTimeout(() => window.location.reload(true), 800);
+    } catch (err) {
+      window.location.reload(true);
     }
   }
 
@@ -2333,6 +2576,495 @@ class ClinikApp {
     const numeroLimpio = telefono.replace(/\D/g, '');
     const url = `https://wa.me/${numeroLimpio}?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
+  }
+
+  // ==================== SOLICITUD DE ANÁLISIS & LABORATORIO ====================
+  renderAnalisisDefault() {
+    if (!this.listaEstudiosInputs) return;
+    this.listaEstudiosInputs.innerHTML = '';
+    this.agregarFilaEstudio('Hemograma Completo + Recuento Plaquetario', 'Sangre Venosa', 'Evaluación de rutina');
+    this.agregarFilaEstudio('Glucemia en Ayunas', 'Sangre Venosa', 'Control metabólico');
+    this.actualizarPreviewAnalisis();
+    this.renderAnalisisGuardados();
+  }
+
+  agregarFilaEstudio(nombre = '', muestra = '', indicacion = '') {
+    if (!this.listaEstudiosInputs) return;
+    const row = document.createElement('div');
+    row.className = 'analisis-row';
+    row.innerHTML = `
+      <div class="analisis-field-group">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label class="analisis-field-label">Estudio / Examen Solicitado:</label>
+          <button type="button" class="btn-voice-mini btn-dictar-estudio" title="Dictar examen por voz">🎙️ Dictar</button>
+        </div>
+        <input type="text" class="input-field estudio-nombre" placeholder="Nombre del Estudio (ej. Hemograma, Perfil Lipídico, Rx)" value="${nombre}">
+      </div>
+      <div class="analisis-field-group">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label class="analisis-field-label">Tipo de Muestra / Región:</label>
+          <button type="button" class="btn-voice-mini btn-dictar-muestra" title="Dictar muestra por voz">🎙️ Dictar</button>
+        </div>
+        <input type="text" class="input-field estudio-muestra" placeholder="Muestra / Región (ej. Sangre venosa, Orina completa, Tórax)" value="${muestra}">
+      </div>
+      <div class="analisis-field-group">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label class="analisis-field-label">Indicación / Observación Clínica:</label>
+          <button type="button" class="btn-voice-mini btn-dictar-ind" title="Dictar indicación por voz">🎙️ Dictar</button>
+        </div>
+        <input type="text" class="input-field estudio-ind" placeholder="Indicación (ej. Control de rutina, Urgente, Preoperatorio)" value="${indicacion}">
+      </div>
+      <button type="button" class="btn btn-subtle btn-remove-estudio" onclick="this.closest('.analisis-row').remove(); app.actualizarPreviewAnalisis();">🗑️ Quitar Examen</button>
+    `;
+
+    const inpNombre = row.querySelector('.estudio-nombre');
+    const inpMuestra = row.querySelector('.estudio-muestra');
+    const inpInd = row.querySelector('.estudio-ind');
+
+    const btnDictarNombre = row.querySelector('.btn-dictar-estudio');
+    const btnDictarMuestra = row.querySelector('.btn-dictar-muestra');
+    const btnDictarInd = row.querySelector('.btn-dictar-ind');
+
+    this.setupVoiceDictation(btnDictarNombre, inpNombre);
+    this.setupVoiceDictation(btnDictarMuestra, inpMuestra);
+    this.setupVoiceDictation(btnDictarInd, inpInd);
+
+    row.querySelectorAll('input').forEach(inp => {
+      inp.addEventListener('input', () => this.actualizarPreviewAnalisis());
+    });
+
+    this.listaEstudiosInputs.appendChild(row);
+    this.actualizarPreviewAnalisis();
+  }
+
+  actualizarPreviewAnalisis() {
+    if (!this.analisisSelectPaciente) return;
+    const cfg = this.db.config;
+    if (this.anHeaderDoctor) this.anHeaderDoctor.textContent = cfg.doctorName;
+    if (this.anHeaderClinic) this.anHeaderClinic.textContent = cfg.clinicName;
+    if (this.anHeaderContact) this.anHeaderContact.innerHTML = `${cfg.phone} &bull; ${cfg.address} ${cfg.email ? '&bull; ' + cfg.email : ''}`;
+
+    const paciente = this.db.pacientes.find(p => p.id === this.analisisSelectPaciente.value);
+    if (this.anPreviewPaciente) this.anPreviewPaciente.textContent = paciente ? paciente.nombre : 'Seleccione paciente';
+    if (this.anPreviewFecha) this.anPreviewFecha.textContent = new Date().toLocaleDateString('es-ES');
+    if (this.anPreviewDx) this.anPreviewDx.textContent = (this.analisisDiagnostico && this.analisisDiagnostico.value.trim()) || 'Evaluación diagnóstica';
+
+    if (this.anPreviewEstudios && this.listaEstudiosInputs) {
+      const rows = this.listaEstudiosInputs.querySelectorAll('.analisis-row');
+      this.anPreviewEstudios.innerHTML = '';
+      rows.forEach(r => {
+        const n = r.querySelector('.estudio-nombre').value.trim();
+        const m = r.querySelector('.estudio-muestra').value.trim();
+        const ind = r.querySelector('.estudio-ind').value.trim();
+        if (n) {
+          const li = document.createElement('li');
+          li.textContent = `${n} — Muestra: ${m || 'Estándar'} ${ind ? `(Nota: ${ind})` : ''}`;
+          this.anPreviewEstudios.appendChild(li);
+        }
+      });
+    }
+
+    if (this.anPreviewInstrucciones && this.analisisIndicaciones) {
+      this.anPreviewInstrucciones.textContent = this.analisisIndicaciones.value.trim() || 'Ayuno estricto de 8 a 12 horas. Presentarse a primera hora de la mañana en laboratorio.';
+    }
+  }
+
+  async procesarOcrAnalisis(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      this.imagenAnalisisEscaneada = evt.target.result;
+      if (this.analisisScannedPreview) {
+        this.analisisScannedPreview.classList.remove('hidden');
+      }
+
+      if (this.analisisOcrLoadingStatus) {
+        this.analisisOcrLoadingStatus.classList.remove('hidden');
+        if (this.analisisOcrStatusText) this.analisisOcrStatusText.textContent = 'Analizando orden o volante con OCR...';
+      }
+
+      try {
+        let textoExtraido = '';
+        if (window.Tesseract) {
+          const worker = await Tesseract.createWorker('spa');
+          const ret = await worker.recognize(file);
+          textoExtraido = ret.data.text;
+          await worker.terminate();
+        }
+
+        if (textoExtraido && textoExtraido.trim()) {
+          const lineas = textoExtraido.split('\n').map(l => l.trim()).filter(Boolean);
+          lineas.forEach(lin => {
+            this.agregarFilaEstudio(lin, 'Según volante', 'Ver orden física');
+          });
+          if (this.analisisIndicaciones) {
+            this.analisisIndicaciones.value = (this.analisisIndicaciones.value ? this.analisisIndicaciones.value + '\n' : '') + '[Texto OCR]: ' + textoExtraido.replace(/\n+/g, ' ');
+          }
+          this.actualizarPreviewAnalisis();
+          this.showToast('✅ Texto del volante de análisis digitalizado por OCR.');
+        } else {
+          this.listaEstudiosInputs.innerHTML = '';
+          this.agregarFilaEstudio('', '', '');
+          this.actualizarPreviewAnalisis();
+          this.showToast('📷 Imagen de la orden capturada y almacenada.');
+        }
+      } catch (err) {
+        console.error('Error OCR análisis:', err);
+        this.listaEstudiosInputs.innerHTML = '';
+        this.agregarFilaEstudio('', '', '');
+        this.actualizarPreviewAnalisis();
+        this.showToast('📷 Imagen de la orden capturada y almacenada (sin texto OCR).');
+      } finally {
+        if (this.analisisOcrLoadingStatus) this.analisisOcrLoadingStatus.classList.add('hidden');
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  guardarAnalisis() {
+    const pacienteId = this.analisisSelectPaciente ? this.analisisSelectPaciente.value : '';
+    if (!pacienteId) {
+      alert('Seleccione un paciente para emitir la orden de análisis.');
+      return;
+    }
+
+    const diagnostico = this.analisisDiagnostico ? this.analisisDiagnostico.value.trim() || 'Evaluación diagnóstica' : '';
+    const indicaciones = this.analisisIndicaciones ? this.analisisIndicaciones.value.trim() : '';
+    const rows = this.listaEstudiosInputs ? this.listaEstudiosInputs.querySelectorAll('.analisis-row') : [];
+    const estudios = [];
+
+    rows.forEach(r => {
+      const n = r.querySelector('.estudio-nombre').value.trim();
+      const m = r.querySelector('.estudio-muestra').value.trim();
+      const ind = r.querySelector('.estudio-ind').value.trim();
+      if (n) estudios.push({ nombre: n, muestra: m, indicacion: ind });
+    });
+
+    if (estudios.length === 0 && !this.imagenAnalisisEscaneada) {
+      alert('Agrega al menos un estudio o examen a la orden o adjunta la imagen escaneada antes de guardar.');
+      return;
+    }
+
+    const hoyStr = new Date().toISOString().split('T')[0];
+    const editId = this.analisisEditId ? this.analisisEditId.value.trim() : '';
+
+    if (!this.db.analisis) this.db.analisis = [];
+
+    if (editId) {
+      // EDITAR ORDEN DEL MISMO DÍA
+      const idx = this.db.analisis.findIndex(a => a.id === editId);
+      if (idx !== -1) {
+        this.db.analisis[idx].diagnostico = diagnostico;
+        this.db.analisis[idx].indicaciones = indicaciones;
+        this.db.analisis[idx].estudios = estudios;
+        if (this.imagenAnalisisEscaneada) {
+          this.db.analisis[idx].imagenEscaneada = this.imagenAnalisisEscaneada;
+        }
+        this.showToast('✅ Solicitud de análisis actualizada exitosamente.');
+      }
+    } else {
+      // GUARDAR NUEVA ORDEN
+      const nuevaOrden = {
+        id: 'an-' + Date.now(),
+        pacienteId,
+        fecha: hoyStr,
+        diagnostico,
+        indicaciones,
+        estudios,
+        imagenEscaneada: this.imagenAnalisisEscaneada || null
+      };
+      this.db.analisis.unshift(nuevaOrden);
+      this.showToast('✅ Solicitud de análisis guardada en la base de datos.');
+    }
+
+    LocalDatabase.save(this.db);
+    this.renderAnalisisGuardados();
+  }
+
+  limpiarFormularioAnalisis() {
+    if (this.analisisEditId) this.analisisEditId.value = '';
+    if (this.analisisDiagnostico) this.analisisDiagnostico.value = '';
+    if (this.analisisIndicaciones) this.analisisIndicaciones.value = '';
+    this.imagenAnalisisEscaneada = null;
+    if (this.analisisScannedPreview) this.analisisScannedPreview.classList.add('hidden');
+    if (this.listaEstudiosInputs) this.listaEstudiosInputs.innerHTML = '';
+    this.agregarFilaEstudio();
+    this.actualizarPreviewAnalisis();
+  }
+
+  renderAnalisisGuardados() {
+    if (!this.listaAnalisisGuardados) return;
+    const pacienteId = this.analisisSelectPaciente ? this.analisisSelectPaciente.value : this.pacienteActivoId;
+    const ordenes = (this.db.analisis || []).filter(a => a.pacienteId === pacienteId);
+    const hoyStr = new Date().toISOString().split('T')[0];
+
+    this.listaAnalisisGuardados.innerHTML = '';
+
+    if (ordenes.length === 0) {
+      this.listaAnalisisGuardados.innerHTML = `<div style="color:var(--text-muted); font-size:0.85rem; padding:0.5rem 0;">No hay solicitudes de análisis guardadas para este paciente.</div>`;
+      return;
+    }
+
+    ordenes.forEach(a => {
+      const item = document.createElement('div');
+      item.className = 'saved-prescription-item';
+      const esMismoDia = a.fecha === hoyStr;
+
+      let estSummary = (a.estudios || []).map(e => `• ${e.nombre} (${e.muestra || 'General'})`).join('<br>');
+      if (!estSummary && a.imagenEscaneada) {
+        estSummary = `<em>[Orden física digitalizada con imagen capturada]</em>`;
+      }
+
+      item.innerHTML = `
+        <div style="flex:1;">
+          <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.25rem; flex-wrap:wrap;">
+            <strong>📅 ${a.fecha}</strong>
+            <span style="font-weight:600; color:var(--color-secondary, #0284c7);">Dx: ${a.diagnostico}</span>
+            ${esMismoDia ? '<span class="badge-status badge-confirmada" style="font-size:0.7rem;">Emitida Hoy</span>' : '<span class="badge-lock" style="font-size:0.7rem;">🔒 Cerrada</span>'}
+            ${a.imagenEscaneada ? '<span class="badge-active" style="font-size:0.7rem;">📷 Imagen Adjunta</span>' : ''}
+          </div>
+          <div style="font-size:0.85rem; color:var(--text-main); margin-bottom:0.25rem;">
+            ${estSummary}
+          </div>
+          ${a.indicaciones ? `<div style="font-size:0.75rem; color:var(--text-muted);"><em>Instrucciones: ${a.indicaciones}</em></div>` : ''}
+        </div>
+        <div style="display:flex; gap:0.4rem; align-items:center; flex-wrap:wrap;">
+          ${a.imagenEscaneada ? `
+            <button class="btn btn-subtle" style="font-size:0.75rem; padding:0.3rem 0.5rem;" onclick="app.abrirLightbox('${encodeURIComponent(a.imagenEscaneada)}', 'Orden de Análisis Escaneada')">
+              📷 Ver Foto
+            </button>
+          ` : ''}
+          ${esMismoDia ? `
+            <button class="btn btn-subtle" style="font-size:0.75rem; padding:0.3rem 0.5rem;" onclick="app.cargarAnalisisParaEditar('${a.id}')">
+              ✏️ Editar
+            </button>
+          ` : ''}
+          <button class="btn btn-primary" style="font-size:0.75rem; padding:0.3rem 0.5rem;" onclick="app.generarPdfAnalisisGuardado('${a.id}')">
+            📄 PDF
+          </button>
+        </div>
+      `;
+      this.listaAnalisisGuardados.appendChild(item);
+    });
+  }
+
+  cargarAnalisisParaEditar(analisisId) {
+    const a = (this.db.analisis || []).find(x => x.id === analisisId);
+    if (!a) return;
+
+    if (this.analisisEditId) this.analisisEditId.value = a.id;
+    if (this.analisisDiagnostico) this.analisisDiagnostico.value = a.diagnostico || '';
+    if (this.analisisIndicaciones) this.analisisIndicaciones.value = a.indicaciones || '';
+    if (this.listaEstudiosInputs) this.listaEstudiosInputs.innerHTML = '';
+
+    if (a.imagenEscaneada) {
+      this.imagenAnalisisEscaneada = a.imagenEscaneada;
+      if (this.analisisScannedPreview) this.analisisScannedPreview.classList.remove('hidden');
+    } else {
+      this.imagenAnalisisEscaneada = null;
+      if (this.analisisScannedPreview) this.analisisScannedPreview.classList.add('hidden');
+    }
+
+    if (a.estudios && a.estudios.length > 0) {
+      a.estudios.forEach(e => {
+        this.agregarFilaEstudio(e.nombre, e.muestra, e.indicacion);
+      });
+    } else {
+      this.agregarFilaEstudio();
+    }
+
+    this.actualizarPreviewAnalisis();
+    this.showToast('📝 Solicitud cargada en el formulario para edición.');
+  }
+
+  generarPdfAnalisisGuardado(analisisId) {
+    const a = (this.db.analisis || []).find(x => x.id === analisisId);
+    if (!a) return;
+    this.generarPdfAnalisis(a);
+  }
+
+  generarPdfAnalisis(analisisData = null) {
+    const paciente = this.db.pacientes.find(p => p.id === (analisisData ? analisisData.pacienteId : (this.analisisSelectPaciente ? this.analisisSelectPaciente.value : '')));
+    if (!paciente) {
+      alert('Seleccione un paciente válido para emitir la orden en PDF.');
+      return;
+    }
+
+    const cfg = this.db.config;
+    const fecha = analisisData ? analisisData.fecha : new Date().toLocaleDateString('es-ES');
+    const dx = analisisData ? analisisData.diagnostico : ((this.analisisDiagnostico && this.analisisDiagnostico.value.trim()) || 'Evaluación diagnóstica');
+    const indicaciones = analisisData ? analisisData.indicaciones : ((this.analisisIndicaciones && this.analisisIndicaciones.value.trim()) || 'Ayuno estricto de 8 a 12 horas. Presentarse en laboratorio.');
+
+    let estudios = [];
+    if (analisisData && analisisData.estudios) {
+      estudios = analisisData.estudios;
+    } else if (this.listaEstudiosInputs) {
+      const rows = this.listaEstudiosInputs.querySelectorAll('.analisis-row');
+      rows.forEach(r => {
+        const n = r.querySelector('.estudio-nombre').value.trim();
+        const m = r.querySelector('.estudio-muestra').value.trim();
+        const ind = r.querySelector('.estudio-ind').value.trim();
+        if (n) estudios.push({ nombre: n, muestra: m, indicacion: ind });
+      });
+    }
+
+    if (estudios.length === 0) {
+      estudios.push({ nombre: 'Estudios de Laboratorio de Rutina', muestra: 'Sangre Venosa', indicacion: 'Evaluación general' });
+    }
+
+    const jsPDFClass = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : (window.jsPDF || null);
+    if (!jsPDFClass) {
+      this.showToast('⚠️ Biblioteca jsPDF no disponible en este momento.');
+      return;
+    }
+
+    try {
+      const doc = new jsPDFClass({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      // Encabezado
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.setTextColor(15, 23, 42);
+      doc.text(cfg.clinicName || 'CENTRO MÉDICO & LABORATORIO', 105, 20, { align: 'center' });
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(11);
+      doc.setTextColor(71, 85, 105);
+      doc.text(`${cfg.doctorName} • ${cfg.doctorReg}`, 105, 27, { align: 'center' });
+      doc.setFontSize(9);
+      doc.text(`${cfg.address} • Tel: ${cfg.phone} ${cfg.email ? '• ' + cfg.email : ''}`, 105, 33, { align: 'center' });
+
+      // Línea divisoria
+      doc.setDrawColor(2, 132, 199);
+      doc.setLineWidth(0.6);
+      doc.line(20, 38, 190, 38);
+
+      // Datos del paciente
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(15, 23, 42);
+      doc.text('PACIENTE:', 20, 47);
+      doc.setFont('helvetica', 'normal');
+      doc.text(paciente.nombre, 43, 47);
+
+      doc.setFont('helvetica', 'bold');
+      doc.text('FECHA:', 140, 47);
+      doc.setFont('helvetica', 'normal');
+      doc.text(fecha, 157, 47);
+
+      doc.setFont('helvetica', 'bold');
+      doc.text('INDICACIÓN / DX:', 20, 54);
+      doc.setFont('helvetica', 'normal');
+      doc.text(dx, 56, 54);
+
+      // Título de Sección
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.setTextColor(2, 132, 199);
+      doc.text('ORDEN DE ANÁLISIS & ESTUDIOS CLÍNICOS:', 20, 66);
+
+      // Lista de análisis
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(15, 23, 42);
+      let curY = 74;
+
+      estudios.forEach((e, idx) => {
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${idx + 1}. ${e.nombre}`, 22, curY);
+        curY += 5;
+        doc.setFont('helvetica', 'normal');
+        doc.text(`    Muestra/Región: ${e.muestra || 'Estándar'} ${e.indicacion ? `• Nota: ${e.indicacion}` : ''}`, 22, curY);
+        curY += 7;
+      });
+
+      // Instrucciones y preparación
+      curY += 4;
+      doc.setFont('helvetica', 'bold');
+      doc.text('INSTRUCCIONES Y PREPARACIÓN DEL PACIENTE:', 20, curY);
+      curY += 6;
+      doc.setFont('helvetica', 'normal');
+      const splitIndicaciones = doc.splitTextToSize(indicaciones, 170);
+      doc.text(splitIndicaciones, 20, curY);
+
+      // Firma
+      doc.setLineWidth(0.4);
+      doc.setDrawColor(148, 163, 184);
+      doc.line(70, 240, 140, 240);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(100, 116, 139);
+      doc.text('Firma y Sello del Solicitante', 105, 246, { align: 'center' });
+
+      const filename = `Orden_Analisis-${paciente.nombre.replace(/\s+/g, '_')}-${fecha.replace(/\//g, '-')}.pdf`;
+      this.mostrarPdfEnModal(doc, filename, `Orden de Análisis - ${paciente.nombre}`);
+    } catch (e) {
+      console.error('Error generando PDF de análisis:', e);
+      this.showToast('⚠️ No se pudo generar el documento PDF.');
+    }
+  }
+
+  enviarAnalisisWhatsApp() {
+    const paciente = this.db.pacientes.find(p => p.id === (this.analisisSelectPaciente ? this.analisisSelectPaciente.value : ''));
+    if (!paciente || !paciente.telefono) {
+      alert('Seleccione un paciente con número de WhatsApp válido.');
+      return;
+    }
+
+    const cfg = this.db.config;
+    let texto = `*SOLICITUD DE ANÁLISIS CLÍNICOS - ${cfg.clinicName.toUpperCase()}*\n`;
+    texto += `👨‍⚕️ *Profesional Solicitante:* ${cfg.doctorName} (${cfg.doctorReg})\n`;
+    texto += `👤 *Paciente:* ${paciente.nombre}\n`;
+    texto += `📅 *Fecha:* ${new Date().toLocaleDateString('es-ES')}\n`;
+    texto += `🔬 *Indicación / Dx Presuntivo:* ${(this.analisisDiagnostico && this.analisisDiagnostico.value.trim()) || 'Control'}\n\n`;
+    texto += `*ESTUDIOS SOLICITADOS:*\n`;
+
+    const rows = this.listaEstudiosInputs ? this.listaEstudiosInputs.querySelectorAll('.analisis-row') : [];
+    rows.forEach((r, idx) => {
+      const n = r.querySelector('.estudio-nombre').value.trim();
+      const m = r.querySelector('.estudio-muestra').value.trim();
+      if (n) texto += `${idx + 1}. ${n} [Muestra: ${m || 'Estándar'}]\n`;
+    });
+
+    if (this.analisisIndicaciones && this.analisisIndicaciones.value.trim()) {
+      texto += `\n*Preparación del paciente:* ${this.analisisIndicaciones.value.trim()}\n`;
+    }
+
+    texto += `\n📍 *Consultorio:* ${cfg.address}\n`;
+    this.registrarAuditoria('Analisis', `an-${Date.now()}`, 'CREAR', `Orden de análisis enviada por WhatsApp a ${paciente.nombre}`);
+    this.abrirChatWhatsApp(paciente.telefono, texto);
+  }
+
+  enviarAnalisisEmail() {
+    const paciente = this.db.pacientes.find(p => p.id === (this.analisisSelectPaciente ? this.analisisSelectPaciente.value : ''));
+    if (!paciente || !paciente.email) {
+      alert('El paciente no tiene un correo electrónico registrado.');
+      return;
+    }
+
+    const cfg = this.db.config;
+    const asunto = `Solicitud de Análisis Clínicos - ${cfg.clinicName} (${paciente.nombre})`;
+    let cuerpo = `SOLICITUD DE ANÁLISIS CLÍNICOS - ${cfg.clinicName}\nProfesional: ${cfg.doctorName} (${cfg.doctorReg})\nPaciente: ${paciente.nombre}\nFecha: ${new Date().toLocaleDateString('es-ES')}\nDiagnóstico / Motivo: ${(this.analisisDiagnostico && this.analisisDiagnostico.value.trim()) || 'Control'}\n\nESTUDIOS SOLICITADOS:\n`;
+
+    const rows = this.listaEstudiosInputs ? this.listaEstudiosInputs.querySelectorAll('.analisis-row') : [];
+    rows.forEach((r, idx) => {
+      const n = r.querySelector('.estudio-nombre').value.trim();
+      const m = r.querySelector('.estudio-muestra').value.trim();
+      if (n) cuerpo += `${idx + 1}. ${n} (Muestra: ${m})\n`;
+    });
+
+    if (this.analisisIndicaciones && this.analisisIndicaciones.value.trim()) {
+      cuerpo += `\nInstrucciones y Preparación: ${this.analisisIndicaciones.value.trim()}\n`;
+    }
+
+    cuerpo += `\nAtentamente,\n${cfg.doctorName}\n${cfg.clinicName}`;
+    window.location.href = `mailto:${paciente.email}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
   }
 
   // ==================== RESPALDO, AUDITORÍA & PAGOS ====================
@@ -2555,6 +3287,7 @@ class ClinikApp {
     this.renderHistoria();
     this.renderAgenda();
     this.renderRecetasDefault();
+    this.renderAnalisisDefault();
     this.renderRespaldoMetricas();
   }
 }

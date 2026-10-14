@@ -1,11 +1,13 @@
-// ClinikLocal Service Worker - Cache-First para Funcionamiento Offline 100% Autónomo
-const CACHE_NAME = 'cliniklocal-v2.5';
+// ClinikLocal Service Worker - Cache-First v2.7 para Funcionamiento Offline 100% Autónomo
+const CACHE_NAME = 'cliniklocal-v2.7';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './landing.html',
   './styles.css',
+  './landing.css',
   './app.js',
+  './jspdf.min.js',
   './manifest.json',
   './icons/icon.svg'
 ];
@@ -29,7 +31,6 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Solo interceptar peticiones GET dentro del mismo origen
   if (event.request.method !== 'GET') return;
   if (event.request.url.includes('/api/')) return; // Llamadas API pasan directo a red
 
@@ -48,8 +49,11 @@ self.addEventListener('fetch', (event) => {
         });
         return networkResponse;
       }).catch(() => {
-        // Si no hay red y se pide página HTML, fallback a index
-        if (event.request.headers.get('accept').includes('text/html')) {
+        // Fallback inteligente para offline
+        if (event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html')) {
+          if (event.request.url.includes('landing.html')) {
+            return caches.match('./landing.html');
+          }
           return caches.match('./index.html');
         }
       });

@@ -7,14 +7,13 @@
   <meta name="description" content="Plataforma de gestión médica y dental local-first, inspirada en la simplicidad de TherapyNotes. Historias clínicas multimedia, odontograma interactivo, recetas en PDF offline, agenda con alertas de confirmación y precios transparentes.">
   <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
   <link rel="stylesheet" href="./landing.css">
-  <link rel="manifest" href="./manifest.json">
 </head>
 <body>
 
   <!-- ==================== TOP BANNER ==================== -->
   <div class="top-announcement">
     <div class="container top-announcement-content">
-      <span>🚀 <strong>ClinikLocal v2.6 disponible:</strong> Funcionamiento 100% autónomo sin internet, odontograma con notas FDI y recetas con PDF instantáneo.</span>
+      <span>🚀 <strong>ClinikLocal v2.7 disponible:</strong> Funcionamiento 100% autónomo sin internet, órdenes de análisis clínicos, odontograma FDI y recetas con PDF visualizable.</span>
       <a href="#descargas" class="top-link">Descargar instaladores &rarr;</a>
     </div>
   </div>
@@ -25,7 +24,7 @@
       <a href="./landing.html" class="nav-brand">
         <span class="brand-icon">🩺</span>
         <span class="brand-name">ClinikLocal</span>
-        <span class="brand-tag">v2.6</span>
+        <span class="brand-tag">v2.7</span>
       </a>
       <nav class="nav-links">
         <a href="#caracteristicas" class="nav-link">Características</a>
@@ -33,6 +32,7 @@
         <a href="#testimonios" class="nav-link">Testimonios</a>
         <a href="#descargas" class="nav-link">Descargas</a>
         <a href="#contacto" class="nav-link">Contacto</a>
+        <a href="#administracion" class="nav-link">Administración</a>
         <a href="./index.html" class="btn-nav-app">⚡ Abrir App Web</a>
       </nav>
     </div>
@@ -543,6 +543,77 @@
         </div>
       </div>
     </section>
+
+    <!-- ==================== SECCIÓN: ADMINISTRACIÓN & ESTADO DE CLIENTES ==================== -->
+    <section id="administracion" class="section-admin">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-kicker">GESTIÓN COMERCIAL Y CONTROL</span>
+          <h2>Portal de Administración y Estado de Pagos</h2>
+          <p>
+            Supervisión consolidada de clientes, códigos de instalación, planes contratados y verificación de pagos realizados vs. pendientes.
+          </p>
+        </div>
+
+        <!-- TARJETAS DE MÉTRICAS -->
+        <div class="admin-metrics-grid">
+          <div class="admin-metric-card">
+            <span class="admin-metric-title">Total Clientes Registrados</span>
+            <span class="admin-metric-val" id="metric-total-clientes">8</span>
+            <span class="admin-metric-sub">Médicos y odontólogos activos</span>
+          </div>
+          <div class="admin-metric-card" style="border-left: 4px solid #16a34a;">
+            <span class="admin-metric-title">Pagos Confirmados</span>
+            <span class="admin-metric-val" id="metric-clientes-pagados" style="color: #16a34a;">6</span>
+            <span class="admin-metric-sub" id="metric-monto-cobrado">$185.00 USD cobrados</span>
+          </div>
+          <div class="admin-metric-card" style="border-left: 4px solid #d97706;">
+            <span class="admin-metric-title">Pagos Pendientes</span>
+            <span class="admin-metric-val" id="metric-clientes-pendientes" style="color: #d97706;">2</span>
+            <span class="admin-metric-sub" id="metric-monto-pendiente">$35.00 USD por cobrar</span>
+          </div>
+          <div class="admin-metric-card" style="border-left: 4px solid var(--primary);">
+            <span class="admin-metric-title">Tasa de Cumplimiento</span>
+            <span class="admin-metric-val" id="metric-tasa-pago" style="color: var(--primary);">75%</span>
+            <span class="admin-metric-sub">Suscripciones y licencias al día</span>
+          </div>
+        </div>
+
+        <!-- BARRA DE CONTROLES Y FILTROS -->
+        <div class="admin-controls-bar">
+          <div class="admin-filters-group">
+            <button type="button" class="admin-filter-btn active" data-filter="todos" id="btn-filtro-todos">Todos los Clientes (<span id="count-todos">8</span>)</button>
+            <button type="button" class="admin-filter-btn" data-filter="pagado" id="btn-filtro-pagados">✅ Pagaron (<span id="count-pagados">6</span>)</button>
+            <button type="button" class="admin-filter-btn" data-filter="pendiente" id="btn-filtro-pendientes">⏳ Pendientes de Pago (<span id="count-pendientes">2</span>)</button>
+          </div>
+          <div>
+            <input type="text" id="admin-search-input" class="admin-search-input" placeholder="🔍 Buscar por nombre, código o ciudad...">
+          </div>
+        </div>
+
+        <!-- TABLA RESPONSIVA DE CLIENTES Y ESTADO DE PAGO -->
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Profesional / Clínica</th>
+                <th>Especialidad & Ciudad</th>
+                <th>Código de Instalación</th>
+                <th>Plan Contratado</th>
+                <th>Fecha Registro</th>
+                <th>Monto</th>
+                <th>Estado de Pago</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="admin-clientes-tbody">
+              <!-- Filas generadas dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </section>
   </main>
 
   <!-- ==================== FOOTER ==================== -->
@@ -567,6 +638,7 @@
             <li><a href="#precios">Precios y Planes</a></li>
             <li><a href="#testimonios">Testimonios</a></li>
             <li><a href="#descargas">Centro de Descargas</a></li>
+            <li><a href="#administracion">Panel de Administración</a></li>
             <li><a href="./index.html">MicroApp Web</a></li>
           </ul>
         </div>
@@ -577,7 +649,7 @@
             <li><a href="#precios">Local Autónomo ($15 USD)</a></li>
             <li><a href="#precios">Cloud Mensual ($10 USD/mes)</a></li>
             <li><a href="#precios">Cloud Anual ($100 USD/año)</a></li>
-            <li><a href="#descargas">Código de Desbloqueo</a></li>
+            <li><a href="#administracion">Control de Pagos</a></li>
           </ul>
         </div>
 
@@ -599,32 +671,199 @@
     </div>
   </footer>
 
-  <!-- SCRIPT DE DESBLOQUEO DE DESCARGAS -->
+  <!-- SCRIPT DE DESBLOQUEO DE DESCARGAS Y ADMINISTRACIÓN -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      // 1. DESBLOQUEO DE DESCARGAS POR ID
       const input = document.getElementById('input-landing-user-id');
       const btn = document.getElementById('btn-desbloquear-descargas');
       const status = document.getElementById('lp-unlock-status');
       const grid = document.getElementById('lp-downloads-grid');
 
-      // Cargar ID almacenado previamente si existe
       const stored = localStorage.getItem('clinik_installation_user_id');
-      if (stored) {
+      if (stored && input) {
         input.value = stored;
       }
 
-      btn.addEventListener('click', () => {
-        const val = input.value.trim().toUpperCase();
-        if (!val) {
-          status.innerHTML = '<span style="color:#ef4444; font-weight:600;">⚠️ Por favor ingresa un Código de Usuario válido (ej. CK-84920-USR o CK-DEMO).</span>';
+      if (btn && input && status && grid) {
+        btn.addEventListener('click', () => {
+          const val = input.value.trim().toUpperCase();
+          if (!val) {
+            status.innerHTML = '<span style="color:#ef4444; font-weight:600;">⚠️ Por favor ingresa un Código de Usuario válido (ej. CK-84920-USR o CK-DEMO).</span>';
+            return;
+          }
+          localStorage.setItem('clinik_installation_user_id', val);
+          status.innerHTML = `<span style="color:#0f766e; font-weight:700;">✅ Usuario <strong>${val}</strong> validado correctamente. Enlaces de descarga directos y verificados.</span>`;
+          grid.scrollIntoView({ behavior: 'smooth' });
+        });
+      }
+
+      // 2. GESTIÓN DE CLIENTES Y ESTADO DE PAGOS (ADMINISTRACIÓN)
+      const DEFAULT_CLIENTES = [
+        { id: 'cli-1', nombre: 'Dr. Alejandro Fernández', especialidad: 'Medicina General & Dental', ciudad: 'Cochabamba', codigo: 'CK-84920-USR', plan: 'Local Autónomo (Pago Único)', monto: 15, fecha: '2026-10-02', pagado: true },
+        { id: 'cli-2', nombre: 'Dra. Marcela Ugarte', especialidad: 'Odontopediatría', ciudad: 'Santa Cruz', codigo: 'CK-39481-USR', plan: 'Sincronizado Anual ($100/año)', monto: 100, fecha: '2026-09-28', pagado: true },
+        { id: 'cli-3', nombre: 'Dr. Carlos Mendoza', especialidad: 'Cirugía Maxilofacial', ciudad: 'La Paz', codigo: 'CK-71829-USR', plan: 'Sincronizado Mensual ($10/mes)', monto: 10, fecha: '2026-10-10', pagado: true },
+        { id: 'cli-4', nombre: 'Dra. Gabriela Soliz', especialidad: 'Ortodoncia Integral', ciudad: 'Sucre', codigo: 'CK-19042-USR', plan: 'Local Autónomo (Pago Único)', monto: 15, fecha: '2026-10-05', pagado: false },
+        { id: 'cli-5', nombre: 'Dr. Fernando Rocha', especialidad: 'Endodoncia Microscópica', ciudad: 'Cochabamba', codigo: 'CK-55219-USR', plan: 'Sincronizado Mensual ($10/mes)', monto: 10, fecha: '2026-10-11', pagado: true },
+        { id: 'cli-6', nombre: 'Dra. Valeria Quiroga', especialidad: 'Periodoncia & Estética', ciudad: 'Tarija', codigo: 'CK-90341-USR', plan: 'Local Autónomo (Pago Único)', monto: 15, fecha: '2026-09-15', pagado: true },
+        { id: 'cli-7', nombre: 'Dr. Rodrigo Navia', especialidad: 'Medicina Interna', ciudad: 'La Paz', codigo: 'CK-44182-USR', plan: 'Local Autónomo (Pago Único)', monto: 20, fecha: '2026-10-12', pagado: false },
+        { id: 'cli-8', nombre: 'Dra. Claudia Benítez', especialidad: 'Rehabilitación Oral', ciudad: 'Santa Cruz', codigo: 'CK-68214-USR', plan: 'Local Autónomo (Pago Único)', monto: 15, fecha: '2026-10-01', pagado: true }
+      ];
+
+      let clientesData = [];
+      try {
+        const guardados = localStorage.getItem('clinik_admin_clients_v2');
+        clientesData = guardados ? JSON.parse(guardados) : DEFAULT_CLIENTES;
+      } catch (e) {
+        clientesData = DEFAULT_CLIENTES;
+      }
+
+      let filtroActual = 'todos';
+      let busquedaActual = '';
+
+      function guardarClientes() {
+        localStorage.setItem('clinik_admin_clients_v2', JSON.stringify(clientesData));
+      }
+
+      function actualizarMetricas() {
+        const total = clientesData.length;
+        const pagados = clientesData.filter(c => c.pagado);
+        const pendientes = clientesData.filter(c => !c.pagado);
+
+        const montoCobrado = pagados.reduce((sum, c) => sum + c.monto, 0);
+        const montoPendiente = pendientes.reduce((sum, c) => sum + c.monto, 0);
+        const tasa = total > 0 ? Math.round((pagados.length / total) * 100) : 0;
+
+        const elTotal = document.getElementById('metric-total-clientes');
+        const elPag = document.getElementById('metric-clientes-pagados');
+        const elCobrado = document.getElementById('metric-monto-cobrado');
+        const elPend = document.getElementById('metric-clientes-pendientes');
+        const elPorCobrar = document.getElementById('metric-monto-pendiente');
+        const elTasa = document.getElementById('metric-tasa-pago');
+
+        if (elTotal) elTotal.textContent = total;
+        if (elPag) elPag.textContent = pagados.length;
+        if (elCobrado) elCobrado.textContent = `$${montoCobrado.toFixed(2)} USD cobrados`;
+        if (elPend) elPend.textContent = pendientes.length;
+        if (elPorCobrar) elPorCobrar.textContent = `$${montoPendiente.toFixed(2)} USD por cobrar`;
+        if (elTasa) elTasa.textContent = `${tasa}%`;
+
+        const cTodos = document.getElementById('count-todos');
+        const cPag = document.getElementById('count-pagados');
+        const cPend = document.getElementById('count-pendientes');
+        if (cTodos) cTodos.textContent = total;
+        if (cPag) cPag.textContent = pagados.length;
+        if (cPend) cPend.textContent = pendientes.length;
+      }
+
+      function renderTablaClientes() {
+        const tbody = document.getElementById('admin-clientes-tbody');
+        if (!tbody) return;
+
+        let lista = clientesData;
+        if (filtroActual === 'pagado') {
+          lista = lista.filter(c => c.pagado);
+        } else if (filtroActual === 'pendiente') {
+          lista = lista.filter(c => !c.pagado);
+        }
+
+        if (busquedaActual) {
+          const q = busquedaActual.toLowerCase();
+          lista = lista.filter(c =>
+            c.nombre.toLowerCase().includes(q) ||
+            c.especialidad.toLowerCase().includes(q) ||
+            c.ciudad.toLowerCase().includes(q) ||
+            c.codigo.toLowerCase().includes(q)
+          );
+        }
+
+        tbody.innerHTML = '';
+        if (lista.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--text-muted);">No se encontraron clientes con el filtro seleccionado.</td></tr>`;
           return;
         }
 
-        // Guardar para conveniencia del usuario
-        localStorage.setItem('clinik_installation_user_id', val);
-        status.innerHTML = `<span style="color:#0f766e; font-weight:700;">✅ Usuario <strong>${val}</strong> validado correctamente. Enlaces de descarga directos y verificados.</span>`;
-        grid.scrollIntoView({ behavior: 'smooth' });
-      });
+        lista.forEach(c => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>${c.nombre}</strong></td>
+            <td>${c.especialidad}<br><small style="color:var(--text-muted);">${c.ciudad}</small></td>
+            <td><code style="font-size:0.85rem; color:var(--primary);">${c.codigo}</code></td>
+            <td>${c.plan}</td>
+            <td>${c.fecha}</td>
+            <td><strong>$${c.monto}.00 USD</strong></td>
+            <td>
+              ${c.pagado 
+                ? '<span class="badge-pagado">✔ Pagado</span>' 
+                : '<span class="badge-pendiente">⏳ Pendiente de Pago</span>'}
+            </td>
+            <td>
+              <button type="button" class="btn-toggle-pago" data-id="${c.id}">
+                ${c.pagado ? 'Marcar Pendiente' : 'Confirmar Pago'}
+              </button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        // Event listener para botones de cambio de estado
+        tbody.querySelectorAll('.btn-toggle-pago').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const id = e.target.getAttribute('data-id');
+            const cli = clientesData.find(c => c.id === id);
+            if (cli) {
+              cli.pagado = !cli.pagado;
+              guardarClientes();
+              actualizarMetricas();
+              renderTablaClientes();
+            }
+          });
+        });
+      }
+
+      // Filtros
+      const btnTodos = document.getElementById('btn-filtro-todos');
+      const btnPagados = document.getElementById('btn-filtro-pagados');
+      const btnPendientes = document.getElementById('btn-filtro-pendientes');
+      const searchInput = document.getElementById('admin-search-input');
+
+      function setActiveFilterBtn(btnActivo) {
+        [btnTodos, btnPagados, btnPendientes].forEach(b => {
+          if (b) b.classList.remove('active');
+        });
+        if (btnActivo) btnActivo.classList.add('active');
+      }
+
+      if (btnTodos) {
+        btnTodos.addEventListener('click', () => {
+          filtroActual = 'todos';
+          setActiveFilterBtn(btnTodos);
+          renderTablaClientes();
+        });
+      }
+      if (btnPagados) {
+        btnPagados.addEventListener('click', () => {
+          filtroActual = 'pagado';
+          setActiveFilterBtn(btnPagados);
+          renderTablaClientes();
+        });
+      }
+      if (btnPendientes) {
+        btnPendientes.addEventListener('click', () => {
+          filtroActual = 'pendiente';
+          setActiveFilterBtn(btnPendientes);
+          renderTablaClientes();
+        });
+      }
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          busquedaActual = e.target.value.trim();
+          renderTablaClientes();
+        });
+      }
+
+      actualizarMetricas();
+      renderTablaClientes();
     });
   </script>
 </body>
