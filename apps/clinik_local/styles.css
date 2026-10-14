@@ -233,6 +233,13 @@ body[data-theme-mode="dark"] .services-checkbox-grid {
 body[data-theme-mode="dark"] .service-check-item {
   color: #f8fafc !important;
 }
+body[data-theme-mode="dark"] .scanned-receta-box,
+body[data-theme-mode="dark"] .med-row,
+body[data-theme-mode="dark"] .analisis-row {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
 
 body[data-theme-mode="dark"] .service-pill-mini {
   background-color: #0f172a !important;
@@ -1457,12 +1464,47 @@ body {
   margin-bottom: 0.5rem;
 }
 
-.med-row {
-  display: grid;
-  grid-template-columns: 2fr 1fr 2fr auto;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-  align-items: center;
+.med-row,
+.analisis-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  background: var(--bg-subtle);
+  padding: 0.85rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  margin-bottom: 0.75rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.med-row .med-field-group,
+.analisis-row .analisis-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  width: 100%;
+}
+
+.med-row .med-field-label,
+.analisis-row .analisis-field-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.med-row .input-field,
+.analisis-row .input-field {
+  width: 100% !important;
+  box-sizing: border-box;
+}
+
+.btn-remove-med,
+.btn-remove-estudio {
+  align-self: flex-end;
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  padding: 0.35rem 0.65rem;
 }
 
 .prescription-preview-card {
