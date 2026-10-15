@@ -11,10 +11,13 @@
 
     <application
         android:allowBackup="true"
-        android:label="PostyLocal"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="Nota Feliz"
         android:supportsRtl="true"
         android:theme="@style/Theme.PostyLocal">
 
+        <!-- Actividad Principal de la Aplicación -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -25,5 +28,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Servicio Oficial de Protector de Pantalla (Daydream / DreamService) -->
+        <service
+            android:name=".PostyScreensaverService"
+            android:exported="true"
+            android:label="Nota Feliz (Protector de Pantalla)"
+            android:permission="android.permission.BIND_DREAM_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.dreams.DreamService" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.dream"
+                android:resource="@xml/screensaver_info" />
+        </service>
+
     </application>
 </manifest>

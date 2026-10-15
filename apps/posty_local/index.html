@@ -2,10 +2,12 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>PostyLocal • Notas Visuales y Recordatorios Inteligentes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Nota Feliz • Notas Visuales y Recordatorios Inteligentes</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="apple-touch-icon" href="icon.png">
   <meta name="theme-color" content="#ffd54f">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,11 +18,11 @@
   <!-- Mockup de Alerta Push Nativa (Notificación del Smartphone) -->
   <div id="pushNotificationBanner" class="push-banner hidden">
     <div class="push-header">
-      <span class="push-app-icon">📝</span>
-      <span class="push-app-name">PostyLocal • Ahora</span>
+      <span class="push-app-icon">😊</span>
+      <span class="push-app-name">Nota Feliz • Recordatorio</span>
       <button class="push-close" onclick="dismissPush()">✕</button>
     </div>
-    <div class="push-title" id="pushTitle">⏰ Recordatorio Urgente</div>
+    <div class="push-title" id="pushTitle">⏰ Recordatorio Automático</div>
     <div class="push-body" id="pushBody">Pagar factura de luz antes de las 18:00</div>
     <div class="push-actions">
       <button class="push-btn complete" onclick="completeFromPush()">✓ Completar</button>
@@ -34,23 +36,22 @@
     <!-- Barra Superior / Header -->
     <header class="app-header">
       <div class="header-left">
-        <span class="header-badge">MicroApp 2 • Local-First</span>
+        <span class="header-badge">Nota Feliz</span>
         <h1 class="header-title" id="currentDateDisplay">Jueves, 15 Octubre</h1>
         <p class="header-subtitle" id="urgentSummaryText">3 actividades pendientes • 1 urgente</p>
       </div>
       <div class="header-actions">
-        <button class="icon-btn" title="Modo Protector de Pantalla (AOD)" onclick="openScreensaver()">🌙</button>
-        <button class="icon-btn" title="Configurar Lugares & Respaldo" onclick="openSettings()">⚙️</button>
+        <!-- Icono de luna eliminado según requerimiento; el protector de pantalla se configura en el sistema o via DreamService -->
+        <button class="icon-btn" title="Configurar Lugares, Tema & Respaldo" onclick="openSettings()">⚙️</button>
       </div>
     </header>
 
-    <!-- Pestañas de Filtro Rápido -->
-    <nav class="filter-bar">
-      <button class="filter-chip active" id="chipAll" onclick="setFilter('all')">Todas (5)</button>
-      <button class="filter-chip chip-red" id="chipUrgent" onclick="setFilter('urgent')">🔴 Urgente (1)</button>
-      <button class="filter-chip chip-yellow" id="chipContext" onclick="setFilter('context')">🟡 Próximas (2)</button>
-      <button class="filter-chip chip-green" id="chipNormal" onclick="setFilter('normal')">🟢 Libres (2)</button>
-      <button class="filter-chip chip-gray" id="chipDone" onclick="setFilter('completed')">✓ Realizadas (0)</button>
+    <!-- Pestañas de Filtro Rápido (Sin 'Todas'; Soporta click y mantener presionado para selección múltiple) -->
+    <nav class="filter-bar" id="filterBar">
+      <button class="filter-chip chip-red active" id="chipUrgent" data-filter="urgent">🔴 Urgente (1)</button>
+      <button class="filter-chip chip-yellow active" id="chipContext" data-filter="context">🟡 Próximas (2)</button>
+      <button class="filter-chip chip-green active" id="chipNormal" data-filter="normal">🟢 Libres (2)</button>
+      <button class="filter-chip chip-gray" id="chipDone" data-filter="completed">✓ Realizadas (0)</button>
     </nav>
 
     <!-- Tablero de Post-its Diarios (Semáforo de Urgencia) -->
@@ -94,7 +95,7 @@
 
     </main>
 
-    <!-- Barra Inferior de Captura Rápida (Ergonomía de 1 Toque) -->
+    <!-- Barra Inferior de Captura Rápida (Sin botón de simular push; alertas son 100% automáticas) -->
     <footer class="bottom-action-bar">
       <button class="secondary-btn" title="Escribir nota a mano" onclick="openNewNoteModal('manual')">
         ✏️ <span>Escribir</span>
@@ -104,10 +105,6 @@
         <span class="mic-wave-pulse"></span>
         <span class="mic-icon">🎙️</span>
         <span class="mic-caption">DICTAR NOTA</span>
-      </button>
-
-      <button class="secondary-btn" title="Simular alarma push" onclick="simulatePushTrigger()">
-        🔔 <span>Simular Push</span>
       </button>
     </footer>
 
@@ -121,14 +118,14 @@
         <button class="close-x-btn" onclick="closeModal()">✕</button>
       </div>
 
-      <!-- Área de Grabación de Voz Interactiva -->
+      <!-- Área de Grabación de Voz Interactiva Real -->
       <div id="voiceRecordingBox" class="voice-box">
         <div class="voice-status">
           <span class="rec-dot"></span>
-          <span id="recordingTimer">0:05</span>
-          <span class="rec-label">Grabando audio...</span>
+          <span id="recordingTimer">0:00</span>
+          <span class="rec-label" id="voiceStatusLabel">Escuchando voz...</span>
         </div>
-        <div class="audio-waves">
+        <div class="audio-waves" id="audioWaves">
           <div class="bar b1"></div>
           <div class="bar b2"></div>
           <div class="bar b3"></div>
@@ -138,7 +135,8 @@
           <div class="bar b7"></div>
           <div class="bar b8"></div>
         </div>
-        <p class="voice-hint">Hable con naturalidad (ej: <em>"Comprar leche y pan en 15 minutos"</em>)</p>
+        <p class="voice-hint" id="voiceHintText">Dicte su nota con naturalidad. Presione Detener al finalizar.</p>
+        <button type="button" class="btn-voice-stop" id="btnStopVoiceRec" onclick="stopRealVoiceRecording()">⏹️ Detener Grabación</button>
       </div>
 
       <!-- Tarjeta Post-it Editable en Lista (Hasta 5 líneas) -->
@@ -155,7 +153,7 @@
       </div>
 
       <!-- Selector de Color del Post-it (Cambio Inmediato) -->
-      <div class="color-picker-row">
+      <div class="color-picker-row" id="modalColorPicker">
         <span class="picker-label">Color:</span>
         <div class="color-options">
           <button type="button" class="color-opt opt-yellow active" onclick="selectColor('yellow')"></button>
@@ -169,7 +167,7 @@
       <!-- Sección de Alertas Temporales Rápidas (Dinámicas con Frecuencia de Uso) -->
       <div class="trigger-group">
         <div class="trigger-header-row">
-          <label class="trigger-label">⏰ ¿Cuándo alertar con Push?</label>
+          <label class="trigger-label">⏰ ¿Cuándo alertar automáticamente?</label>
           <button type="button" class="btn-text-action" onclick="openVoicePromptModal('time')">➕ Otro tiempo</button>
         </div>
         
@@ -250,77 +248,68 @@
   <div id="screensaverOverlay" class="screensaver-view hidden" onclick="closeScreensaver()">
     <div class="screensaver-content">
       <div class="aod-clock" id="aodClock">21:45</div>
-      <div class="aod-date" id="aodDate">Jueves, 15 de Octubre • En Casa</div>
+      <div class="aod-date" id="aodDate">Jueves, 15 de Octubre • Nota Feliz</div>
       
       <div class="aod-divider"></div>
       
       <div class="aod-tasks-container">
         <div class="aod-subtitle">ACTIVIDADES RELEVANTES POR CUMPLIRSE</div>
-        <div class="aod-task red">
-          <span class="aod-icon">🔴</span>
-          <div class="aod-info">
-            <span class="aod-task-title">Pagar factura de luz antes de las 18:00</span>
-            <span class="aod-task-meta">⏰ Vence en 1h 15m • Alarma activa</span>
-          </div>
-        </div>
-
-        <div class="aod-task yellow">
-          <span class="aod-icon">🟡</span>
-          <div class="aod-info">
-            <span class="aod-task-title">Cerrar llave de gas al salir</span>
-            <span class="aod-task-meta">🏠 Geocerca activa: Al salir de casa</span>
-          </div>
-        </div>
-
-        <div class="aod-task yellow">
-          <span class="aod-icon">🟡</span>
-          <div class="aod-info">
-            <span class="aod-task-title">Comprar leche y frutas frescas</span>
-            <span class="aod-task-meta">🛒 Geocerca activa: Cerca del súper (150m)</span>
-          </div>
+        <div id="screensaverTasksDynamic">
+          <!-- Se inyectan las 3 tareas más prioritarias en tiempo real -->
         </div>
       </div>
 
       <div class="aod-footer-hint">
-        <span>Toque cualquier parte de la pantalla para volver al tablero</span>
+        <span>Toque la pantalla para volver al tablero</span>
       </div>
     </div>
   </div>
 
-  <!-- MODAL DE CONFIGURACIÓN & GEOFENCING -->
+  <!-- MODAL DE CONFIGURACIÓN, TEMA & GEOFENCING -->
   <div id="settingsModal" class="modal-backdrop hidden">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>Configuración & Geocercas</h3>
+        <h3>Configuración de Nota Feliz</h3>
         <button class="close-x-btn" onclick="closeSettings()">✕</button>
       </div>
 
       <div class="settings-content">
+        <!-- Requerimiento 11: Opciones de tema Oscuro, Claro y Sistema -->
+        <h4>🎨 Tema Visual de Fondo</h4>
+        <div class="theme-selector-row">
+          <button type="button" class="theme-btn" id="themeBtnDark" onclick="setAppTheme('dark')">🌙 Oscuro</button>
+          <button type="button" class="theme-btn" id="themeBtnLight" onclick="setAppTheme('light')">☀️ Claro</button>
+          <button type="button" class="theme-btn" id="themeBtnSystem" onclick="setAppTheme('system')">📱 Sistema</button>
+        </div>
+
+        <hr class="settings-divider">
+
+        <!-- Requerimiento 5: Actualización de GPS Real con Geolocation / Puente Nativo -->
         <h4>📍 Mis Lugares de Georreferenciación (Radio 150m)</h4>
-        <p class="settings-desc">Las alertas se activan mediante sensores locales de tu smartphone sin enviar tus coordenadas a ningún servidor.</p>
+        <p class="settings-desc">Las alertas se activan mediante GPS local en su celular sin enviar coordenadas a internet.</p>
 
         <div class="location-item">
           <div>
             <strong>🏠 Casa</strong>
-            <div class="coords-text">Lat: -16.5024, Lng: -68.1311 (Guardada)</div>
+            <div class="coords-text" id="coordsTextCasa">Lat: -16.5024, Lng: -68.1311</div>
           </div>
-          <button class="chip-action" onclick="updateGeoCoord('Casa')">Actualizar Aquí</button>
+          <button class="chip-action" id="btnUpdateCasa" onclick="updateGeoCoord('Casa')">Actualizar Aquí</button>
         </div>
 
         <div class="location-item">
           <div>
             <strong>🛒 Supermercado</strong>
-            <div class="coords-text">Lat: -16.5089, Lng: -68.1275 (Radio 150m)</div>
+            <div class="coords-text" id="coordsTextSupermercado">Lat: -16.5089, Lng: -68.1275</div>
           </div>
-          <button class="chip-action" onclick="updateGeoCoord('Supermercado')">Actualizar Aquí</button>
+          <button class="chip-action" id="btnUpdateSupermercado" onclick="updateGeoCoord('Supermercado')">Actualizar Aquí</button>
         </div>
 
         <div class="location-item">
           <div>
             <strong>🏢 Trabajo / Oficina</strong>
-            <div class="coords-text">Lat: -16.5140, Lng: -68.1210 (Radio 150m)</div>
+            <div class="coords-text" id="coordsTextTrabajo">Lat: -16.5140, Lng: -68.1210</div>
           </div>
-          <button class="chip-action" onclick="updateGeoCoord('Trabajo')">Actualizar Aquí</button>
+          <button class="chip-action" id="btnUpdateTrabajo" onclick="updateGeoCoord('Trabajo')">Actualizar Aquí</button>
         </div>
 
         <hr class="settings-divider">
@@ -328,16 +317,16 @@
         <h4>💾 Respaldo y Soberanía Local</h4>
         <div class="backup-actions">
           <button class="backup-btn" onclick="exportDataJSON()">📥 Exportar Notas & Audios (JSON)</button>
-          <button class="backup-btn" onclick="resetDemoData()">🔄 Restaurar Datos de Demostración</button>
+          <button class="backup-btn" onclick="resetDemoData()">🔄 Restaurar Datos Iniciales</button>
         </div>
 
         <div class="privacy-callout">
-          🛡️ <strong>100% Local-First:</strong> Todos los audios, textos y ubicaciones residen en este dispositivo.
+          🛡️ <strong>100% Local-First:</strong> Todos los audios, textos y ubicaciones residen únicamente en este dispositivo.
         </div>
       </div>
 
       <div class="modal-footer">
-        <button class="btn-save" onclick="closeSettings()">Entendido</button>
+        <button class="btn-save" onclick="closeSettings()">Cerrar</button>
       </div>
     </div>
   </div>

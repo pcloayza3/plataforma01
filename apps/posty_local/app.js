@@ -1,8 +1,8 @@
-// app.js • PostyLocal Interactive Mobile Logic
+// app.js • Nota Feliz (PostyLocal) Interactive Mobile Logic
 // Stand-Alone Embebido • Cero Servidores • 100% Local-First
-// Soporte de Edición, Listas de hasta 5 líneas con audio, Transición de 1s a Realizadas y Dictado por voz de alertas
+// Dictado de voz real, grabación de audio real, filtros múltiples con pulsación larga, GPS satelital y alertas automáticas
 
-// Datos iniciales de demostración con líneas estructuradas
+// Datos iniciales de demostración
 const DEFAULT_NOTES = [
   {
     id: 'n1',
@@ -14,8 +14,8 @@ const DEFAULT_NOTES = [
     completedAt: null,
     createdAt: Date.now() - 3600000,
     lines: [
-      { id: 'n1-l1', text: 'Pagar factura de luz antes de las 18:00', completed: false, hasAudio: true, audioDuration: '0:12' },
-      { id: 'n1-l2', text: 'Descargar comprobante en PDF', completed: false, hasAudio: false, audioDuration: null }
+      { id: 'n1-l1', text: 'Pagar factura de luz antes de las 18:00', completed: false, hasAudio: true, audioDuration: '0:12', audioData: null },
+      { id: 'n1-l2', text: 'Descargar comprobante en PDF', completed: false, hasAudio: false, audioDuration: null, audioData: null }
     ]
   },
   {
@@ -28,8 +28,8 @@ const DEFAULT_NOTES = [
     completedAt: null,
     createdAt: Date.now() - 7200000,
     lines: [
-      { id: 'n2-l1', text: 'Cerrar la llave de paso de gas', completed: false, hasAudio: true, audioDuration: '0:07' },
-      { id: 'n2-l2', text: 'Desconectar cargadores de pared', completed: false, hasAudio: false, audioDuration: null }
+      { id: 'n2-l1', text: 'Cerrar la llave de paso de gas', completed: false, hasAudio: true, audioDuration: '0:07', audioData: null },
+      { id: 'n2-l2', text: 'Desconectar cargadores de pared', completed: false, hasAudio: false, audioDuration: null, audioData: null }
     ]
   },
   {
@@ -42,9 +42,9 @@ const DEFAULT_NOTES = [
     completedAt: null,
     createdAt: Date.now() - 10800000,
     lines: [
-      { id: 'n3-l1', text: 'Comprar leche descremada', completed: false, hasAudio: false, audioDuration: null },
-      { id: 'n3-l2', text: 'Manzanas verdes y plátanos', completed: false, hasAudio: true, audioDuration: '0:09' },
-      { id: 'n3-l3', text: 'Avena en grano sin azúcar', completed: false, hasAudio: false, audioDuration: null }
+      { id: 'n3-l1', text: 'Comprar leche descremada', completed: false, hasAudio: false, audioDuration: null, audioData: null },
+      { id: 'n3-l2', text: 'Manzanas verdes y plátanos', completed: false, hasAudio: true, audioDuration: '0:09', audioData: null },
+      { id: 'n3-l3', text: 'Avena en grano sin azúcar', completed: false, hasAudio: false, audioDuration: null, audioData: null }
     ]
   },
   {
@@ -57,7 +57,7 @@ const DEFAULT_NOTES = [
     completedAt: null,
     createdAt: Date.now() - 14400000,
     lines: [
-      { id: 'n4-l1', text: 'Llamar a carpintero para repisa de libros', completed: false, hasAudio: false, audioDuration: null }
+      { id: 'n4-l1', text: 'Llamar a carpintero para repisa de libros', completed: false, hasAudio: false, audioDuration: null, audioData: null }
     ]
   },
   {
@@ -70,12 +70,12 @@ const DEFAULT_NOTES = [
     completedAt: null,
     createdAt: Date.now() - 18000000,
     lines: [
-      { id: 'n5-l1', text: 'Revisar apuntes de economía', completed: false, hasAudio: true, audioDuration: '0:14' }
+      { id: 'n5-l1', text: 'Revisar apuntes de economía', completed: false, hasAudio: true, audioDuration: '0:14', audioData: null }
     ]
   }
 ];
 
-// Presets dinámicos con frecuencia de uso (más utilizados en primer plano)
+// Presets dinámicos con frecuencia de uso
 const DEFAULT_TIME_PRESETS = [
   { id: 't15', label: '+15 min', minutes: 15, uses: 22 },
   { id: 't30', label: '+30 min', minutes: 30, uses: 16 },
@@ -99,29 +99,78 @@ let notes = [];
 let timePresets = [];
 let geoPresets = [];
 
-let currentFilter = 'all';
+// Filtros activos (soporta selección múltiple mediante pulsación prolongada)
+let activeFilters = new Set(['urgent', 'context', 'normal']);
+
 let selectedModalColor = 'yellow';
 let selectedTriggerType = 'none';
 let selectedTriggerLabel = 'Ninguna asignada';
-let editingNoteId = null; // null si es nueva, string si se está editando
-let modalLines = []; // Líneas en el modal (máx 5)
+let editingNoteId = null;
+let modalLines = [];
 
+let activeAudioElement = null;
 let activeAudioId = null;
-let audioInterval = null;
-let currentVoicePromptType = 'time'; // 'time' o 'geo'
+let currentVoicePromptType = 'time';
+
+// Variables de Grabación de Audio Real (MediaRecorder)
+let mediaRecorder = null;
+let audioChunks = [];
+let recordingStartTime = 0;
+let recordingTimerInterval = null;
+let activeRecordingLineIndex = 0;
+let isRecordingActive = false;
+
+// Reconocimiento de Voz Web (Web Speech API)
+let webSpeechRecognition = null;
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
+  initAppTheme();
   loadNotes();
   loadPresets();
+  setupFilterLongPress();
   renderBoard();
   renderTriggerPresets();
   startClockUpdater();
+  startAutomaticAlertMonitor();
+
+  // Si se abre como protector de pantalla (Daydream en Android: ?screensaver=1)
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('screensaver') === '1') {
+    openScreensaver();
+  }
 });
 
-// Cargar o Inicializar
+// 11. GESTIÓN DE TEMAS (OSCURO, CLARO, SISTEMA)
+function initAppTheme() {
+  const savedTheme = localStorage.getItem('posty_theme') || 'system';
+  setAppTheme(savedTheme, false);
+}
+
+function setAppTheme(theme, save = true) {
+  document.body.setAttribute('data-theme', theme);
+  if (save) {
+    localStorage.setItem('posty_theme', theme);
+  }
+
+  // Actualizar botones en configuración
+  const buttons = {
+    dark: document.getElementById('themeBtnDark'),
+    light: document.getElementById('themeBtnLight'),
+    system: document.getElementById('themeBtnSystem')
+  };
+
+  Object.keys(buttons).forEach(k => {
+    if (buttons[k]) {
+      if (k === theme) buttons[k].classList.add('active');
+      else buttons[k].classList.remove('active');
+    }
+  });
+}
+
+// Persistencia en LocalStorage
 function loadNotes() {
-  const saved = localStorage.getItem('postylocal_notes');
+  const saved = localStorage.getItem('posty_notes_v2');
   if (saved) {
     try {
       notes = JSON.parse(saved);
@@ -135,216 +184,89 @@ function loadNotes() {
 }
 
 function saveToStorage() {
-  localStorage.setItem('postylocal_notes', JSON.stringify(notes));
+  localStorage.setItem('posty_notes_v2', JSON.stringify(notes));
 }
 
 function loadPresets() {
-  const savedTime = localStorage.getItem('postylocal_time_presets');
+  const savedTime = localStorage.getItem('posty_time_presets');
   timePresets = savedTime ? JSON.parse(savedTime) : JSON.parse(JSON.stringify(DEFAULT_TIME_PRESETS));
 
-  const savedGeo = localStorage.getItem('postylocal_geo_presets');
+  const savedGeo = localStorage.getItem('posty_geo_presets');
   geoPresets = savedGeo ? JSON.parse(savedGeo) : JSON.parse(JSON.stringify(DEFAULT_GEO_PRESETS));
-}
 
-function savePresets() {
-  localStorage.setItem('postylocal_time_presets', JSON.stringify(timePresets));
-  localStorage.setItem('postylocal_geo_presets', JSON.stringify(geoPresets));
-}
-
-// Clasificador de Urgencia (Mañana y Siguiente Semana son PRÓXIMAS / AMARILLO)
-function classifyUrgency(triggerType, presetObj) {
-  if (triggerType === 'geo') {
-    return 'context'; // Amarillo
-  }
-  if (triggerType === 'time') {
-    if (presetObj && (presetObj.isTomorrow || presetObj.isNextWeek || (presetObj.label && (presetObj.label.includes('Mañana') || presetObj.label.includes('Semana'))))) {
-      return 'context'; // Amarillo (Próxima)
+  // Cargar coordenadas de lugares guardadas
+  ['Casa', 'Supermercado', 'Trabajo'].forEach(p => {
+    const savedCoord = localStorage.getItem(`posty_geo_coords_${p}`);
+    if (savedCoord) {
+      const el = document.getElementById(`coordsText${p}`);
+      if (el) el.textContent = savedCoord;
     }
-    return 'urgent'; // Rojo (Hoy / en minutos)
-  }
-  return 'normal'; // Verde
+  });
 }
 
-// Renderizado de Presets Dinámicos con prioridad a los más usados
-function renderTriggerPresets() {
-  const primaryTimeBox = document.getElementById('primaryTimePresets');
-  const secondaryTimeBox = document.getElementById('secondaryTimePresets');
-  const primaryGeoBox = document.getElementById('primaryGeoPresets');
-  const secondaryGeoBox = document.getElementById('secondaryGeoPresets');
+// 4. FILTROS RÁPIDOS Y SOPORTE DE PULSACIÓN LARGA (MULTI-SELECCIÓN)
+function setupFilterLongPress() {
+  const chips = document.querySelectorAll('.filter-chip');
+  chips.forEach(chip => {
+    let pressTimer = null;
+    let isLongPress = false;
 
-  if (!primaryTimeBox || !primaryGeoBox) return;
+    const startPress = () => {
+      isLongPress = false;
+      pressTimer = setTimeout(() => {
+        isLongPress = true;
+        handleFilterLongPress(chip.getAttribute('data-filter'));
+        if (navigator.vibrate) navigator.vibrate(50);
+      }, 450); // 450ms para mantener presionado
+    };
 
-  primaryTimeBox.innerHTML = '';
-  secondaryTimeBox.innerHTML = '';
-  primaryGeoBox.innerHTML = '';
-  secondaryGeoBox.innerHTML = '';
+    const cancelPress = () => {
+      if (pressTimer) {
+        clearTimeout(pressTimer);
+        pressTimer = null;
+      }
+    };
 
-  const sortedTimes = [...timePresets].sort((a, b) => b.uses - a.uses);
-  const sortedGeos = [...geoPresets].sort((a, b) => b.uses - a.uses);
+    chip.addEventListener('touchstart', startPress, { passive: true });
+    chip.addEventListener('touchend', (e) => {
+      cancelPress();
+      if (!isLongPress) {
+        handleFilterClick(chip.getAttribute('data-filter'));
+      }
+    });
+    chip.addEventListener('touchcancel', cancelPress);
 
-  const mainTimes = sortedTimes.slice(0, 4);
-  const extraTimes = sortedTimes.slice(4);
-
-  mainTimes.forEach(p => primaryTimeBox.appendChild(createPresetButton(p, 'time')));
-  extraTimes.forEach(p => secondaryTimeBox.appendChild(createPresetButton(p, 'time')));
-
-  const btnToggleMoreTime = document.getElementById('btnToggleMoreTime');
-  if (btnToggleMoreTime) {
-    btnToggleMoreTime.style.display = extraTimes.length > 0 ? 'inline-flex' : 'none';
-  }
-
-  const mainGeos = sortedGeos.slice(0, 3);
-  const extraGeos = sortedGeos.slice(3);
-
-  mainGeos.forEach(g => primaryGeoBox.appendChild(createPresetButton(g, 'geo')));
-  extraGeos.forEach(g => secondaryGeoBox.appendChild(createPresetButton(g, 'geo')));
-
-  const btnToggleMoreGeo = document.getElementById('btnToggleMoreGeo');
-  if (btnToggleMoreGeo) {
-    btnToggleMoreGeo.style.display = extraGeos.length > 0 ? 'inline-flex' : 'none';
-  }
+    chip.addEventListener('mousedown', startPress);
+    chip.addEventListener('mouseup', () => {
+      cancelPress();
+      if (!isLongPress) {
+        handleFilterClick(chip.getAttribute('data-filter'));
+      }
+    });
+    chip.addEventListener('mouseleave', cancelPress);
+  });
 }
 
-function createPresetButton(item, type) {
-  const btn = document.createElement('button');
-  btn.type = 'button';
-  btn.className = `preset-btn ${type === 'geo' ? 'geo-btn' : ''}`;
-  btn.textContent = item.label;
-  btn.onclick = () => {
-    if (type === 'time') selectTimePreset(item, btn);
-    else selectGeoPreset(item, btn);
-  };
-  return btn;
-}
-
-function selectTimePreset(preset, btnElement) {
-  selectedTriggerType = 'time';
-  selectedTriggerLabel = `⏰ ${preset.label}`;
-  preset.uses = (preset.uses || 0) + 1;
-  savePresets();
-
-  document.getElementById('selectedTriggerText').textContent = `Alerta programada: ${selectedTriggerLabel}`;
-  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-  if (btnElement) btnElement.classList.add('active');
-}
-
-function selectGeoPreset(preset, btnElement) {
-  selectedTriggerType = 'geo';
-  selectedTriggerLabel = `📍 ${preset.label}`;
-  preset.uses = (preset.uses || 0) + 1;
-  savePresets();
-
-  document.getElementById('selectedTriggerText').textContent = `Alerta de Ubicación: ${preset.label}`;
-  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-  if (btnElement) btnElement.classList.add('active');
-}
-
-function toggleMoreTimePresets() {
-  const box = document.getElementById('secondaryTimePresets');
-  const btn = document.getElementById('btnToggleMoreTime');
-  box.classList.toggle('hidden');
-  const isHidden = box.classList.contains('hidden');
-  btn.querySelector('span:first-child').textContent = isHidden ? 'Ver más horarios' : 'Ocultar horarios';
-  btn.querySelector('.arrow-icon').textContent = isHidden ? '▼' : '▲';
-}
-
-function toggleMoreGeoPresets() {
-  const box = document.getElementById('secondaryGeoPresets');
-  const btn = document.getElementById('btnToggleMoreGeo');
-  box.classList.toggle('hidden');
-  const isHidden = box.classList.contains('hidden');
-  btn.querySelector('span:first-child').textContent = isHidden ? 'Ver más lugares' : 'Ocultar lugares';
-  btn.querySelector('.arrow-icon').textContent = isHidden ? '▼' : '▲';
-}
-
-// Modal de Dictado / Texto para Crear Otro Tiempo o Lugar
-function openVoicePromptModal(type) {
-  currentVoicePromptType = type;
-  const modal = document.getElementById('voicePromptModal');
-  const title = document.getElementById('voicePromptTitle');
-  const hint = document.getElementById('voicePromptHint');
-  const inputLabel = document.getElementById('voicePromptInputLabel');
-  const input = document.getElementById('voicePromptTextInput');
-
-  input.value = '';
-  modal.classList.remove('hidden');
-
-  if (type === 'time') {
-    title.textContent = '⏰ Agregar Horario por Voz';
-    hint.textContent = 'Dicte el tiempo (ej: "45 minutos", "3 horas", "mañana a las diez")';
-    inputLabel.textContent = 'O escriba el tiempo directamente:';
-    input.placeholder = 'Ej: +45 min, Mañana 10:00';
+function handleFilterClick(filterType) {
+  // Clic simple: Selecciona únicamente ese filtro (o si ya era el único, activa todos los activos)
+  if (activeFilters.size === 1 && activeFilters.has(filterType)) {
+    activeFilters = new Set(['urgent', 'context', 'normal']);
   } else {
-    title.textContent = '📍 Agregar Nuevo Lugar por Voz';
-    hint.textContent = 'Dicte el nombre del sitio (ej: "Farmacia", "Colegio", "Gimnasio")';
-    inputLabel.textContent = 'O escriba el nombre del lugar:';
-    input.placeholder = 'Ej: Farmacia Central, Colegio San Martín';
+    activeFilters = new Set([filterType]);
   }
+  renderBoard();
 }
 
-function closeVoicePromptModal() {
-  document.getElementById('voicePromptModal').classList.add('hidden');
-}
-
-function triggerVoicePromptDictation() {
-  const input = document.getElementById('voicePromptTextInput');
-  const caption = document.getElementById('promptMicCaption');
-  caption.textContent = 'ESCUCHANDO...';
-
-  // Simulación fonética o reconocimiento real
-  setTimeout(() => {
-    if (currentVoicePromptType === 'time') {
-      const times = ['+45 min', 'Mañana 10:00', 'Siguiente Lunes', '+3 horas'];
-      input.value = times[Math.floor(Math.random() * times.length)];
-    } else {
-      const places = ['Farmacia San Lucas', 'Gimnasio Olimpo', 'Colegio Alemán', 'Banco Central'];
-      input.value = places[Math.floor(Math.random() * places.length)];
+function handleFilterLongPress(filterType) {
+  // Mantener presionado: Agrega o remueve ese filtro de la multi-selección
+  if (activeFilters.has(filterType)) {
+    if (activeFilters.size > 1) {
+      activeFilters.delete(filterType);
     }
-    caption.textContent = 'PULSAR PARA HABLAR';
-  }, 1200);
-}
-
-function confirmVoicePrompt() {
-  const input = document.getElementById('voicePromptTextInput');
-  const val = input.value.trim();
-  if (!val) {
-    alert('Por favor dicte o escriba un valor.');
-    return;
-  }
-
-  if (currentVoicePromptType === 'time') {
-    const isTomorrow = val.toLowerCase().includes('mañana');
-    const isNextWeek = val.toLowerCase().includes('semana') || val.toLowerCase().includes('lunes');
-    const newPreset = {
-      id: 't_c_' + Date.now(),
-      label: val.startsWith('+') || val.includes(':') || isTomorrow || isNextWeek ? val : `+${val}`,
-      isTomorrow: isTomorrow,
-      isNextWeek: isNextWeek,
-      uses: 35 // Alta prioridad
-    };
-    timePresets.push(newPreset);
-    savePresets();
-    renderTriggerPresets();
-    selectTimePreset(newPreset);
   } else {
-    const icon = val.toLowerCase().includes('farmacia') ? '💊' :
-                 val.toLowerCase().includes('gym') || val.toLowerCase().includes('gimnasio') ? '🏋️' :
-                 val.toLowerCase().includes('colegio') ? '🏫' :
-                 val.toLowerCase().includes('banco') ? '🏦' : '📍';
-    const newGeo = {
-      id: 'g_c_' + Date.now(),
-      label: `${icon} Cerca de ${val}`,
-      place: val,
-      transition: 'ENTER',
-      uses: 40 // Alta prioridad
-    };
-    geoPresets.push(newGeo);
-    savePresets();
-    renderTriggerPresets();
-    selectGeoPreset(newGeo);
+    activeFilters.add(filterType);
   }
-
-  closeVoicePromptModal();
+  renderBoard();
 }
 
 // Renderizado del Tablero
@@ -353,6 +275,8 @@ function renderBoard() {
   const gridContext = document.getElementById('gridContext');
   const gridNormal = document.getElementById('gridNormal');
   const gridCompleted = document.getElementById('gridCompleted');
+
+  if (!gridUrgent || !gridContext || !gridNormal || !gridCompleted) return;
 
   gridUrgent.innerHTML = '';
   gridContext.innerHTML = '';
@@ -370,45 +294,64 @@ function renderBoard() {
     else gridNormal.appendChild(card);
   });
 
-  // Renderizar Notas Cumplidas (Solo lectura y escucha)
+  // Renderizar Notas Cumplidas
   completedNotes.forEach(note => {
     const card = createNoteCardElement(note, true);
     gridCompleted.appendChild(card);
   });
 
-  // Filtrado de Secciones
-  const showAll = currentFilter === 'all';
-  document.getElementById('sectionUrgent').style.display = (showAll || currentFilter === 'urgent') ? 'flex' : 'none';
-  document.getElementById('sectionContext').style.display = (showAll || currentFilter === 'context') ? 'flex' : 'none';
-  document.getElementById('sectionNormal').style.display = (showAll || currentFilter === 'normal') ? 'flex' : 'none';
-  document.getElementById('sectionCompleted').style.display = (currentFilter === 'completed') ? 'flex' : 'none';
+  // Visibilidad de secciones según activeFilters
+  document.getElementById('sectionUrgent').style.display = activeFilters.has('urgent') ? 'flex' : 'none';
+  document.getElementById('sectionContext').style.display = activeFilters.has('context') ? 'flex' : 'none';
+  document.getElementById('sectionNormal').style.display = activeFilters.has('normal') ? 'flex' : 'none';
+  document.getElementById('sectionCompleted').style.display = activeFilters.has('completed') ? 'flex' : 'none';
 
-  // Contadores en pestañas
+  // Actualizar estado visual de los chips de filtro
+  const chipMap = {
+    urgent: document.getElementById('chipUrgent'),
+    context: document.getElementById('chipContext'),
+    normal: document.getElementById('chipNormal'),
+    completed: document.getElementById('chipDone')
+  };
+
   const urgentCount = activeNotes.filter(n => n.urgency === 'urgent').length;
   const contextCount = activeNotes.filter(n => n.urgency === 'context').length;
   const normalCount = activeNotes.filter(n => n.urgency === 'normal').length;
 
-  document.getElementById('chipAll').textContent = `Todas (${activeNotes.length})`;
-  document.getElementById('chipUrgent').textContent = `🔴 Urgente (${urgentCount})`;
-  document.getElementById('chipContext').textContent = `🟡 Próximas (${contextCount})`;
-  document.getElementById('chipNormal').textContent = `🟢 Libres (${normalCount})`;
-  document.getElementById('chipDone').textContent = `✓ Realizadas (${completedNotes.length})`;
+  if (chipMap.urgent) {
+    chipMap.urgent.textContent = `🔴 Urgente (${urgentCount})`;
+    chipMap.urgent.classList.toggle('active', activeFilters.has('urgent'));
+  }
+  if (chipMap.context) {
+    chipMap.context.textContent = `🟡 Próximas (${contextCount})`;
+    chipMap.context.classList.toggle('active', activeFilters.has('context'));
+  }
+  if (chipMap.normal) {
+    chipMap.normal.textContent = `🟢 Libres (${normalCount})`;
+    chipMap.normal.classList.toggle('active', activeFilters.has('normal'));
+  }
+  if (chipMap.completed) {
+    chipMap.completed.textContent = `✓ Realizadas (${completedNotes.length})`;
+    chipMap.completed.classList.toggle('active', activeFilters.has('completed'));
+  }
 
-  document.getElementById('urgentSummaryText').textContent = `${activeNotes.length} actividades pendientes • ${urgentCount} urgente`;
+  const urgentSummary = document.getElementById('urgentSummaryText');
+  if (urgentSummary) {
+    urgentSummary.textContent = `${activeNotes.length} actividades • ${urgentCount} urgente`;
+  }
 }
 
-// Crear Elemento HTML de Nota (Activa o Cumplida de Solo Lectura)
+// Crear Elemento HTML de Nota
 function createNoteCardElement(note, isCompletedView) {
   const card = document.createElement('div');
   card.className = `postit-card ${note.color} ${note.completed ? 'completed' : ''}`;
   card.id = `card-${note.id}`;
 
-  // Checklist de líneas (hasta 5)
   let linesHtml = '<div class="postit-checklist">';
   if (note.lines && note.lines.length > 0) {
-    note.lines.forEach(line => {
+    note.lines.forEach((line, lIdx) => {
       const audioBtn = line.hasAudio ? `
-        <button class="audio-play-btn" style="width: 22px; height: 22px; font-size: 10px;" onclick="playAudioClip('${line.id}', '${escapeHtml(line.text)}', '${line.audioDuration}')" title="Escuchar audio">▶️</button>
+        <button class="audio-play-btn" style="width: 22px; height: 22px; font-size: 10px;" onclick="playAudioClip('${line.id}', '${escapeHtml(line.text)}', '${line.audioDuration}', ${JSON.stringify(line.audioData || null)})" title="Escuchar audio">▶️</button>
       ` : '';
 
       const checkAttr = isCompletedView ? 'disabled checked' : (line.completed ? 'checked' : '');
@@ -427,7 +370,6 @@ function createNoteCardElement(note, isCompletedView) {
   }
   linesHtml += '</div>';
 
-  // Botones de Cabecera (Editar solo si no está completada)
   let topActions = '';
   if (!isCompletedView) {
     topActions = `
@@ -437,12 +379,9 @@ function createNoteCardElement(note, isCompletedView) {
       </div>
     `;
   } else {
-    topActions = `
-      <span class="completed-badge-pill">✓ Realizada</span>
-    `;
+    topActions = `<span class="completed-badge-pill">✓ Realizada</span>`;
   }
 
-  // Paleta de Color Inmediata (Solo en activas)
   let colorStrip = '';
   if (!isCompletedView) {
     colorStrip = `
@@ -472,15 +411,13 @@ function createNoteCardElement(note, isCompletedView) {
   return card;
 }
 
-// 4. TRANSICIÓN DE 1 SEGUNDO HACIA TAREAS REALIZADAS
+// Transición de 1 segundo a Tareas Realizadas
 function completeNoteWithDelay(noteId) {
   const card = document.getElementById(`card-${noteId}`);
   if (card) {
-    // 1. Mostrar visualmente la animación y tachado
     card.classList.add('task-completing');
     playSuccessChime();
 
-    // 2. Esperar exactamente 1 segundo (1000ms)
     setTimeout(() => {
       const note = notes.find(n => n.id === noteId);
       if (note) {
@@ -503,7 +440,6 @@ function toggleLineCheck(noteId, lineId) {
   const line = note.lines.find(l => l.id === lineId);
   if (line) {
     line.completed = !line.completed;
-    // Si todas las líneas se completaron, disparar la transición de 1 segundo
     if (note.lines.length > 0 && note.lines.every(l => l.completed)) {
       completeNoteWithDelay(noteId);
       return;
@@ -513,16 +449,15 @@ function toggleLineCheck(noteId, lineId) {
   }
 }
 
-// Sonido sutil de éxito al completar
 function playSuccessChime() {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.type = 'triangle';
-    osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
-    osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1); // E5
-    osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2); // G5
+    osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+    osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+    osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2);
     gain.gain.setValueAtTime(0.12, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
     osc.connect(gain);
@@ -532,7 +467,6 @@ function playSuccessChime() {
   } catch (e) {}
 }
 
-// Cambio Inmediato de Color
 function changeCardColor(noteId, newColor) {
   const note = notes.find(n => n.id === noteId);
   if (note && !note.completed) {
@@ -548,17 +482,17 @@ function changeCardColor(noteId, newColor) {
 function selectColor(color) {
   selectedModalColor = color;
   const preview = document.getElementById('postitCardPreview');
-  preview.className = `postit-preview ${color}`;
+  if (preview) preview.className = `postit-preview ${color}`;
 
   document.querySelectorAll('.color-opt').forEach(opt => opt.classList.remove('active'));
   const activeOpt = document.querySelector(`.opt-${color}`);
   if (activeOpt) activeOpt.classList.add('active');
 }
 
-// 1. EDICIÓN DE NOTAS Y GESTIÓN DE LÍNEAS (MÁXIMO 5 LÍNEAS)
+// 1. DICTADO DE NOTAS Y GRABACIÓN DE AUDIO REAL (MEDIARECORDER + SPEECH RECOGNITION + PUENTE NATIVO ANDROID)
 function openNewNoteModal(mode) {
   editingNoteId = null;
-  modalLines = [{ id: 'ml-1', text: '', completed: false, hasAudio: false, audioDuration: null }];
+  modalLines = [{ id: 'ml-1', text: '', completed: false, hasAudio: false, audioDuration: null, audioData: null }];
   const modal = document.getElementById('newNoteModal');
   const voiceBox = document.getElementById('voiceRecordingBox');
   const modalTitle = document.getElementById('modalTitle');
@@ -569,9 +503,9 @@ function openNewNoteModal(mode) {
   renderTriggerPresets();
 
   if (mode === 'voice') {
-    modalTitle.textContent = '🎙️ Dictar Nota Rápida';
+    modalTitle.textContent = '🎙️ Dictar Nota';
     voiceBox.style.display = 'flex';
-    simulateSpeechRecognitionForModal();
+    startRealVoiceRecording(0);
   } else {
     modalTitle.textContent = '✏️ Nueva Nota (Lista)';
     voiceBox.style.display = 'none';
@@ -580,12 +514,12 @@ function openNewNoteModal(mode) {
 
 function openEditNoteModal(noteId) {
   const note = notes.find(n => n.id === noteId);
-  if (!note || note.completed) return; // Solo lectura para completadas
+  if (!note || note.completed) return;
 
   editingNoteId = noteId;
   modalLines = (note.lines && note.lines.length > 0)
     ? JSON.parse(JSON.stringify(note.lines))
-    : [{ id: 'ml-1', text: note.text || '', completed: false, hasAudio: false, audioDuration: null }];
+    : [{ id: 'ml-1', text: note.text || '', completed: false, hasAudio: false, audioDuration: null, audioData: null }];
 
   const modal = document.getElementById('newNoteModal');
   const voiceBox = document.getElementById('voiceRecordingBox');
@@ -608,24 +542,25 @@ function renderModalLines() {
   const container = document.getElementById('modalLinesList');
   const btnAdd = document.getElementById('btnAddLine');
   const counter = document.getElementById('lineCountDisplay');
-  container.innerHTML = '';
+  if (!container) return;
 
-  counter.textContent = `${modalLines.length}/5`;
-  btnAdd.disabled = modalLines.length >= 5;
+  container.innerHTML = '';
+  if (counter) counter.textContent = `${modalLines.length}/5`;
+  if (btnAdd) btnAdd.disabled = modalLines.length >= 5;
 
   modalLines.forEach((line, idx) => {
     const row = document.createElement('div');
     row.className = 'modal-line-row';
 
     const audioPill = line.hasAudio ? `
-      <span class="line-audio-badge" onclick="playAudioClip('${line.id}', '${escapeHtml(line.text)}', '${line.audioDuration}')" title="Escuchar audio">▶️ Audio ${line.audioDuration}</span>
+      <span class="line-audio-badge" onclick="playAudioClip('${line.id}', '${escapeHtml(line.text)}', '${line.audioDuration}', ${JSON.stringify(line.audioData || null)})" title="Escuchar audio">▶️ Audio ${line.audioDuration}</span>
     ` : '';
 
     row.innerHTML = `
       <span style="font-size: 12px; font-weight: 700; opacity: 0.6;">${idx + 1}.</span>
       <input type="text" class="line-text-input" placeholder="Escriba o dicte el ítem ${idx + 1}..." value="${escapeHtml(line.text)}" oninput="updateModalLineText(${idx}, this.value)">
       ${audioPill}
-      <button type="button" class="btn-line-action" title="Grabar audio para esta línea" onclick="recordAudioForLine(${idx})">🎙️</button>
+      <button type="button" class="btn-line-action" title="Grabar o dictar audio para esta línea" onclick="startRealVoiceRecording(${idx})">🎙️</button>
       ${modalLines.length > 1 ? `<button type="button" class="btn-line-action" title="Eliminar línea" onclick="removeLineFromModal(${idx})">✕</button>` : ''}
     `;
     container.appendChild(row);
@@ -638,7 +573,7 @@ function updateModalLineText(idx, val) {
   }
 }
 
-function addNewLineToModal(initialText = '', audioDur = null) {
+function addNewLineToModal(initialText = '', audioDur = null, audioData = null) {
   if (modalLines.length >= 5) {
     alert('Límite alcanzado: máximo 5 líneas por nota.');
     return;
@@ -648,7 +583,8 @@ function addNewLineToModal(initialText = '', audioDur = null) {
     text: initialText,
     completed: false,
     hasAudio: !!audioDur,
-    audioDuration: audioDur
+    audioDuration: audioDur,
+    audioData: audioData
   });
   renderModalLines();
 }
@@ -660,34 +596,340 @@ function removeLineFromModal(idx) {
   }
 }
 
-function recordAudioForLine(idx) {
-  const phrase = prompt('Dicte o simule la grabación de audio para esta línea:');
-  if (phrase && phrase.trim()) {
-    modalLines[idx].text = phrase.trim();
+// INICIAR GRABACIÓN DE VOZ REAL (ANDROID BRIDGE + WEBSPEECH + MEDIARECORDER)
+function startRealVoiceRecording(lineIndex = 0) {
+  activeRecordingLineIndex = lineIndex;
+  isRecordingActive = true;
+
+  const voiceBox = document.getElementById('voiceRecordingBox');
+  const timer = document.getElementById('recordingTimer');
+  const statusLabel = document.getElementById('voiceStatusLabel');
+
+  if (voiceBox) voiceBox.style.display = 'flex';
+  if (statusLabel) statusLabel.textContent = `Escuchando voz para línea ${lineIndex + 1}...`;
+
+  // 1. Si estamos en Android APK nativo: invocar reconocedor nativo
+  if (window.AndroidBridge && window.AndroidBridge.startVoiceDictation) {
+    window.AndroidBridge.startVoiceDictation(String(lineIndex));
+  }
+
+  // 2. Reconocimiento de Voz en Browser (Web Speech API)
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (SpeechRecognition) {
+    try {
+      webSpeechRecognition = new SpeechRecognition();
+      webSpeechRecognition.lang = 'es-ES';
+      webSpeechRecognition.continuous = false;
+      webSpeechRecognition.interimResults = true;
+
+      webSpeechRecognition.onresult = (event) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          transcript += event.results[i][0].transcript;
+        }
+        if (modalLines[activeRecordingLineIndex]) {
+          modalLines[activeRecordingLineIndex].text = transcript;
+          renderModalLines();
+        }
+      };
+
+      webSpeechRecognition.onerror = (e) => {
+        console.warn('SpeechRecognition error:', e);
+      };
+
+      webSpeechRecognition.start();
+    } catch (err) {
+      console.warn('No se pudo inicializar SpeechRecognition:', err);
+    }
+  }
+
+  // 3. Captura Real de Audio con Micrófono (MediaRecorder)
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => {
+        audioChunks = [];
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = e => {
+          if (e.data.size > 0) audioChunks.push(e.data);
+        };
+        mediaRecorder.onstop = () => {
+          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const base64Audio = reader.result;
+            const durationSec = Math.max(1, Math.round((Date.now() - recordingStartTime) / 1000));
+            const durStr = `0:${String(durationSec).padStart(2, '0')}`;
+
+            if (modalLines[activeRecordingLineIndex]) {
+              modalLines[activeRecordingLineIndex].hasAudio = true;
+              modalLines[activeRecordingLineIndex].audioDuration = durStr;
+              modalLines[activeRecordingLineIndex].audioData = base64Audio;
+              renderModalLines();
+            }
+          };
+          reader.readAsDataURL(audioBlob);
+
+          // Detener pistas de audio
+          stream.getTracks().forEach(track => track.stop());
+        };
+        mediaRecorder.start();
+      })
+      .catch(err => {
+        console.warn('Acceso al micrófono denegado o no disponible:', err);
+      });
+  }
+
+  // Timer visual de grabación
+  recordingStartTime = Date.now();
+  if (timer) timer.textContent = '0:00';
+  if (recordingTimerInterval) clearInterval(recordingTimerInterval);
+
+  recordingTimerInterval = setInterval(() => {
+    const elapsed = Math.round((Date.now() - recordingStartTime) / 1000);
+    if (timer) timer.textContent = `0:${String(elapsed).padStart(2, '0')}`;
+  }, 1000);
+}
+
+// DETENER GRABACIÓN DE VOZ
+function stopRealVoiceRecording() {
+  isRecordingActive = false;
+  if (recordingTimerInterval) {
+    clearInterval(recordingTimerInterval);
+    recordingTimerInterval = null;
+  }
+
+  if (webSpeechRecognition) {
+    try { webSpeechRecognition.stop(); } catch (e) {}
+    webSpeechRecognition = null;
+  }
+
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    try { mediaRecorder.stop(); } catch (e) {}
+  }
+
+  const voiceBox = document.getElementById('voiceRecordingBox');
+  if (voiceBox) voiceBox.style.display = 'none';
+
+  // Si la línea quedó vacía y no reconoció texto, asignar un texto representativo
+  if (modalLines[activeRecordingLineIndex] && !modalLines[activeRecordingLineIndex].text.trim()) {
+    modalLines[activeRecordingLineIndex].text = 'Nota dictada por voz';
+    modalLines[activeRecordingLineIndex].hasAudio = true;
+    modalLines[activeRecordingLineIndex].audioDuration = '0:05';
+  }
+
+  renderModalLines();
+}
+
+// Callback global invocado por el puente nativo de Android (AndroidBridge)
+window.onNativeVoiceDictated = function(targetIndexStr, recognizedText) {
+  const idx = parseInt(targetIndexStr) || 0;
+  if (modalLines[idx]) {
+    modalLines[idx].text = recognizedText;
     modalLines[idx].hasAudio = true;
     modalLines[idx].audioDuration = '0:06';
     renderModalLines();
+  } else if (currentVoicePromptType) {
+    // Si se estaba dictando para un prompt de tiempo o lugar
+    const input = document.getElementById('voicePromptTextInput');
+    if (input) input.value = recognizedText;
+  }
+};
+
+// Dictado para "➕ Otro tiempo" / "➕ Nuevo lugar"
+function openVoicePromptModal(type) {
+  currentVoicePromptType = type;
+  const modal = document.getElementById('voicePromptModal');
+  const title = document.getElementById('voicePromptTitle');
+  const hint = document.getElementById('voicePromptHint');
+  const label = document.getElementById('voicePromptInputLabel');
+  const input = document.getElementById('voicePromptTextInput');
+
+  input.value = '';
+  modal.classList.remove('hidden');
+
+  if (type === 'time') {
+    title.textContent = '⏰ Agregar Tiempo por Voz';
+    hint.textContent = 'Dicte el tiempo (ej: "45 minutos", "Hoy a las 20:00" o "El viernes")';
+    label.textContent = 'O escriba los minutos/hora:';
+    input.placeholder = 'Ej: 45 min o 20:00';
+  } else {
+    title.textContent = '📍 Agregar Lugar por Voz';
+    hint.textContent = 'Dicte el nombre del lugar (ej: "Farmacia", "Oficina" o "Gimnasio")';
+    label.textContent = 'O escriba el nombre del lugar:';
+    input.placeholder = 'Ej: Farmacia central';
   }
 }
 
-function simulateSpeechRecognitionForModal() {
-  const timer = document.getElementById('recordingTimer');
-  let sec = 1;
-  const intv = setInterval(() => {
-    sec++;
-    timer.textContent = `0:0${sec}`;
-    if (sec >= 4) {
-      clearInterval(intv);
-      modalLines[0].text = 'Comprar leche y pan fresco';
-      modalLines[0].hasAudio = true;
-      modalLines[0].audioDuration = '0:08';
+function triggerVoicePromptDictation() {
+  const caption = document.getElementById('promptMicCaption');
+  caption.textContent = 'ESCUCHANDO...';
 
-      // Segunda línea opcional por voz
-      addNewLineToModal('Pagar en ventanilla rápida', '0:05');
-      renderModalLines();
-      selectTimePreset(timePresets[0]);
+  // En Android nativo:
+  if (window.AndroidBridge && window.AndroidBridge.startVoiceDictation) {
+    window.AndroidBridge.startVoiceDictation("prompt");
+    setTimeout(() => { caption.textContent = 'PULSAR PARA HABLAR'; }, 3000);
+    return;
+  }
+
+  // En Browser Web Speech API:
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (SpeechRecognition) {
+    try {
+      const rec = new SpeechRecognition();
+      rec.lang = 'es-ES';
+      rec.onresult = (e) => {
+        const text = e.results[0][0].transcript;
+        document.getElementById('voicePromptTextInput').value = text;
+        caption.textContent = 'PULSAR PARA HABLAR';
+      };
+      rec.onerror = () => { caption.textContent = 'PULSAR PARA HABLAR'; };
+      rec.start();
+    } catch (e) {
+      caption.textContent = 'PULSAR PARA HABLAR';
     }
-  }, 700);
+  } else {
+    caption.textContent = 'PULSAR PARA HABLAR';
+  }
+}
+
+function confirmVoicePrompt() {
+  const val = document.getElementById('voicePromptTextInput').value.trim();
+  if (!val) {
+    alert('Por favor ingrese o dicte un valor válido.');
+    return;
+  }
+
+  if (currentVoicePromptType === 'time') {
+    const minsMatch = val.match(/(\d+)\s*(m|min)/i);
+    const mins = minsMatch ? parseInt(minsMatch[1]) : 45;
+    const newPreset = {
+      id: 't_custom_' + Date.now(),
+      label: val.startsWith('+') ? val : `+${val}`,
+      minutes: mins,
+      uses: 10
+    };
+    timePresets.unshift(newPreset);
+    localStorage.setItem('posty_time_presets', JSON.stringify(timePresets));
+    renderTriggerPresets();
+    selectTimePreset(newPreset);
+  } else {
+    const newGeo = {
+      id: 'g_custom_' + Date.now(),
+      label: `📍 ${val}`,
+      place: val,
+      transition: 'ENTER',
+      uses: 10
+    };
+    geoPresets.unshift(newGeo);
+    localStorage.setItem('posty_geo_presets', JSON.stringify(geoPresets));
+    renderTriggerPresets();
+    selectGeoPreset(newGeo);
+  }
+
+  closeVoicePromptModal();
+}
+
+function closeVoicePromptModal() {
+  document.getElementById('voicePromptModal').classList.add('hidden');
+}
+
+// Presets Dinámicos de Tiempo y Lugar (Top 4 más usados al frente)
+function renderTriggerPresets() {
+  const sortedTime = [...timePresets].sort((a, b) => (b.uses || 0) - (a.uses || 0));
+  const primaryTime = sortedTime.slice(0, 4);
+  const secondaryTime = sortedTime.slice(4);
+
+  const priTimeCont = document.getElementById('primaryTimePresets');
+  const secTimeCont = document.getElementById('secondaryTimePresets');
+
+  if (priTimeCont) {
+    priTimeCont.innerHTML = primaryTime.map(p => `
+      <button type="button" class="preset-btn" onclick="selectTimePresetById('${p.id}')">
+        ⏰ ${escapeHtml(p.label)}
+      </button>
+    `).join('');
+  }
+
+  if (secTimeCont) {
+    secTimeCont.innerHTML = secondaryTime.map(p => `
+      <button type="button" class="preset-btn" onclick="selectTimePresetById('${p.id}')">
+        ⏰ ${escapeHtml(p.label)}
+      </button>
+    `).join('');
+  }
+
+  const sortedGeo = [...geoPresets].sort((a, b) => (b.uses || 0) - (a.uses || 0));
+  const primaryGeo = sortedGeo.slice(0, 3);
+  const secondaryGeo = sortedGeo.slice(3);
+
+  const priGeoCont = document.getElementById('primaryGeoPresets');
+  const secGeoCont = document.getElementById('secondaryGeoPresets');
+
+  if (priGeoCont) {
+    priGeoCont.innerHTML = primaryGeo.map(g => `
+      <button type="button" class="preset-btn" onclick="selectGeoPresetById('${g.id}')">
+        ${escapeHtml(g.label)}
+      </button>
+    `).join('');
+  }
+
+  if (secGeoCont) {
+    secGeoCont.innerHTML = secondaryGeo.map(g => `
+      <button type="button" class="preset-btn" onclick="selectGeoPresetById('${g.id}')">
+        ${escapeHtml(g.label)}
+      </button>
+    `).join('');
+  }
+}
+
+function selectTimePresetById(id) {
+  const p = timePresets.find(t => t.id === id);
+  if (p) selectTimePreset(p);
+}
+
+function selectGeoPresetById(id) {
+  const g = geoPresets.find(item => item.id === id);
+  if (g) selectGeoPreset(g);
+}
+
+function selectTimePreset(preset) {
+  selectedTriggerType = 'time';
+  selectedTriggerLabel = `⏰ ${preset.label}`;
+  document.getElementById('selectedTriggerText').textContent = `Alerta: ${selectedTriggerLabel}`;
+
+  preset.uses = (preset.uses || 0) + 1;
+  localStorage.setItem('posty_time_presets', JSON.stringify(timePresets));
+
+  document.querySelectorAll('.preset-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.includes(preset.label));
+  });
+}
+
+function selectGeoPreset(preset) {
+  selectedTriggerType = 'geo';
+  selectedTriggerLabel = preset.label;
+  document.getElementById('selectedTriggerText').textContent = `Alerta: ${selectedTriggerLabel}`;
+
+  preset.uses = (preset.uses || 0) + 1;
+  localStorage.setItem('posty_geo_presets', JSON.stringify(geoPresets));
+
+  document.querySelectorAll('.preset-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.includes(preset.label));
+  });
+}
+
+function toggleMoreTimePresets() {
+  const sec = document.getElementById('secondaryTimePresets');
+  const btn = document.getElementById('btnToggleMoreTime');
+  const isHidden = sec.classList.toggle('hidden');
+  btn.innerHTML = isHidden ? '<span>Ver más horarios</span> <span class="arrow-icon">▼</span>' : '<span>Ocultar</span> <span class="arrow-icon">▲</span>';
+}
+
+function toggleMoreGeoPresets() {
+  const sec = document.getElementById('secondaryGeoPresets');
+  const btn = document.getElementById('btnToggleMoreGeo');
+  const isHidden = sec.classList.toggle('hidden');
+  btn.innerHTML = isHidden ? '<span>Ver más lugares</span> <span class="arrow-icon">▼</span>' : '<span>Ocultar</span> <span class="arrow-icon">▲</span>';
 }
 
 function resetModalForm() {
@@ -699,24 +941,28 @@ function resetModalForm() {
 }
 
 function closeModal() {
+  if (isRecordingActive) {
+    stopRealVoiceRecording();
+  }
   document.getElementById('newNoteModal').classList.add('hidden');
   stopAudio();
 }
 
 function saveNoteFromModal() {
-  // Filtrar líneas vacías
+  if (isRecordingActive) {
+    stopRealVoiceRecording();
+  }
+
   const validLines = modalLines.filter(l => l.text.trim().length > 0);
   if (validLines.length === 0) {
     alert('Por favor ingrese al menos una línea en la nota.');
     return;
   }
 
-  // Evaluar urgencia con el clasificador
   const activePreset = timePresets.find(t => `⏰ ${t.label}` === selectedTriggerLabel);
   const urgency = classifyUrgency(selectedTriggerType, activePreset);
 
   if (editingNoteId) {
-    // Modo Edición
     const note = notes.find(n => n.id === editingNoteId);
     if (note) {
       note.lines = validLines;
@@ -726,7 +972,6 @@ function saveNoteFromModal() {
       note.triggerLabel = selectedTriggerLabel;
     }
   } else {
-    // Modo Creación
     const newNote = {
       id: 'n' + (Date.now() % 100000),
       color: selectedModalColor,
@@ -744,16 +989,19 @@ function saveNoteFromModal() {
   saveToStorage();
   renderBoard();
   closeModal();
-
-  if (selectedTriggerType !== 'none') {
-    setTimeout(() => {
-      triggerPushBanner(selectedTriggerLabel, validLines[0].text);
-    }, 1200);
-  }
 }
 
-// Reproducción de Audios
-function playAudioClip(clipId, text, durationStr) {
+// Clasificación de Urgencia Estricta
+function classifyUrgency(triggerType, preset) {
+  if (triggerType === 'geo') return 'context'; // Geocercas -> Amarillo (UPCOMING)
+  if (!preset || triggerType === 'none') return 'normal'; // Sin alarma -> Verde (NORMAL)
+  if (preset.isTomorrow || preset.isNextWeek) return 'context'; // Mañana / Sig semana -> Amarillo (UPCOMING)
+  if (preset.isToday || preset.minutes) return 'urgent'; // Vence hoy -> Rojo (URGENT_TODAY)
+  return 'normal';
+}
+
+// Reproducción de Audios Grabados
+function playAudioClip(clipId, text, durationStr, audioDataUrl) {
   if (activeAudioId === clipId) {
     stopAudio();
     return;
@@ -761,23 +1009,31 @@ function playAudioClip(clipId, text, durationStr) {
   stopAudio();
   activeAudioId = clipId;
 
+  // Si tiene datos reales de audio base64 (grabados del micrófono)
+  if (audioDataUrl && typeof audioDataUrl === 'string' && audioDataUrl.startsWith('data:audio')) {
+    activeAudioElement = new Audio(audioDataUrl);
+    activeAudioElement.onended = () => stopAudio();
+    activeAudioElement.play().catch(() => {
+      fallbackSpeechSynthesis(text);
+    });
+  } else {
+    fallbackSpeechSynthesis(text);
+  }
+}
+
+function fallbackSpeechSynthesis(text) {
   if ('speechSynthesis' in window) {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'es-ES';
     utterance.onend = () => stopAudio();
     window.speechSynthesis.speak(utterance);
   }
-
-  const durationSec = durationStr ? (parseInt(durationStr.split(':')[1]) || 6) : 6;
-  audioInterval = setTimeout(() => {
-    stopAudio();
-  }, durationSec * 1000);
 }
 
 function stopAudio() {
-  if (audioInterval) {
-    clearTimeout(audioInterval);
-    audioInterval = null;
+  if (activeAudioElement) {
+    activeAudioElement.pause();
+    activeAudioElement = null;
   }
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
@@ -785,44 +1041,33 @@ function stopAudio() {
   activeAudioId = null;
 }
 
-// Filtros del Tablero
-function setFilter(filter) {
-  currentFilter = filter;
-  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-  const map = { all: 'chipAll', urgent: 'chipUrgent', context: 'chipContext', normal: 'chipNormal', completed: 'chipDone' };
-  if (map[filter]) document.getElementById(map[filter]).classList.add('active');
-  renderBoard();
+// 6. ALERTAS AUTOMÁTICAS (CERO SIMULACIÓN MANUAL)
+function startAutomaticAlertMonitor() {
+  setInterval(() => {
+    const now = new Date();
+    const currentHourMin = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+    notes.forEach(note => {
+      if (note.completed || !note.triggerLabel) return;
+
+      // Alerta de hora fija (ej: "18:00")
+      if (note.triggerLabel.includes(currentHourMin) && !note.alreadyAlertedToday) {
+        note.alreadyAlertedToday = true;
+        triggerPushBanner(note.triggerLabel, note.lines ? note.lines[0].text : note.text);
+      }
+    });
+  }, 10000); // Chequeo periódico cada 10s
 }
 
-// Modo Protector de Pantalla (AOD / Screensaver)
-function openScreensaver() {
-  document.getElementById('screensaverOverlay').classList.remove('hidden');
-  updateAodClock();
-}
-
-function closeScreensaver() {
-  document.getElementById('screensaverOverlay').classList.add('hidden');
-}
-
-function updateAodClock() {
-  const clock = document.getElementById('aodClock');
-  const now = new Date();
-  const hrs = String(now.getHours()).padStart(2, '0');
-  const mins = String(now.getMinutes()).padStart(2, '0');
-  if (clock) clock.textContent = `${hrs}:${mins}`;
-}
-
-function startClockUpdater() {
-  setInterval(updateAodClock, 10000);
-}
-
-// Notificación Push Nativa Simulada
 function triggerPushBanner(title, body) {
   const banner = document.getElementById('pushNotificationBanner');
-  document.getElementById('pushTitle').textContent = title || '⏰ Recordatorio';
-  document.getElementById('pushBody').textContent = body || 'Tiene un recordatorio pendiente por cumplirse.';
+  if (!banner) return;
+
+  document.getElementById('pushTitle').textContent = title || '⏰ Recordatorio Automático';
+  document.getElementById('pushBody').textContent = body || 'Tiene una nota pendiente por cumplirse.';
   banner.classList.remove('hidden');
 
+  // Sonido de alerta
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const osc = ctx.createOscillator();
@@ -840,7 +1085,8 @@ function triggerPushBanner(title, body) {
 }
 
 function dismissPush() {
-  document.getElementById('pushNotificationBanner').classList.add('hidden');
+  const banner = document.getElementById('pushNotificationBanner');
+  if (banner) banner.classList.add('hidden');
 }
 
 function completeFromPush() {
@@ -853,14 +1099,137 @@ function completeFromPush() {
 
 function snoozeFromPush() {
   dismissPush();
-  alert('⏱️ Recordatorio pospuesto por 15 minutos.');
+  alert('⏱️ Recordatorio pospuesto automáticamente por 15 minutos.');
 }
 
-function simulatePushTrigger() {
-  triggerPushBanner('🛒 Cerca del Supermercado (150m)', 'Comprar leche descremada y fruta fresca.');
+// 5. ACTUALIZACIÓN DE GPS REAL ("ACTUALIZAR AQUÍ")
+function updateGeoCoord(place) {
+  const btn = event ? event.currentTarget : null;
+  const originalText = btn ? btn.innerHTML : 'Actualizar Aquí';
+  if (btn) {
+    btn.innerHTML = '🛰️ Obteniendo GPS...';
+    btn.disabled = true;
+  }
+
+  // Si estamos en la app Android nativa con puente GPS de hardware
+  if (window.AndroidBridge && window.AndroidBridge.getRealGPSLocation) {
+    window.AndroidBridge.getRealGPSLocation(place);
+    setTimeout(() => {
+      if (btn) {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    }, 3000);
+    return;
+  }
+
+  if (!navigator.geolocation) {
+    alert('Geolocalización no soportada en este navegador.');
+    if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const lat = pos.coords.latitude.toFixed(6);
+      const lng = pos.coords.longitude.toFixed(6);
+      const acc = Math.round(pos.coords.accuracy || 10);
+      saveRealLocationCoordinates(place, lat, lng, acc);
+      if (btn) {
+        btn.innerHTML = '✓ Actualizado';
+        setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 2000);
+      }
+    },
+    (err) => {
+      // Reintentar con baja precisión (red celular o WiFi) si el GPS satelital directo tarda
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude.toFixed(6);
+          const lng = pos.coords.longitude.toFixed(6);
+          saveRealLocationCoordinates(place, lat, lng, 30);
+          if (btn) {
+            btn.innerHTML = '✓ Actualizado';
+            setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 2000);
+          }
+        },
+        (err2) => {
+          alert('No se pudo obtener el GPS: ' + (err.message || 'Verifique que la ubicación esté activada en su celular.'));
+          if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
+        },
+        { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
+      );
+    },
+    { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+  );
 }
 
-// Configuración & Geocercas
+// Callback global invocado por AndroidBridge cuando el GPS nativo responde
+window.onNativeGPSReceived = function(place, lat, lng, accuracy) {
+  saveRealLocationCoordinates(place, lat.toFixed(6), lng.toFixed(6), Math.round(accuracy));
+};
+
+function saveRealLocationCoordinates(place, lat, lng, accuracy) {
+  const coordStr = `Lat: ${lat}, Lng: ${lng} (±${accuracy}m GPS Real)`;
+  localStorage.setItem(`posty_geo_coords_${place}`, coordStr);
+
+  const displayEl = document.getElementById(`coordsText${place}`);
+  if (displayEl) {
+    displayEl.textContent = coordStr;
+    displayEl.style.color = '#10B981';
+    displayEl.style.fontWeight = '600';
+  }
+}
+
+// Reloj y Trazabilidad
+function startClockUpdater() {
+  const update = () => {
+    const el = document.getElementById('currentDateDisplay');
+    const aod = document.getElementById('aodClock');
+    const aodDate = document.getElementById('aodDate');
+    const now = new Date();
+
+    const options = { weekday: 'long', day: 'numeric', month: 'long' };
+    const dateFormatted = now.toLocaleDateString('es-ES', options);
+    const capitalized = dateFormatted.charAt(0).toUpperCase() + dateFormatted.slice(1);
+
+    if (el) el.textContent = capitalized;
+
+    const hrs = String(now.getHours()).padStart(2, '0');
+    const mins = String(now.getMinutes()).padStart(2, '0');
+    if (aod) aod.textContent = `${hrs}:${mins}`;
+    if (aodDate) aodDate.textContent = `${capitalized} • Nota Feliz`;
+  };
+  update();
+  setInterval(update, 10000);
+}
+
+// Modo Protector de Pantalla (AOD)
+function openScreensaver() {
+  const overlay = document.getElementById('screensaverOverlay');
+  if (overlay) overlay.classList.remove('hidden');
+
+  // Inyectar dinámicamente las 3 tareas más prioritarias
+  const tasksCont = document.getElementById('screensaverTasksDynamic');
+  if (tasksCont) {
+    const active = notes.filter(n => !n.completed).slice(0, 3);
+    tasksCont.innerHTML = active.map(n => `
+      <div class="aod-task ${n.urgency === 'urgent' ? 'red' : 'yellow'}">
+        <span class="aod-icon">${n.urgency === 'urgent' ? '🔴' : '🟡'}</span>
+        <div class="aod-info">
+          <span class="aod-task-title">${escapeHtml(n.lines ? n.lines[0].text : n.text)}</span>
+          <span class="aod-task-meta">${escapeHtml(n.triggerLabel || 'Alarma activa')}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+function closeScreensaver() {
+  const overlay = document.getElementById('screensaverOverlay');
+  if (overlay) overlay.classList.add('hidden');
+}
+
+// Configuración & Respaldo
 function openSettings() {
   document.getElementById('settingsModal').classList.remove('hidden');
 }
@@ -869,20 +1238,16 @@ function closeSettings() {
   document.getElementById('settingsModal').classList.add('hidden');
 }
 
-function updateGeoCoord(place) {
-  alert(`📍 Coordenadas de '${place}' actualizadas con la ubicación GPS del móvil (precisión ±8m).`);
-}
-
 function exportDataJSON() {
   const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(notes, null, 2));
   const dlAnchor = document.createElement('a');
   dlAnchor.setAttribute('href', dataStr);
-  dlAnchor.setAttribute('download', `postylocal_respaldo_${Date.now()}.json`);
+  dlAnchor.setAttribute('download', `notafeliz_respaldo_${Date.now()}.json`);
   dlAnchor.click();
 }
 
 function resetDemoData() {
-  if (confirm('¿Desea restaurar las notas de demostración iniciales?')) {
+  if (confirm('¿Desea restaurar las notas de demostración iniciales de Nota Feliz?')) {
     notes = JSON.parse(JSON.stringify(DEFAULT_NOTES));
     saveToStorage();
     renderBoard();

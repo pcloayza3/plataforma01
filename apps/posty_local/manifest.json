@@ -1,6 +1,6 @@
 {
-  "name": "PostyLocal • Notas Visuales y Recordatorios",
-  "short_name": "PostyLocal",
+  "name": "Nota Feliz • Recordatorios Visuales",
+  "short_name": "Nota Feliz",
   "description": "App de post-its visuales y recordatorios 100% offline y local",
   "start_url": "./index.html",
   "display": "standalone",
@@ -9,7 +9,7 @@
   "icons": [
     {
       "src": "icon.png",
-      "sizes": "192x192",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
