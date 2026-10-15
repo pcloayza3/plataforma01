@@ -17,7 +17,6 @@ import android.webkit.JavascriptInterface;
 import android.webkit.PermissionRequest;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -27,7 +26,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowCompat;
-import androidx.webkit.WebViewAssetLoader;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -39,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private WebView webView;
     private String pendingVoiceTargetIndex = "0";
 
-    // Grabación de audio nativa de Android (Hardware Micrófono)
+    // Grabación nativa de audio de Android (Hardware de Micrófono)
     private MediaRecorder nativeRecorder = null;
     private File currentAudioFile = null;
     private long recordingStartTime = 0;
@@ -62,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Previene terminantemente que la vista sobrepase la barra de navegación de Android (||| O <)
+        // Ajusta la ventana para que NO se superponga con la barra de navegación de Android (||| O <)
         WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
 
         webView = new WebView(this);
@@ -71,8 +69,8 @@ public class MainActivity extends AppCompatActivity {
         requestAppPermissions();
         configureWebView();
 
-        // Carga segura https://appassets.androidplatform.net para activar permisos de hardware y contexto seguro
-        webView.loadUrl("https://appassets.androidplatform.net/assets/index.html");
+        // Carga 100% local y offline desde los assets del APK (sin dependencia de red)
+        webView.loadUrl("file:///android_asset/www/index.html");
     }
 
     private void configureWebView() {
@@ -82,37 +80,39 @@ public class MainActivity extends AppCompatActivity {
         settings.setDatabaseEnabled(true);
         settings.setAllowFileAccess(true);
         settings.setAllowContentAccess(true);
+        settings.setAllowFileAccessFromFileURLs(true);
+        settings.setAllowUniversalAccessFromFileURLs(true);
         settings.setGeolocationEnabled(true);
         settings.setMediaPlaybackRequiresUserGesture(false);
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
 
-        // Carga de activos empaquetados como origen seguro https
-        final WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
-            .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
-            .build();
-
         webView.setWebViewClient(new WebViewClient() {
             @Override
-            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-                return assetLoader.shouldInterceptRequest(request.getUrl());
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                return false;
+            }
+
+            @Override
+            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                // Fallback de contingencia si falla alguna ruta
+                view.loadUrl("file:///android_asset/index.html");
             }
         });
 
-        // Puente nativo JavaScript para Voz real, Grabación real y GPS por hardware
+        // Puente nativo JavaScript para Voz real, Grabación real y GPS satelital
         webView.addJavascriptInterface(new AndroidNativeBridge(), "AndroidBridge");
 
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onPermissionRequest(final PermissionRequest request) {
                 runOnUiThread(() -> {
-                    // Otorgar permisos nativos de captura de audio y video a la página
+                    // Otorgar permisos nativos de hardware
                     request.grant(request.getResources());
                 });
             }
 
             @Override
             public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
-                // Otorgar permisos locales de geolocalización
                 callback.invoke(origin, true, false);
             }
         });
@@ -154,12 +154,12 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Dicte su nota para Nota Feliz...");
                     speechResultLauncher.launch(intent);
                 } catch (Exception e) {
-                    webView.evaluateJavascript("alert('El servicio de voz de Android no está disponible.');", null);
+                    webView.evaluateJavascript("alert('El servicio de voz del celular no está disponible.');", null);
                 }
             });
         }
 
-        // Grabación de audio real con el micrófono físico del celular (Hardware MediaRecorder)
+        // Grabación física con el micrófono del celular (MediaRecorder nativo)
         @JavascriptInterface
         public void startNativeAudioRecording() {
             runOnUiThread(() -> {

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Nota Feliz • Notas Visuales y Recordatorios Inteligentes</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="apple-touch-icon" href="icon.png">
+  <meta name="theme-color" content="#ffd54f">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Mockup de Alerta Push Nativa (Notificación del Smartphone) -->
+  <div id="pushNotificationBanner" class="push-banner hidden">
+    <div class="push-header">
+      <span class="push-app-icon">😊</span>
+      <span class="push-app-name">Nota Feliz • Recordatorio</span>
+      <button class="push-close" onclick="dismissPush()">✕</button>
+    </div>
+    <div class="push-title" id="pushTitle">⏰ Recordatorio Automático</div>
+    <div class="push-body" id="pushBody">Pagar factura de luz antes de las 18:00</div>
+    <div class="push-actions">
+      <button class="push-btn complete" onclick="completeFromPush()">✓ Completar</button>
+      <button class="push-btn snooze" onclick="snoozeFromPush()">⏱️ Posponer 15m</button>
+    </div>
+  </div>
+
+  <!-- Contenedor Principal Móvil -->
+  <div class="app-viewport">
+    
+    <!-- Barra Superior / Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <span class="header-badge">Nota Feliz</span>
+        <h1 class="header-title" id="currentDateDisplay">Jueves, 15 Octubre</h1>
+        <p class="header-subtitle" id="urgentSummaryText">3 actividades pendientes • 1 urgente</p>
+      </div>
+      <div class="header-actions">
+        <!-- Icono de luna eliminado según requerimiento; el protector de pantalla se configura en el sistema o via DreamService -->
+        <button class="icon-btn" title="Configurar Lugares, Tema & Respaldo" onclick="openSettings()">⚙️</button>
+      </div>
+    </header>
+
+    <!-- Pestañas de Filtro Rápido (Sin 'Todas'; Soporta click y mantener presionado para selección múltiple) -->
+    <nav class="filter-bar" id="filterBar">
+      <button class="filter-chip chip-red active" id="chipUrgent" data-filter="urgent">🔴 Urgente (1)</button>
+      <button class="filter-chip chip-yellow active" id="chipContext" data-filter="context">🟡 Próximas (2)</button>
+      <button class="filter-chip chip-green active" id="chipNormal" data-filter="normal">🟢 Libres (2)</button>
+      <button class="filter-chip chip-gray" id="chipDone" data-filter="completed">✓ Realizadas (0)</button>
+    </nav>
+
+    <!-- Tablero de Post-its Diarios (Semáforo de Urgencia) -->
+    <main class="board-container" id="boardContainer">
+
+      <!-- Sección 1: Urgente / Vence Hoy -->
+      <section class="board-section" id="sectionUrgent">
+        <div class="section-label red-label">
+          <span class="label-dot"></span>
+          <span>URGENTE / VENCE HOY</span>
+        </div>
+        <div class="cards-grid" id="gridUrgent"></div>
+      </section>
+
+      <!-- Sección 2: Próximas & Geocercas (Ubicación) -->
+      <section class="board-section" id="sectionContext">
+        <div class="section-label yellow-label">
+          <span class="label-dot"></span>
+          <span>CONTEXTO & PRÓXIMAS (MAÑANA / GEOFENCE)</span>
+        </div>
+        <div class="cards-grid" id="gridContext"></div>
+      </section>
+
+      <!-- Sección 3: Pendientes Generales -->
+      <section class="board-section" id="sectionNormal">
+        <div class="section-label green-label">
+          <span class="label-dot"></span>
+          <span>PENDIENTES LIBRES (SIN PLAZO FIJO)</span>
+        </div>
+        <div class="cards-grid" id="gridNormal"></div>
+      </section>
+
+      <!-- Sección 4: Tareas Realizadas / Cumplidas (Solo Lectura y Escucha) -->
+      <section class="board-section" id="sectionCompleted" style="display: none;">
+        <div class="section-label gray-label">
+          <span class="label-dot"></span>
+          <span>TAREAS REALIZADAS (SOLO LECTURA Y ESCUCHA)</span>
+        </div>
+        <div class="cards-grid" id="gridCompleted"></div>
+      </section>
+
+    </main>
+
+    <!-- Barra Inferior de Captura Rápida (Sin botón de simular push; alertas son 100% automáticas) -->
+    <footer class="bottom-action-bar">
+      <button class="secondary-btn" title="Escribir nota a mano" onclick="openNewNoteModal('manual')">
+        ✏️ <span>Escribir</span>
+      </button>
+
+      <button class="mic-primary-btn" id="micMainBtn" title="Dictar nota por voz" onclick="openNewNoteModal('voice')">
+        <span class="mic-wave-pulse"></span>
+        <span class="mic-icon">🎙️</span>
+        <span class="mic-caption">DICTAR NOTA</span>
+      </button>
+    </footer>
+
+  </div>
+
+  <!-- MODAL DE CREACIÓN / EDICIÓN (Lista hasta 5 líneas, audio por línea y alertas) -->
+  <div id="newNoteModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle">Nueva Nota Rápida</h3>
+        <button class="close-x-btn" onclick="closeModal()">✕</button>
+      </div>
+
+      <!-- Área de Grabación de Voz Interactiva Real -->
+      <div id="voiceRecordingBox" class="voice-box">
+        <div class="voice-status">
+          <span class="rec-dot"></span>
+          <span id="recordingTimer">0:00</span>
+          <span class="rec-label" id="voiceStatusLabel">Escuchando voz...</span>
+        </div>
+        <div class="audio-waves" id="audioWaves">
+          <div class="bar b1"></div>
+          <div class="bar b2"></div>
+          <div class="bar b3"></div>
+          <div class="bar b4"></div>
+          <div class="bar b5"></div>
+          <div class="bar b6"></div>
+          <div class="bar b7"></div>
+          <div class="bar b8"></div>
+        </div>
+        <p class="voice-hint" id="voiceHintText">Dicte su nota con naturalidad. Presione Detener al finalizar.</p>
+        <button type="button" class="btn-voice-stop" id="btnStopVoiceRec" onclick="stopRealVoiceRecording()">⏹️ Detener Grabación</button>
+      </div>
+
+      <!-- Tarjeta Post-it Editable en Lista (Hasta 5 líneas) -->
+      <div class="postit-preview yellow" id="postitCardPreview">
+        <div class="lines-container" id="modalLinesList">
+          <!-- Las líneas estructuradas se inyectan dinámicamente aquí -->
+        </div>
+
+        <div class="add-line-control">
+          <button type="button" class="btn-add-line" id="btnAddLine" onclick="addNewLineToModal()">
+            ➕ Aumentar nueva línea de lista (<span id="lineCountDisplay">1/5</span>)
+          </button>
+        </div>
+      </div>
+
+      <!-- Selector de Color del Post-it (Cambio Inmediato) -->
+      <div class="color-picker-row" id="modalColorPicker">
+        <span class="picker-label">Color:</span>
+        <div class="color-options">
+          <button type="button" class="color-opt opt-yellow active" onclick="selectColor('yellow')"></button>
+          <button type="button" class="color-opt opt-green" onclick="selectColor('green')"></button>
+          <button type="button" class="color-opt opt-blue" onclick="selectColor('blue')"></button>
+          <button type="button" class="color-opt opt-pink" onclick="selectColor('pink')"></button>
+          <button type="button" class="color-opt opt-purple" onclick="selectColor('purple')"></button>
+        </div>
+      </div>
+
+      <!-- Sección de Alertas Temporales Rápidas (Dinámicas con Frecuencia de Uso) -->
+      <div class="trigger-group">
+        <div class="trigger-header-row">
+          <label class="trigger-label">⏰ ¿Cuándo alertar automáticamente?</label>
+          <button type="button" class="btn-text-action" onclick="openVoicePromptModal('time')">➕ Otro tiempo</button>
+        </div>
+        
+        <!-- Fila Principal (Los más utilizados) -->
+        <div class="trigger-presets" id="primaryTimePresets"></div>
+
+        <!-- Botón para ver más opciones si no hay espacio -->
+        <div class="more-toggle-row">
+          <button type="button" class="btn-toggle-more" id="btnToggleMoreTime" onclick="toggleMoreTimePresets()">
+            <span>Ver más horarios</span> <span class="arrow-icon">▼</span>
+          </button>
+        </div>
+
+        <!-- Fila Secundaria Desplegable -->
+        <div class="trigger-presets secondary-presets hidden" id="secondaryTimePresets"></div>
+      </div>
+
+      <!-- Sección de Alertas por Geofencing (Dinámicas con Frecuencia de Uso) -->
+      <div class="trigger-group">
+        <div class="trigger-header-row">
+          <label class="trigger-label">📍 ¿O alertar por Ubicación (Geocerca local)?</label>
+          <button type="button" class="btn-text-action" onclick="openVoicePromptModal('geo')">➕ Nuevo lugar</button>
+        </div>
+
+        <!-- Fila Principal (Lugares más utilizados) -->
+        <div class="trigger-presets" id="primaryGeoPresets"></div>
+
+        <!-- Botón para ver más lugares si no hay espacio -->
+        <div class="more-toggle-row">
+          <button type="button" class="btn-toggle-more" id="btnToggleMoreGeo" onclick="toggleMoreGeoPresets()">
+            <span>Ver más lugares</span> <span class="arrow-icon">▼</span>
+          </button>
+        </div>
+
+        <!-- Fila Secundaria Desplegable -->
+        <div class="trigger-presets secondary-presets hidden" id="secondaryGeoPresets"></div>
+        
+        <div id="selectedTriggerText" class="selected-trigger-pill">Alerta: Ninguna asignada</div>
+      </div>
+
+      <!-- Botones de Acción del Modal -->
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+        <button class="btn-save" onclick="saveNoteFromModal()">✓ Guardar Nota</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE ENTRADA POR VOZ O TEXTO PARA TIEMPO / LUGAR -->
+  <div id="voicePromptModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="voicePromptTitle">Agregar Alerta por Voz</h3>
+        <button class="close-x-btn" onclick="closeVoicePromptModal()">✕</button>
+      </div>
+
+      <div class="voice-box">
+        <button type="button" class="mic-primary-btn" id="btnPromptMic" onclick="triggerVoicePromptDictation()">
+          <span class="mic-icon">🎙️</span>
+          <span id="promptMicCaption">PULSAR PARA HABLAR</span>
+        </button>
+        <p class="voice-hint" id="voicePromptHint">Dicte el tiempo o nombre del lugar</p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <label class="trigger-label" id="voicePromptInputLabel">O escriba directamente:</label>
+        <input type="text" id="voicePromptTextInput" class="custom-input" placeholder="Ej: 45 min o Farmacia">
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeVoicePromptModal()">Cancelar</button>
+        <button class="btn-save" onclick="confirmVoicePrompt()">✓ Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANTALLA: MODO PROTECTOR DE PANTALLA (AOD / Screensaver) -->
+  <div id="screensaverOverlay" class="screensaver-view hidden" onclick="closeScreensaver()">
+    <div class="screensaver-content">
+      <div class="aod-clock" id="aodClock">21:45</div>
+      <div class="aod-date" id="aodDate">Jueves, 15 de Octubre • Nota Feliz</div>
+      
+      <div class="aod-divider"></div>
+      
+      <div class="aod-tasks-container">
+        <div class="aod-subtitle">ACTIVIDADES RELEVANTES POR CUMPLIRSE</div>
+        <div id="screensaverTasksDynamic">
+          <!-- Se inyectan las 3 tareas más prioritarias en tiempo real -->
+        </div>
+      </div>
+
+      <div class="aod-footer-hint">
+        <span>Toque la pantalla para volver al tablero</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE CONFIGURACIÓN, TEMA & GEOFENCING -->
+  <div id="settingsModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Configuración de Nota Feliz</h3>
+        <button class="close-x-btn" onclick="closeSettings()">✕</button>
+      </div>
+
+      <div class="settings-content">
+        <!-- Requerimiento 11: Opciones de tema Oscuro, Claro y Sistema -->
+        <h4>🎨 Tema Visual de Fondo</h4>
+        <div class="theme-selector-row">
+          <button type="button" class="theme-btn" id="themeBtnDark" onclick="setAppTheme('dark')">🌙 Oscuro</button>
+          <button type="button" class="theme-btn" id="themeBtnLight" onclick="setAppTheme('light')">☀️ Claro</button>
+          <button type="button" class="theme-btn" id="themeBtnSystem" onclick="setAppTheme('system')">📱 Sistema</button>
+        </div>
+
+        <hr class="settings-divider">
+
+        <!-- Requerimiento 5: Actualización de GPS Real con Geolocation / Puente Nativo -->
+        <h4>📍 Mis Lugares de Georreferenciación (Radio 150m)</h4>
+        <p class="settings-desc">Las alertas se activan mediante GPS local en su celular sin enviar coordenadas a internet.</p>
+
+        <div class="location-item">
+          <div>
+            <strong>🏠 Casa</strong>
+            <div class="coords-text" id="coordsTextCasa">Lat: -16.5024, Lng: -68.1311</div>
+          </div>
+          <button class="chip-action" id="btnUpdateCasa" onclick="updateGeoCoord('Casa')">Actualizar Aquí</button>
+        </div>
+
+        <div class="location-item">
+          <div>
+            <strong>🛒 Supermercado</strong>
+            <div class="coords-text" id="coordsTextSupermercado">Lat: -16.5089, Lng: -68.1275</div>
+          </div>
+          <button class="chip-action" id="btnUpdateSupermercado" onclick="updateGeoCoord('Supermercado')">Actualizar Aquí</button>
+        </div>
+
+        <div class="location-item">
+          <div>
+            <strong>🏢 Trabajo / Oficina</strong>
+            <div class="coords-text" id="coordsTextTrabajo">Lat: -16.5140, Lng: -68.1210</div>
+          </div>
+          <button class="chip-action" id="btnUpdateTrabajo" onclick="updateGeoCoord('Trabajo')">Actualizar Aquí</button>
+        </div>
+
+        <hr class="settings-divider">
+
+        <h4>💾 Respaldo y Soberanía Local</h4>
+        <div class="backup-actions">
+          <button class="backup-btn" onclick="exportDataJSON()">📥 Exportar Notas & Audios (JSON)</button>
+          <button class="backup-btn" onclick="resetDemoData()">🔄 Restaurar Datos Iniciales</button>
+        </div>
+
+        <div class="privacy-callout">
+          🛡️ <strong>100% Local-First:</strong> Todos los audios, textos y ubicaciones residen únicamente en este dispositivo.
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-save" onclick="closeSettings()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>
