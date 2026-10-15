@@ -116,6 +116,7 @@ html, body {
   background-color: var(--bg-primary);
   color: var(--text-main);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  box-sizing: border-box;
 }
 
 /* Viewport Móvil Ajustado Exactamente a la Pantalla del Celular */
@@ -124,26 +125,27 @@ html, body {
   max-width: 100vw;
   height: 100%;
   height: 100dvh;
-  max-height: 100%;
+  max-height: 100dvh;
   background-color: var(--bg-primary);
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
   box-sizing: border-box;
-  /* Margen seguro para que la barra inferior no tape los botones base de Android (||| O <) */
-  padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
 }
 
 /* Header */
 .app-header {
-  padding: 16px 20px 12px;
+  flex-shrink: 0;
+  padding: 12px 16px 8px;
   background-color: var(--bg-surface);
   border-bottom: 1px solid var(--border-subtle);
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   z-index: 10;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .header-badge {
@@ -160,15 +162,15 @@ html, body {
 }
 
 .header-title {
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 700;
   color: var(--text-main);
 }
 
 .header-subtitle {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-muted);
-  margin-top: 2px;
+  margin-top: 1px;
 }
 
 .header-actions {
@@ -197,9 +199,10 @@ html, body {
 
 /* Filtros (4 pestañas optimizadas, cero scroll) */
 .filter-bar {
+  flex-shrink: 0;
   display: flex;
-  gap: 6px;
-  padding: 8px 10px;
+  gap: 4px;
+  padding: 6px 8px;
   background-color: var(--bg-surface);
   overflow: hidden; /* CERO SCROLL HORIZONTAL */
   border-bottom: 1px solid var(--border-subtle);
@@ -208,17 +211,20 @@ html, body {
 }
 
 .filter-chip {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0; /* Permite que los 4 chips se adapten sin desbordar el ancho */
   background-color: var(--bg-primary);
   border: 1px solid var(--border-subtle);
-  border-radius: 12px;
-  padding: 8px 4px;
+  border-radius: 10px;
+  padding: 7px 2px;
   font-size: 11px;
   font-weight: 600;
   color: var(--text-muted);
   cursor: pointer;
   text-align: center;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   transition: all 0.15s;
   user-select: none;
   -webkit-user-select: none;
@@ -238,14 +244,13 @@ body[data-theme="dark"] .filter-chip.active {
 
 /* Tablero de Notas */
 .board-container {
-  flex: 1;
+  flex: 1 1 auto;
   overflow-y: auto;
   overflow-x: hidden; /* CERO SCROLL HORIZONTAL */
-  padding: 12px;
+  padding: 10px 12px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding-bottom: 110px;
+  gap: 14px;
   width: 100%;
   box-sizing: border-box;
 }
@@ -461,21 +466,20 @@ body[data-theme="dark"] .filter-chip.active {
   border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-/* Barra Inferior de Captura Rápida (Ergonomía de 1 Toque y margen seguro Android) */
+/* Barra Inferior de Captura Rápida (Flex natural al pie, nunca sobrepasa la pantalla ni los botones de Android) */
 .bottom-action-bar {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 80px;
+  flex-shrink: 0;
+  position: relative;
+  width: 100%;
+  height: 74px;
   background: var(--bar-bg);
   backdrop-filter: blur(10px);
   border-top: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   justify-content: space-evenly;
-  padding: 0 24px;
-  padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
+  padding: 6px 20px;
+  padding-bottom: max(6px, env(safe-area-inset-bottom, 6px));
   z-index: 20;
   box-sizing: border-box;
 }

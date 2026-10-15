@@ -7,13 +7,17 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
+import android.util.Base64;
 import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
 import android.webkit.PermissionRequest;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -22,9 +26,10 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.webkit.WebViewAssetLoader;
+import java.io.File;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +39,12 @@ public class MainActivity extends AppCompatActivity {
     private WebView webView;
     private String pendingVoiceTargetIndex = "0";
 
+    // Grabación de audio nativa de Android (Hardware Micrófono)
+    private MediaRecorder nativeRecorder = null;
+    private File currentAudioFile = null;
+    private long recordingStartTime = 0;
+
+    // Lanzador nativo de reconocimiento de voz del sistema Android
     private final ActivityResultLauncher<Intent> speechResultLauncher =
         registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == RESULT_OK && result.getData() != null) {
@@ -51,25 +62,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Previene que el contenido sobrepase la barra base de botones de Android (||| O <)
+        // Previene terminantemente que la vista sobrepase la barra de navegación de Android (||| O <)
         WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
 
         webView = new WebView(this);
         setContentView(webView);
 
-        // Ajuste dinámico de Insets del sistema (Status Bar + Navigation Bar)
-        ViewCompat.setOnApplyWindowInsetsListener(webView, (v, insets) -> {
-            int bottom = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
-            int top = insets.getInsets(WindowInsetsCompat.Type.systemBars()).top;
-            v.setPadding(0, 0, 0, bottom);
-            return insets;
-        });
-
         requestAppPermissions();
         configureWebView();
 
-        // Cargar Nota Feliz 100% offline y local desde assets
-        webView.loadUrl("file:///android_asset/www/index.html");
+        // Carga segura https://appassets.androidplatform.net para activar permisos de hardware y contexto seguro
+        webView.loadUrl("https://appassets.androidplatform.net/assets/index.html");
     }
 
     private void configureWebView() {
@@ -83,23 +86,33 @@ public class MainActivity extends AppCompatActivity {
         settings.setMediaPlaybackRequiresUserGesture(false);
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
 
-        // Puente nativo JavaScript para Voz real y GPS satelital
-        webView.addJavascriptInterface(new AndroidNativeBridge(), "AndroidBridge");
+        // Carga de activos empaquetados como origen seguro https
+        final WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
+            .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
+            .build();
 
-        webView.setWebViewClient(new WebViewClient());
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                return assetLoader.shouldInterceptRequest(request.getUrl());
+            }
+        });
+
+        // Puente nativo JavaScript para Voz real, Grabación real y GPS por hardware
+        webView.addJavascriptInterface(new AndroidNativeBridge(), "AndroidBridge");
 
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onPermissionRequest(final PermissionRequest request) {
                 runOnUiThread(() -> {
-                    // Otorgar permisos de captura de audio a la WebApp
+                    // Otorgar permisos nativos de captura de audio y video a la página
                     request.grant(request.getResources());
                 });
             }
 
             @Override
             public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
-                // Otorgar permisos de geolocalización local
+                // Otorgar permisos locales de geolocalización
                 callback.invoke(origin, true, false);
             }
         });
@@ -141,11 +154,65 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Dicte su nota para Nota Feliz...");
                     speechResultLauncher.launch(intent);
                 } catch (Exception e) {
-                    webView.evaluateJavascript("alert('El servicio de voz de Android no está disponible o requiere activación.');", null);
+                    webView.evaluateJavascript("alert('El servicio de voz de Android no está disponible.');", null);
                 }
             });
         }
 
+        // Grabación de audio real con el micrófono físico del celular (Hardware MediaRecorder)
+        @JavascriptInterface
+        public void startNativeAudioRecording() {
+            runOnUiThread(() -> {
+                try {
+                    if (nativeRecorder != null) {
+                        try { nativeRecorder.stop(); } catch (Exception ignored) {}
+                        nativeRecorder.release();
+                        nativeRecorder = null;
+                    }
+                    currentAudioFile = new File(getCacheDir(), "audio_" + System.currentTimeMillis() + ".m4a");
+                    nativeRecorder = new MediaRecorder();
+                    nativeRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+                    nativeRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+                    nativeRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+                    nativeRecorder.setAudioEncodingBitRate(64000);
+                    nativeRecorder.setAudioSamplingRate(44100);
+                    nativeRecorder.setOutputFile(currentAudioFile.getAbsolutePath());
+                    nativeRecorder.prepare();
+                    nativeRecorder.start();
+                    recordingStartTime = System.currentTimeMillis();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void stopNativeAudioRecording(String targetIndexStr) {
+            runOnUiThread(() -> {
+                try {
+                    if (nativeRecorder != null) {
+                        nativeRecorder.stop();
+                        nativeRecorder.release();
+                        nativeRecorder = null;
+
+                        long durationSec = Math.max(1, (System.currentTimeMillis() - recordingStartTime) / 1000);
+                        byte[] bytes = Files.readAllBytes(currentAudioFile.toPath());
+                        String base64 = Base64.encodeToString(bytes, Base64.NO_WRAP);
+                        String dataUrl = "data:audio/mp4;base64," + base64;
+                        String durStr = String.format(java.util.Locale.US, "0:%02d", durationSec);
+
+                        webView.evaluateJavascript(
+                            String.format("if (window.onNativeAudioRecorded) { window.onNativeAudioRecorded('%s', '%s', '%s'); }",
+                            targetIndexStr, durStr, dataUrl), null
+                        );
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+
+        // Obtener GPS real del hardware del celular
         @JavascriptInterface
         public void getRealGPSLocation(String placeName) {
             runOnUiThread(() -> {
@@ -168,12 +235,8 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     if (bestLocation != null) {
-                        double lat = bestLocation.getLatitude();
-                        double lng = bestLocation.getLongitude();
-                        float acc = bestLocation.getAccuracy();
-                        sendGpsToWebView(placeName, lat, lng, acc);
+                        sendGpsToWebView(placeName, bestLocation.getLatitude(), bestLocation.getLongitude(), bestLocation.getAccuracy());
                     } else {
-                        // Solicitar actualización única fresca de ubicación
                         LocationListener listener = new LocationListener() {
                             @Override
                             public void onLocationChanged(Location loc) {

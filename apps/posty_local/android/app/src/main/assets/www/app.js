@@ -606,11 +606,16 @@ function startRealVoiceRecording(lineIndex = 0) {
   const statusLabel = document.getElementById('voiceStatusLabel');
 
   if (voiceBox) voiceBox.style.display = 'flex';
-  if (statusLabel) statusLabel.textContent = `Escuchando voz para línea ${lineIndex + 1}...`;
+  if (statusLabel) statusLabel.textContent = `Grabando audio real para línea ${lineIndex + 1}...`;
 
-  // 1. Si estamos en Android APK nativo: invocar reconocedor nativo
-  if (window.AndroidBridge && window.AndroidBridge.startVoiceDictation) {
-    window.AndroidBridge.startVoiceDictation(String(lineIndex));
+  // 1. Si estamos en Android APK nativo: Iniciar grabación nativa por hardware y reconocimiento de voz
+  if (window.AndroidBridge) {
+    if (window.AndroidBridge.startNativeAudioRecording) {
+      window.AndroidBridge.startNativeAudioRecording();
+    }
+    if (window.AndroidBridge.startVoiceDictation) {
+      window.AndroidBridge.startVoiceDictation(String(lineIndex));
+    }
   }
 
   // 2. Reconocimiento de Voz en Browser (Web Speech API)
@@ -643,7 +648,7 @@ function startRealVoiceRecording(lineIndex = 0) {
     }
   }
 
-  // 3. Captura Real de Audio con Micrófono (MediaRecorder)
+  // 3. Captura Real de Audio con Micrófono del Dispositivo (MediaRecorder)
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     navigator.mediaDevices.getUserMedia({ audio: true })
       .then(stream => {
@@ -669,7 +674,6 @@ function startRealVoiceRecording(lineIndex = 0) {
           };
           reader.readAsDataURL(audioBlob);
 
-          // Detener pistas de audio
           stream.getTracks().forEach(track => track.stop());
         };
         mediaRecorder.start();
@@ -698,6 +702,10 @@ function stopRealVoiceRecording() {
     recordingTimerInterval = null;
   }
 
+  if (window.AndroidBridge && window.AndroidBridge.stopNativeAudioRecording) {
+    window.AndroidBridge.stopNativeAudioRecording(String(activeRecordingLineIndex));
+  }
+
   if (webSpeechRecognition) {
     try { webSpeechRecognition.stop(); } catch (e) {}
     webSpeechRecognition = null;
@@ -710,28 +718,34 @@ function stopRealVoiceRecording() {
   const voiceBox = document.getElementById('voiceRecordingBox');
   if (voiceBox) voiceBox.style.display = 'none';
 
-  // Si la línea quedó vacía y no reconoció texto, asignar un texto representativo
-  if (modalLines[activeRecordingLineIndex] && !modalLines[activeRecordingLineIndex].text.trim()) {
-    modalLines[activeRecordingLineIndex].text = 'Nota dictada por voz';
-    modalLines[activeRecordingLineIndex].hasAudio = true;
-    modalLines[activeRecordingLineIndex].audioDuration = '0:05';
-  }
-
   renderModalLines();
 }
 
-// Callback global invocado por el puente nativo de Android (AndroidBridge)
+// Callback invocado por el puente nativo de Android al dictar texto
 window.onNativeVoiceDictated = function(targetIndexStr, recognizedText) {
   const idx = parseInt(targetIndexStr) || 0;
   if (modalLines[idx]) {
     modalLines[idx].text = recognizedText;
-    modalLines[idx].hasAudio = true;
-    modalLines[idx].audioDuration = '0:06';
     renderModalLines();
   } else if (currentVoicePromptType) {
-    // Si se estaba dictando para un prompt de tiempo o lugar
     const input = document.getElementById('voicePromptTextInput');
     if (input) input.value = recognizedText;
+  }
+
+  // Al terminar dictado, detener grabación nativa para guardar el clip
+  if (window.AndroidBridge && window.AndroidBridge.stopNativeAudioRecording) {
+    window.AndroidBridge.stopNativeAudioRecording(String(idx));
+  }
+};
+
+// Callback invocado por el puente nativo de Android al guardar archivo de audio real
+window.onNativeAudioRecorded = function(targetIndexStr, durStr, dataUrl) {
+  const idx = parseInt(targetIndexStr) || 0;
+  if (modalLines[idx]) {
+    modalLines[idx].hasAudio = true;
+    modalLines[idx].audioDuration = durStr;
+    modalLines[idx].audioData = dataUrl;
+    renderModalLines();
   }
 };
 
