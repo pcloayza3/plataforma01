@@ -1,0 +1,14 @@
+services:
+  posty-local:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: posty_local_app
+    ports:
+      - "8092:80"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/index.html"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
