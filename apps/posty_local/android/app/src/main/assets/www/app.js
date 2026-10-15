@@ -99,8 +99,9 @@ let notes = [];
 let timePresets = [];
 let geoPresets = [];
 
-// Filtros activos (soporta selección múltiple mediante pulsación prolongada)
-let activeFilters = new Set(['urgent', 'context', 'normal']);
+// Filtro activo único (permanece presionado hasta pulsar otro botón)
+let currentFilter = 'urgent';
+let modalPhotoData = null;
 
 let selectedModalColor = 'yellow';
 let selectedTriggerType = 'none';
@@ -112,27 +113,22 @@ let activeAudioElement = null;
 let activeAudioId = null;
 let currentVoicePromptType = 'time';
 
-// Variables de Grabación de Audio Real (MediaRecorder)
-let mediaRecorder = null;
-let audioChunks = [];
-let recordingStartTime = 0;
-let recordingTimerInterval = null;
-let activeRecordingLineIndex = 0;
-let isRecordingActive = false;
-
 // Reconocimiento de Voz Web (Web Speech API)
-let webSpeechRecognition = null;
+let postyRecognitionInstance = null;
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
   initAppTheme();
   loadNotes();
   loadPresets();
-  setupFilterLongPress();
+  setupFilterButtons();
   renderBoard();
   renderTriggerPresets();
   startClockUpdater();
   startAutomaticAlertMonitor();
+
+  // Conectar dictado estilo clinik_local en el modal de otro tiempo / nuevo lugar
+  setupVoiceDictation('btnVoicePromptDictar', 'voicePromptTextInput');
 
   // Si se abre como protector de pantalla (Daydream en Android: ?screensaver=1)
   const urlParams = new URLSearchParams(window.location.search);
@@ -204,68 +200,20 @@ function loadPresets() {
   });
 }
 
-// 4. FILTROS RÁPIDOS Y SOPORTE DE PULSACIÓN LARGA (MULTI-SELECCIÓN)
-function setupFilterLongPress() {
+// 4. FILTROS RÁPIDOS (BOTÓN SELECCIONADO PERMANECE PRESIONADO HASTA QUE SE PRESIONE OTRO)
+function setupFilterButtons() {
   const chips = document.querySelectorAll('.filter-chip');
   chips.forEach(chip => {
-    let pressTimer = null;
-    let isLongPress = false;
-
-    const startPress = () => {
-      isLongPress = false;
-      pressTimer = setTimeout(() => {
-        isLongPress = true;
-        handleFilterLongPress(chip.getAttribute('data-filter'));
-        if (navigator.vibrate) navigator.vibrate(50);
-      }, 450); // 450ms para mantener presionado
-    };
-
-    const cancelPress = () => {
-      if (pressTimer) {
-        clearTimeout(pressTimer);
-        pressTimer = null;
-      }
-    };
-
-    chip.addEventListener('touchstart', startPress, { passive: true });
-    chip.addEventListener('touchend', (e) => {
-      cancelPress();
-      if (!isLongPress) {
-        handleFilterClick(chip.getAttribute('data-filter'));
-      }
+    chip.addEventListener('click', (e) => {
+      e.preventDefault();
+      const filterType = chip.getAttribute('data-filter');
+      handleFilterClick(filterType);
     });
-    chip.addEventListener('touchcancel', cancelPress);
-
-    chip.addEventListener('mousedown', startPress);
-    chip.addEventListener('mouseup', () => {
-      cancelPress();
-      if (!isLongPress) {
-        handleFilterClick(chip.getAttribute('data-filter'));
-      }
-    });
-    chip.addEventListener('mouseleave', cancelPress);
   });
 }
 
 function handleFilterClick(filterType) {
-  // Clic simple: Selecciona únicamente ese filtro (o si ya era el único, activa todos los activos)
-  if (activeFilters.size === 1 && activeFilters.has(filterType)) {
-    activeFilters = new Set(['urgent', 'context', 'normal']);
-  } else {
-    activeFilters = new Set([filterType]);
-  }
-  renderBoard();
-}
-
-function handleFilterLongPress(filterType) {
-  // Mantener presionado: Agrega o remueve ese filtro de la multi-selección
-  if (activeFilters.has(filterType)) {
-    if (activeFilters.size > 1) {
-      activeFilters.delete(filterType);
-    }
-  } else {
-    activeFilters.add(filterType);
-  }
+  currentFilter = filterType;
   renderBoard();
 }
 
@@ -300,11 +248,11 @@ function renderBoard() {
     gridCompleted.appendChild(card);
   });
 
-  // Visibilidad de secciones según activeFilters
-  document.getElementById('sectionUrgent').style.display = activeFilters.has('urgent') ? 'flex' : 'none';
-  document.getElementById('sectionContext').style.display = activeFilters.has('context') ? 'flex' : 'none';
-  document.getElementById('sectionNormal').style.display = activeFilters.has('normal') ? 'flex' : 'none';
-  document.getElementById('sectionCompleted').style.display = activeFilters.has('completed') ? 'flex' : 'none';
+  // Visibilidad de secciones según currentFilter (el botón seleccionado permanece activo hasta pulsar otro)
+  document.getElementById('sectionUrgent').style.display = (currentFilter === 'urgent') ? 'flex' : 'none';
+  document.getElementById('sectionContext').style.display = (currentFilter === 'context') ? 'flex' : 'none';
+  document.getElementById('sectionNormal').style.display = (currentFilter === 'normal') ? 'flex' : 'none';
+  document.getElementById('sectionCompleted').style.display = (currentFilter === 'completed') ? 'flex' : 'none';
 
   // Actualizar estado visual de los chips de filtro
   const chipMap = {
@@ -320,19 +268,19 @@ function renderBoard() {
 
   if (chipMap.urgent) {
     chipMap.urgent.textContent = `🔴 Urgente (${urgentCount})`;
-    chipMap.urgent.classList.toggle('active', activeFilters.has('urgent'));
+    chipMap.urgent.classList.toggle('active', currentFilter === 'urgent');
   }
   if (chipMap.context) {
     chipMap.context.textContent = `🟡 Próximas (${contextCount})`;
-    chipMap.context.classList.toggle('active', activeFilters.has('context'));
+    chipMap.context.classList.toggle('active', currentFilter === 'context');
   }
   if (chipMap.normal) {
     chipMap.normal.textContent = `🟢 Libres (${normalCount})`;
-    chipMap.normal.classList.toggle('active', activeFilters.has('normal'));
+    chipMap.normal.classList.toggle('active', currentFilter === 'normal');
   }
   if (chipMap.completed) {
     chipMap.completed.textContent = `✓ Realizadas (${completedNotes.length})`;
-    chipMap.completed.classList.toggle('active', activeFilters.has('completed'));
+    chipMap.completed.classList.toggle('active', currentFilter === 'completed');
   }
 
   const urgentSummary = document.getElementById('urgentSummaryText');
@@ -350,9 +298,9 @@ function createNoteCardElement(note, isCompletedView) {
   let linesHtml = '<div class="postit-checklist">';
   if (note.lines && note.lines.length > 0) {
     note.lines.forEach((line, lIdx) => {
-      const audioBtn = line.hasAudio ? `
-        <button class="audio-play-btn" style="width: 22px; height: 22px; font-size: 10px;" onclick="playAudioClip('${line.id}', '${escapeHtml(line.text)}', '${line.audioDuration}', ${JSON.stringify(line.audioData || null)})" title="Escuchar audio">▶️</button>
-      ` : '';
+      const audioBtn = `
+        <button type="button" class="audio-play-btn" style="width: 24px; height: 24px; font-size: 11px; margin-left: 6px; cursor: pointer; border-radius: 50%; border: none; background: rgba(0,0,0,0.08);" onclick="playLineAudioById('${note.id}', '${line.id}')" title="Escuchar audio">▶️</button>
+      `;
 
       const checkAttr = isCompletedView ? 'disabled checked' : (line.completed ? 'checked' : '');
       const clickHandler = isCompletedView ? '' : `onclick="toggleLineCheck('${note.id}', '${line.id}')"`;
@@ -369,6 +317,11 @@ function createNoteCardElement(note, isCompletedView) {
     linesHtml += `<div class="checklist-item"><span class="checklist-text">${escapeHtml(note.text || 'Sin texto')}</span></div>`;
   }
   linesHtml += '</div>';
+
+  let photoHtml = '';
+  if (note.photo) {
+    photoHtml = `<img src="${note.photo}" class="note-attached-image" alt="Foto adjunta" onclick="window.open('${note.photo}')">`;
+  }
 
   let topActions = '';
   if (!isCompletedView) {
@@ -399,7 +352,10 @@ function createNoteCardElement(note, isCompletedView) {
 
   card.innerHTML = `
     <div class="postit-top-row">
-      <div style="flex: 1;">${linesHtml}</div>
+      <div style="flex: 1;">
+        ${linesHtml}
+        ${photoHtml}
+      </div>
       ${topActions}
     </div>
     <div class="postit-footer">
@@ -489,27 +445,21 @@ function selectColor(color) {
   if (activeOpt) activeOpt.classList.add('active');
 }
 
-// 1. DICTADO DE NOTAS Y GRABACIÓN DE AUDIO REAL (MEDIARECORDER + SPEECH RECOGNITION + PUENTE NATIVO ANDROID)
-function openNewNoteModal(mode) {
+// 1. CREACIÓN, EDICIÓN Y GESTIÓN DE NOTAS CON LISTAS
+function openNewNoteModal() {
   editingNoteId = null;
   modalLines = [{ id: 'ml-1', text: '', completed: false, hasAudio: false, audioDuration: null, audioData: null }];
+  modalPhotoData = null;
   const modal = document.getElementById('newNoteModal');
-  const voiceBox = document.getElementById('voiceRecordingBox');
   const modalTitle = document.getElementById('modalTitle');
 
   modal.classList.remove('hidden');
   resetModalForm();
   renderModalLines();
+  renderPhotoPreview();
   renderTriggerPresets();
 
-  if (mode === 'voice') {
-    modalTitle.textContent = '🎙️ Dictar Nota';
-    voiceBox.style.display = 'flex';
-    startRealVoiceRecording(0);
-  } else {
-    modalTitle.textContent = '✏️ Nueva Nota (Lista)';
-    voiceBox.style.display = 'none';
-  }
+  modalTitle.textContent = '✏️ Nueva Nota (Lista)';
 }
 
 function openEditNoteModal(noteId) {
@@ -520,13 +470,12 @@ function openEditNoteModal(noteId) {
   modalLines = (note.lines && note.lines.length > 0)
     ? JSON.parse(JSON.stringify(note.lines))
     : [{ id: 'ml-1', text: note.text || '', completed: false, hasAudio: false, audioDuration: null, audioData: null }];
+  modalPhotoData = note.photo || null;
 
   const modal = document.getElementById('newNoteModal');
-  const voiceBox = document.getElementById('voiceRecordingBox');
   const modalTitle = document.getElementById('modalTitle');
 
   modal.classList.remove('hidden');
-  voiceBox.style.display = 'none';
   modalTitle.textContent = '✏️ Editar Nota y Lista';
 
   selectColor(note.color || 'yellow');
@@ -535,6 +484,7 @@ function openEditNoteModal(noteId) {
   document.getElementById('selectedTriggerText').textContent = `Alerta: ${selectedTriggerLabel}`;
 
   renderModalLines();
+  renderPhotoPreview();
   renderTriggerPresets();
 }
 
@@ -552,18 +502,16 @@ function renderModalLines() {
     const row = document.createElement('div');
     row.className = 'modal-line-row';
 
-    const audioPill = line.hasAudio ? `
-      <span class="line-audio-badge" onclick="playAudioClip('${line.id}', '${escapeHtml(line.text)}', '${line.audioDuration}', ${JSON.stringify(line.audioData || null)})" title="Escuchar audio">▶️ Audio ${line.audioDuration}</span>
-    ` : '';
-
     row.innerHTML = `
       <span style="font-size: 12px; font-weight: 700; opacity: 0.6;">${idx + 1}.</span>
-      <input type="text" class="line-text-input" placeholder="Escriba o dicte el ítem ${idx + 1}..." value="${escapeHtml(line.text)}" oninput="updateModalLineText(${idx}, this.value)">
-      ${audioPill}
-      <button type="button" class="btn-line-action" title="Grabar o dictar audio para esta línea" onclick="startRealVoiceRecording(${idx})">🎙️</button>
+      <input type="text" id="modalLineInput_${idx}" class="line-text-input" placeholder="Escriba o dicte el ítem ${idx + 1}..." value="${escapeHtml(line.text)}" oninput="updateModalLineText(${idx}, this.value)">
+      <button type="button" class="btn-voice-mini" id="btnVoiceLine_${idx}" title="Dictar por voz">🎙️ Dictar</button>
       ${modalLines.length > 1 ? `<button type="button" class="btn-line-action" title="Eliminar línea" onclick="removeLineFromModal(${idx})">✕</button>` : ''}
     `;
     container.appendChild(row);
+
+    // Conectar dictado estilo clinik_local
+    setupVoiceDictation(`btnVoiceLine_${idx}`, `modalLineInput_${idx}`, idx);
   });
 }
 
@@ -596,158 +544,154 @@ function removeLineFromModal(idx) {
   }
 }
 
-// INICIAR GRABACIÓN DE VOZ REAL (ANDROID BRIDGE + WEBSPEECH + MEDIARECORDER)
-function startRealVoiceRecording(lineIndex = 0) {
-  activeRecordingLineIndex = lineIndex;
-  isRecordingActive = true;
+// ==================== DICTADO POR VOZ (IDÉNTICO A CLINIK_LOCAL) ====================
+function setupVoiceDictation(buttonOrId, targetInputOrId, lineIdx = null) {
+  const btn = typeof buttonOrId === 'string' ? document.getElementById(buttonOrId) : buttonOrId;
+  const input = typeof targetInputOrId === 'string' ? document.getElementById(targetInputOrId) : targetInputOrId;
+  if (!btn || !input) return;
 
-  const voiceBox = document.getElementById('voiceRecordingBox');
-  const timer = document.getElementById('recordingTimer');
-  const statusLabel = document.getElementById('voiceStatusLabel');
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-  if (voiceBox) voiceBox.style.display = 'flex';
-  if (statusLabel) statusLabel.textContent = `Grabando audio real para línea ${lineIndex + 1}...`;
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-  // 1. Si estamos en Android APK nativo: Iniciar grabación nativa por hardware y reconocimiento de voz
-  if (window.AndroidBridge) {
-    if (window.AndroidBridge.startNativeAudioRecording) {
-      window.AndroidBridge.startNativeAudioRecording();
+    if (btn.classList.contains('listening')) {
+      if (postyRecognitionInstance) {
+        try { postyRecognitionInstance.stop(); } catch (err) {}
+      }
+      btn.classList.remove('listening');
+      btn.innerHTML = '🎙️ Dictar';
+      return;
     }
-    if (window.AndroidBridge.startVoiceDictation) {
-      window.AndroidBridge.startVoiceDictation(String(lineIndex));
-    }
-  }
 
-  // 2. Reconocimiento de Voz en Browser (Web Speech API)
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (SpeechRecognition) {
-    try {
-      webSpeechRecognition = new SpeechRecognition();
-      webSpeechRecognition.lang = 'es-ES';
-      webSpeechRecognition.continuous = false;
-      webSpeechRecognition.interimResults = true;
+    if (SpeechRec) {
+      try {
+        const recognition = new SpeechRec();
+        recognition.lang = 'es-ES';
+        recognition.continuous = false;
+        recognition.interimResults = false;
 
-      webSpeechRecognition.onresult = (event) => {
-        let transcript = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          transcript += event.results[i][0].transcript;
-        }
-        if (modalLines[activeRecordingLineIndex]) {
-          modalLines[activeRecordingLineIndex].text = transcript;
-          renderModalLines();
-        }
-      };
-
-      webSpeechRecognition.onerror = (e) => {
-        console.warn('SpeechRecognition error:', e);
-      };
-
-      webSpeechRecognition.start();
-    } catch (err) {
-      console.warn('No se pudo inicializar SpeechRecognition:', err);
-    }
-  }
-
-  // 3. Captura Real de Audio con Micrófono del Dispositivo (MediaRecorder)
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then(stream => {
-        audioChunks = [];
-        mediaRecorder = new MediaRecorder(stream);
-        mediaRecorder.ondataavailable = e => {
-          if (e.data.size > 0) audioChunks.push(e.data);
+        recognition.onstart = () => {
+          btn.classList.add('listening');
+          btn.innerHTML = '🔴 Escuchando...';
         };
-        mediaRecorder.onstop = () => {
-          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const base64Audio = reader.result;
-            const durationSec = Math.max(1, Math.round((Date.now() - recordingStartTime) / 1000));
-            const durStr = `0:${String(durationSec).padStart(2, '0')}`;
 
-            if (modalLines[activeRecordingLineIndex]) {
-              modalLines[activeRecordingLineIndex].hasAudio = true;
-              modalLines[activeRecordingLineIndex].audioDuration = durStr;
-              modalLines[activeRecordingLineIndex].audioData = base64Audio;
-              renderModalLines();
+        recognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          if (transcript) {
+            const val = input.value ? input.value + ' ' + transcript : transcript;
+            input.value = val;
+            input.dispatchEvent(new Event('input'));
+            if (lineIdx !== null && modalLines[lineIdx]) {
+              modalLines[lineIdx].text = val;
+              modalLines[lineIdx].hasAudio = true;
             }
-          };
-          reader.readAsDataURL(audioBlob);
-
-          stream.getTracks().forEach(track => track.stop());
+          }
         };
-        mediaRecorder.start();
-      })
-      .catch(err => {
-        console.warn('Acceso al micrófono denegado o no disponible:', err);
-      });
-  }
 
-  // Timer visual de grabación
-  recordingStartTime = Date.now();
-  if (timer) timer.textContent = '0:00';
-  if (recordingTimerInterval) clearInterval(recordingTimerInterval);
+        recognition.onerror = () => {
+          btn.classList.remove('listening');
+          btn.innerHTML = '🎙️ Dictar';
+        };
 
-  recordingTimerInterval = setInterval(() => {
-    const elapsed = Math.round((Date.now() - recordingStartTime) / 1000);
-    if (timer) timer.textContent = `0:${String(elapsed).padStart(2, '0')}`;
-  }, 1000);
-}
+        recognition.onend = () => {
+          btn.classList.remove('listening');
+          btn.innerHTML = '🎙️ Dictar';
+        };
 
-// DETENER GRABACIÓN DE VOZ
-function stopRealVoiceRecording() {
-  isRecordingActive = false;
-  if (recordingTimerInterval) {
-    clearInterval(recordingTimerInterval);
-    recordingTimerInterval = null;
-  }
+        postyRecognitionInstance = recognition;
+        recognition.start();
+        return;
+      } catch (err) {
+        console.warn('SpeechRec fallo, intentando fallback nativo:', err);
+      }
+    }
 
-  if (window.AndroidBridge && window.AndroidBridge.stopNativeAudioRecording) {
-    window.AndroidBridge.stopNativeAudioRecording(String(activeRecordingLineIndex));
-  }
-
-  if (webSpeechRecognition) {
-    try { webSpeechRecognition.stop(); } catch (e) {}
-    webSpeechRecognition = null;
-  }
-
-  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-    try { mediaRecorder.stop(); } catch (e) {}
-  }
-
-  const voiceBox = document.getElementById('voiceRecordingBox');
-  if (voiceBox) voiceBox.style.display = 'none';
-
-  renderModalLines();
+    // Fallback nativo para Android WebView cuando WebSpeech no está soportado internamente
+    if (window.AndroidBridge && window.AndroidBridge.startVoiceDictation) {
+      btn.classList.add('listening');
+      btn.innerHTML = '🔴 Escuchando...';
+      window.activeDictationInput = input;
+      window.activeDictationBtn = btn;
+      window.activeDictationLineIdx = lineIdx;
+      window.AndroidBridge.startVoiceDictation(lineIdx !== null ? String(lineIdx) : 'prompt');
+    } else {
+      alert('Dictado por voz no disponible en este dispositivo.');
+    }
+  });
 }
 
 // Callback invocado por el puente nativo de Android al dictar texto
 window.onNativeVoiceDictated = function(targetIndexStr, recognizedText) {
-  const idx = parseInt(targetIndexStr) || 0;
-  if (modalLines[idx]) {
-    modalLines[idx].text = recognizedText;
-    renderModalLines();
-  } else if (currentVoicePromptType) {
-    const input = document.getElementById('voicePromptTextInput');
-    if (input) input.value = recognizedText;
+  if (window.activeDictationInput && recognizedText) {
+    const val = window.activeDictationInput.value ? window.activeDictationInput.value + ' ' + recognizedText : recognizedText;
+    window.activeDictationInput.value = val;
+    window.activeDictationInput.dispatchEvent(new Event('input'));
+    if (window.activeDictationLineIdx !== null && modalLines[window.activeDictationLineIdx]) {
+      modalLines[window.activeDictationLineIdx].text = val;
+      modalLines[window.activeDictationLineIdx].hasAudio = true;
+    }
   }
-
-  // Al terminar dictado, detener grabación nativa para guardar el clip
-  if (window.AndroidBridge && window.AndroidBridge.stopNativeAudioRecording) {
-    window.AndroidBridge.stopNativeAudioRecording(String(idx));
-  }
-};
-
-// Callback invocado por el puente nativo de Android al guardar archivo de audio real
-window.onNativeAudioRecorded = function(targetIndexStr, durStr, dataUrl) {
-  const idx = parseInt(targetIndexStr) || 0;
-  if (modalLines[idx]) {
-    modalLines[idx].hasAudio = true;
-    modalLines[idx].audioDuration = durStr;
-    modalLines[idx].audioData = dataUrl;
-    renderModalLines();
+  if (window.activeDictationBtn) {
+    window.activeDictationBtn.classList.remove('listening');
+    window.activeDictationBtn.innerHTML = '🎙️ Dictar';
   }
 };
+
+// ==================== ADJUNTAR FOTO OPCIONAL (1 SOLA FOTO) ====================
+function handlePhotoSelected(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const maxDim = 800;
+      let width = img.width;
+      let height = img.height;
+      if (width > height && width > maxDim) {
+        height = Math.round((height * maxDim) / width);
+        width = maxDim;
+      } else if (height > maxDim) {
+        width = Math.round((width * maxDim) / height);
+        height = maxDim;
+      }
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      modalPhotoData = canvas.toDataURL('image/jpeg', 0.8);
+      renderPhotoPreview();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderPhotoPreview() {
+  const box = document.getElementById('photoPreviewBox');
+  const img = document.getElementById('photoPreviewImg');
+  const btnAttach = document.getElementById('btnAttachPhoto');
+  if (modalPhotoData) {
+    if (img) img.src = modalPhotoData;
+    if (box) box.classList.remove('hidden');
+    if (btnAttach) btnAttach.style.display = 'none';
+  } else {
+    if (img) img.src = '';
+    if (box) box.classList.add('hidden');
+    if (btnAttach) btnAttach.style.display = 'block';
+  }
+}
+
+function removeAttachedPhoto() {
+  modalPhotoData = null;
+  const fileInput = document.getElementById('notePhotoInput');
+  if (fileInput) fileInput.value = '';
+  renderPhotoPreview();
+}
 
 // Dictado para "➕ Otro tiempo" / "➕ Nuevo lugar"
 function openVoicePromptModal(type) {
@@ -762,47 +706,15 @@ function openVoicePromptModal(type) {
   modal.classList.remove('hidden');
 
   if (type === 'time') {
-    title.textContent = '⏰ Agregar Tiempo por Voz';
-    hint.textContent = 'Dicte el tiempo (ej: "45 minutos", "Hoy a las 20:00" o "El viernes")';
-    label.textContent = 'O escriba los minutos/hora:';
+    title.textContent = '⏰ Agregar Alerta de Tiempo';
+    hint.textContent = 'Presione "🎙️ Dictar" para hablar (ej: "45 minutos", "Hoy a las 20:00") o escriba directamente.';
+    label.textContent = 'Escriba o dicte el tiempo:';
     input.placeholder = 'Ej: 45 min o 20:00';
   } else {
-    title.textContent = '📍 Agregar Lugar por Voz';
-    hint.textContent = 'Dicte el nombre del lugar (ej: "Farmacia", "Oficina" o "Gimnasio")';
-    label.textContent = 'O escriba el nombre del lugar:';
+    title.textContent = '📍 Agregar Alerta de Lugar';
+    hint.textContent = 'Presione "🎙️ Dictar" para hablar (ej: "Farmacia", "Oficina") o escriba directamente.';
+    label.textContent = 'Escriba o dicte el lugar:';
     input.placeholder = 'Ej: Farmacia central';
-  }
-}
-
-function triggerVoicePromptDictation() {
-  const caption = document.getElementById('promptMicCaption');
-  caption.textContent = 'ESCUCHANDO...';
-
-  // En Android nativo:
-  if (window.AndroidBridge && window.AndroidBridge.startVoiceDictation) {
-    window.AndroidBridge.startVoiceDictation("prompt");
-    setTimeout(() => { caption.textContent = 'PULSAR PARA HABLAR'; }, 3000);
-    return;
-  }
-
-  // En Browser Web Speech API:
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (SpeechRecognition) {
-    try {
-      const rec = new SpeechRecognition();
-      rec.lang = 'es-ES';
-      rec.onresult = (e) => {
-        const text = e.results[0][0].transcript;
-        document.getElementById('voicePromptTextInput').value = text;
-        caption.textContent = 'PULSAR PARA HABLAR';
-      };
-      rec.onerror = () => { caption.textContent = 'PULSAR PARA HABLAR'; };
-      rec.start();
-    } catch (e) {
-      caption.textContent = 'PULSAR PARA HABLAR';
-    }
-  } else {
-    caption.textContent = 'PULSAR PARA HABLAR';
   }
 }
 
@@ -984,6 +896,7 @@ function saveNoteFromModal() {
       note.urgency = urgency;
       note.triggerType = selectedTriggerType;
       note.triggerLabel = selectedTriggerLabel;
+      note.photo = modalPhotoData;
     }
   } else {
     const newNote = {
@@ -995,7 +908,8 @@ function saveNoteFromModal() {
       completed: false,
       completedAt: null,
       createdAt: Date.now(),
-      lines: validLines
+      lines: validLines,
+      photo: modalPhotoData
     };
     notes.unshift(newNote);
   }
@@ -1014,31 +928,56 @@ function classifyUrgency(triggerType, preset) {
   return 'normal';
 }
 
-// Reproducción de Audios Grabados
-function playAudioClip(clipId, text, durationStr, audioDataUrl) {
-  if (activeAudioId === clipId) {
-    stopAudio();
+// Reproducción de Audios Infalible (Android TTS Nativo + Audio + Web Speech)
+function playLineAudioById(noteId, lineId) {
+  const note = notes.find(n => n.id === noteId);
+  if (!note) return;
+  const line = (note.lines && note.lines.length > 0) ? note.lines.find(l => l.id === lineId) : null;
+  const textToSpeak = line ? line.text : (note.text || '');
+
+  if (!textToSpeak) return;
+
+  // 1. Android APK Nativo: Invocar el motor de voz TTS de hardware de Android
+  if (window.AndroidBridge && window.AndroidBridge.speakText) {
+    window.AndroidBridge.speakText(textToSpeak);
     return;
   }
-  stopAudio();
-  activeAudioId = clipId;
 
-  // Si tiene datos reales de audio base64 (grabados del micrófono)
-  if (audioDataUrl && typeof audioDataUrl === 'string' && audioDataUrl.startsWith('data:audio')) {
-    activeAudioElement = new Audio(audioDataUrl);
-    activeAudioElement.onended = () => stopAudio();
-    activeAudioElement.play().catch(() => {
-      fallbackSpeechSynthesis(text);
-    });
-  } else {
-    fallbackSpeechSynthesis(text);
+  // 2. Si hay clip grabado base64 en memoria
+  if (line && line.audioData && typeof line.audioData === 'string' && line.audioData.startsWith('data:audio')) {
+    try {
+      if (activeAudioElement) {
+        activeAudioElement.pause();
+        activeAudioElement = null;
+      }
+      activeAudioElement = new Audio(line.audioData);
+      activeAudioElement.play().catch(() => fallbackSpeechSynthesis(textToSpeak));
+      return;
+    } catch (e) {
+      fallbackSpeechSynthesis(textToSpeak);
+      return;
+    }
   }
+
+  // 3. Fallback a SpeechSynthesis del Navegador
+  fallbackSpeechSynthesis(textToSpeak);
+}
+
+function playAudioClip(clipId, text, durationStr, audioDataUrl) {
+  if (window.AndroidBridge && window.AndroidBridge.speakText) {
+    window.AndroidBridge.speakText(text);
+    return;
+  }
+  fallbackSpeechSynthesis(text);
 }
 
 function fallbackSpeechSynthesis(text) {
   if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'es-ES';
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
     utterance.onend = () => stopAudio();
     window.speechSynthesis.speak(utterance);
   }

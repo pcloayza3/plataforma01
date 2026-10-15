@@ -8,13 +8,16 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.MediaRecorder;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
+import android.speech.tts.TextToSpeech;
 import android.util.Base64;
 import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
 import android.webkit.PermissionRequest;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
@@ -25,17 +28,24 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int PERMISSION_REQUEST_CODE = 1001;
+    private static final int FILE_CHOOSER_REQUEST_CODE = 1002;
     private WebView webView;
     private String pendingVoiceTargetIndex = "0";
+    private TextToSpeech textToSpeech;
+    private ValueCallback<Uri[]> fileUploadCallback;
 
     // Grabación nativa de audio de Android (Hardware de Micrófono)
     private MediaRecorder nativeRecorder = null;
@@ -60,11 +70,25 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Ajusta la ventana para que NO se superponga con la barra de navegación de Android (||| O <)
+        // Ajusta la ventana para que NO se superponga con la barra de navegación de Android (||| O <) ni barra superior
         WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
 
         webView = new WebView(this);
         setContentView(webView);
+
+        // Previene de forma infalible que la barra de botones (||| O <) o barra de estado solapen la aplicación
+        ViewCompat.setOnApplyWindowInsetsListener(webView, (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
+        // Inicializar motor de voz Text-To-Speech en español para reproducción infalible
+        textToSpeech = new TextToSpeech(this, status -> {
+            if (status == TextToSpeech.SUCCESS) {
+                textToSpeech.setLanguage(new Locale("es", "ES"));
+            }
+        });
 
         requestAppPermissions();
         configureWebView();
@@ -115,6 +139,23 @@ public class MainActivity extends AppCompatActivity {
             public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
                 callback.invoke(origin, true, false);
             }
+
+            @Override
+            public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
+                if (fileUploadCallback != null) {
+                    fileUploadCallback.onReceiveValue(null);
+                }
+                fileUploadCallback = filePathCallback;
+
+                Intent intent = fileChooserParams.createIntent();
+                try {
+                    startActivityForResult(intent, FILE_CHOOSER_REQUEST_CODE);
+                } catch (Exception e) {
+                    fileUploadCallback = null;
+                    return false;
+                }
+                return true;
+            }
         });
     }
 
@@ -124,9 +165,13 @@ public class MainActivity extends AppCompatActivity {
         permissions.add(Manifest.permission.MODIFY_AUDIO_SETTINGS);
         permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
         permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
+        permissions.add(Manifest.permission.CAMERA);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             permissions.add(Manifest.permission.POST_NOTIFICATIONS);
+            permissions.add(Manifest.permission.READ_MEDIA_IMAGES);
+        } else {
+            permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
         }
 
         List<String> needed = new ArrayList<>();
@@ -259,6 +304,15 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
+        @JavascriptInterface
+        public void speakText(String text) {
+            runOnUiThread(() -> {
+                if (textToSpeech != null && text != null && !text.isEmpty()) {
+                    textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, "PostyTTS");
+                }
+            });
+        }
+
         private void sendGpsToWebView(String place, double lat, double lng, float acc) {
             webView.post(() -> {
                 String js = String.format(java.util.Locale.US,
@@ -267,6 +321,39 @@ public class MainActivity extends AppCompatActivity {
                 webView.evaluateJavascript(js, null);
             });
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == FILE_CHOOSER_REQUEST_CODE) {
+            if (fileUploadCallback != null) {
+                Uri[] results = null;
+                if (resultCode == RESULT_OK && data != null) {
+                    if (data.getData() != null) {
+                        results = new Uri[]{data.getData()};
+                    } else if (data.getClipData() != null) {
+                        int count = data.getClipData().getItemCount();
+                        results = new Uri[count];
+                        for (int i = 0; i < count; i++) {
+                            results[i] = data.getClipData().getItemAt(i).getUri();
+                        }
+                    }
+                }
+                fileUploadCallback.onReceiveValue(results);
+                fileUploadCallback = null;
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (textToSpeech != null) {
+            textToSpeech.stop();
+            textToSpeech.shutdown();
+        }
+        super.onDestroy();
     }
 
     @Override

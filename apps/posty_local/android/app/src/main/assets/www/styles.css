@@ -45,25 +45,25 @@ body[data-theme="dark"] {
   --bar-bg: linear-gradient(to top, rgba(30, 30, 30, 0.98), rgba(30, 30, 30, 0.88));
   --card-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
 
-  --postit-yellow-bg: #854D0E;
+  --postit-yellow-bg: #28210B;
   --postit-yellow-border: #FACC15;
-  --postit-yellow-text: #FEF08A;
+  --postit-yellow-text: #FFFFFF;
 
-  --postit-green-bg: #14532D;
+  --postit-green-bg: #0B2416;
   --postit-green-border: #4ADE80;
-  --postit-green-text: #DCFCE7;
+  --postit-green-text: #FFFFFF;
 
-  --postit-blue-bg: #0C4A6E;
+  --postit-blue-bg: #0A2338;
   --postit-blue-border: #38BDF8;
-  --postit-blue-text: #E0F2FE;
+  --postit-blue-text: #FFFFFF;
 
-  --postit-pink-bg: #881337;
+  --postit-pink-bg: #300C1B;
   --postit-pink-border: #FB7185;
-  --postit-pink-text: #FFE4E6;
+  --postit-pink-text: #FFFFFF;
 
-  --postit-purple-bg: #581C87;
+  --postit-purple-bg: #220F35;
   --postit-purple-border: #C084FC;
-  --postit-purple-text: #F3E8FF;
+  --postit-purple-text: #FFFFFF;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -76,25 +76,25 @@ body[data-theme="dark"] {
     --bar-bg: linear-gradient(to top, rgba(30, 30, 30, 0.98), rgba(30, 30, 30, 0.88));
     --card-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
 
-    --postit-yellow-bg: #854D0E;
+    --postit-yellow-bg: #28210B;
     --postit-yellow-border: #FACC15;
-    --postit-yellow-text: #FEF08A;
+    --postit-yellow-text: #FFFFFF;
 
-    --postit-green-bg: #14532D;
+    --postit-green-bg: #0B2416;
     --postit-green-border: #4ADE80;
-    --postit-green-text: #DCFCE7;
+    --postit-green-text: #FFFFFF;
 
-    --postit-blue-bg: #0C4A6E;
+    --postit-blue-bg: #0A2338;
     --postit-blue-border: #38BDF8;
-    --postit-blue-text: #E0F2FE;
+    --postit-blue-text: #FFFFFF;
 
-    --postit-pink-bg: #881337;
+    --postit-pink-bg: #300C1B;
     --postit-pink-border: #FB7185;
-    --postit-pink-text: #FFE4E6;
+    --postit-pink-text: #FFFFFF;
 
-    --postit-purple-bg: #581C87;
+    --postit-purple-bg: #220F35;
     --postit-purple-border: #C084FC;
-    --postit-purple-text: #F3E8FF;
+    --postit-purple-text: #FFFFFF;
   }
 }
 
@@ -137,7 +137,7 @@ html, body {
 /* Header */
 .app-header {
   flex-shrink: 0;
-  padding: 12px 16px 8px;
+  padding: max(14px, env(safe-area-inset-top, 14px)) 16px 10px;
   background-color: var(--bg-surface);
   border-bottom: 1px solid var(--border-subtle);
   display: flex;
@@ -231,15 +231,19 @@ html, body {
 }
 
 .filter-chip.active {
-  background-color: var(--text-main);
-  color: var(--bg-surface);
-  border-color: var(--text-main);
+  background-color: #0284C7 !important;
+  color: #FFFFFF !important;
+  border-color: #0284C7 !important;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.4);
 }
 
 body[data-theme="dark"] .filter-chip.active {
-  background-color: #38BDF8;
-  color: #0F172A;
-  border-color: #38BDF8;
+  background-color: #38BDF8 !important;
+  color: #0F172A !important;
+  border-color: #38BDF8 !important;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(56, 189, 248, 0.4);
 }
 
 /* Tablero de Notas */
@@ -471,17 +475,41 @@ body[data-theme="dark"] .filter-chip.active {
   flex-shrink: 0;
   position: relative;
   width: 100%;
-  height: 74px;
+  min-height: 64px;
   background: var(--bar-bg);
   backdrop-filter: blur(10px);
   border-top: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
-  justify-content: space-evenly;
-  padding: 6px 20px;
-  padding-bottom: max(6px, env(safe-area-inset-bottom, 6px));
+  justify-content: center;
+  padding: 8px 16px max(14px, env(safe-area-inset-bottom, 14px));
   z-index: 20;
   box-sizing: border-box;
+}
+
+.btn-create-note-main {
+  width: 100%;
+  max-width: 480px;
+  background: #0284C7;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 14px;
+  padding: 13px 20px;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+  transition: transform 0.12s ease, background 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-create-note-main:active {
+  transform: scale(0.98);
+  background: #0369A1;
 }
 
 /* Selector de Tema en Configuración */
@@ -579,7 +607,7 @@ body[data-theme="dark"] .filter-chip.active {
 
 /* Modal Backdrop & Tarjeta */
 .modal-backdrop {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
@@ -590,6 +618,7 @@ body[data-theme="dark"] .filter-chip.active {
   align-items: flex-end;
   z-index: 100;
   transition: opacity 0.2s;
+  box-sizing: border-box;
 }
 
 .modal-backdrop.hidden {
@@ -598,15 +627,17 @@ body[data-theme="dark"] .filter-chip.active {
 
 .modal-card {
   width: 100%;
-  background: #FFFFFF;
+  background: var(--bg-surface);
+  color: var(--text-main);
   border-radius: 28px 28px 0 0;
-  padding: 20px;
+  padding: 20px 20px max(32px, env(safe-area-inset-bottom, 28px));
   display: flex;
   flex-direction: column;
   gap: 16px;
-  max-height: 85vh;
+  max-height: calc(100dvh - 70px);
   overflow-y: auto;
-  box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.25);
+  box-sizing: border-box;
 }
 
 .modal-header {
@@ -1322,6 +1353,140 @@ body[data-theme="dark"] .filter-chip.active {
   font-size: 15px;
   font-weight: 600;
   color: inherit;
+}
+
+/* Dictado por Voz Idéntico a Clinik Local */
+.btn-voice-mini {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0F172A;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.btn-voice-mini:hover {
+  border-color: #0284C7;
+  color: #0284C7;
+}
+
+.btn-voice-mini.listening {
+  background-color: #fee2e2 !important;
+  border-color: #ef4444 !important;
+  color: #b91c1c !important;
+  animation: pulse-voice 1.2s infinite !important;
+}
+
+@keyframes pulse-voice {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  70% { transform: scale(1.04); box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+/* Modo oscuro para modal-line-row y controles */
+body[data-theme="dark"] .modal-line-row {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #F8FAFC;
+}
+
+body[data-theme="dark"] .line-text-input {
+  color: #F8FAFC;
+}
+
+body[data-theme="dark"] .line-text-input::placeholder {
+  color: #94A3B8;
+}
+
+body[data-theme="dark"] .btn-add-line {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #F8FAFC;
+}
+
+body[data-theme="dark"] .btn-voice-mini {
+  background: #1E293B;
+  border-color: #334155;
+  color: #F8FAFC;
+}
+
+/* Adjuntar Foto Opcional */
+.photo-attachment-group {
+  margin-top: 6px;
+  margin-bottom: 6px;
+}
+
+.btn-attach-photo {
+  width: 100%;
+  background: var(--bg-primary);
+  border: 1px dashed var(--border-subtle);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s ease;
+}
+
+.btn-attach-photo:hover {
+  border-color: #0284C7;
+  color: #0284C7;
+}
+
+.photo-preview-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--bg-primary);
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  margin-bottom: 6px;
+}
+
+.photo-preview-thumb {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+}
+
+.btn-remove-photo {
+  background: #EF4444;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.note-attached-image {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-top: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.note-attached-image:hover {
+  transform: scale(1.01);
 }
 
 .btn-line-action {

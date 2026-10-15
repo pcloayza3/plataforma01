@@ -95,48 +95,21 @@
 
     </main>
 
-    <!-- Barra Inferior de Captura Rápida (Sin botón de simular push; alertas son 100% automáticas) -->
+    <!-- Barra Inferior de Captura Rápida (Botón CREAR NOTA prominente sin iconos) -->
     <footer class="bottom-action-bar">
-      <button class="secondary-btn" title="Escribir nota a mano" onclick="openNewNoteModal('manual')">
-        ✏️ <span>Escribir</span>
-      </button>
-
-      <button class="mic-primary-btn" id="micMainBtn" title="Dictar nota por voz" onclick="openNewNoteModal('voice')">
-        <span class="mic-wave-pulse"></span>
-        <span class="mic-icon">🎙️</span>
-        <span class="mic-caption">DICTAR NOTA</span>
+      <button class="btn-create-note-main" id="btnCreateNote" onclick="openNewNoteModal()">
+        CREAR NOTA
       </button>
     </footer>
 
   </div>
 
-  <!-- MODAL DE CREACIÓN / EDICIÓN (Lista hasta 5 líneas, audio por línea y alertas) -->
+  <!-- MODAL DE CREACIÓN / EDICIÓN (Lista hasta 5 líneas, audio por línea, foto opcional y alertas) -->
   <div id="newNoteModal" class="modal-backdrop hidden">
     <div class="modal-card">
       <div class="modal-header">
         <h3 id="modalTitle">Nueva Nota Rápida</h3>
         <button class="close-x-btn" onclick="closeModal()">✕</button>
-      </div>
-
-      <!-- Área de Grabación de Voz Interactiva Real -->
-      <div id="voiceRecordingBox" class="voice-box">
-        <div class="voice-status">
-          <span class="rec-dot"></span>
-          <span id="recordingTimer">0:00</span>
-          <span class="rec-label" id="voiceStatusLabel">Escuchando voz...</span>
-        </div>
-        <div class="audio-waves" id="audioWaves">
-          <div class="bar b1"></div>
-          <div class="bar b2"></div>
-          <div class="bar b3"></div>
-          <div class="bar b4"></div>
-          <div class="bar b5"></div>
-          <div class="bar b6"></div>
-          <div class="bar b7"></div>
-          <div class="bar b8"></div>
-        </div>
-        <p class="voice-hint" id="voiceHintText">Dicte su nota con naturalidad. Presione Detener al finalizar.</p>
-        <button type="button" class="btn-voice-stop" id="btnStopVoiceRec" onclick="stopRealVoiceRecording()">⏹️ Detener Grabación</button>
       </div>
 
       <!-- Tarjeta Post-it Editable en Lista (Hasta 5 líneas) -->
@@ -162,6 +135,18 @@
           <button type="button" class="color-opt opt-pink" onclick="selectColor('pink')"></button>
           <button type="button" class="color-opt opt-purple" onclick="selectColor('purple')"></button>
         </div>
+      </div>
+
+      <!-- Adjuntar Foto Opcional (1 sola foto) -->
+      <div class="photo-attachment-group">
+        <input type="file" id="notePhotoInput" accept="image/*" style="display:none;" onchange="handlePhotoSelected(event)">
+        <div id="photoPreviewBox" class="photo-preview-box hidden">
+          <img id="photoPreviewImg" src="" alt="Foto adjunta" class="photo-preview-thumb">
+          <button type="button" class="btn-remove-photo" onclick="removeAttachedPhoto()" title="Eliminar foto">✕ Quitar foto</button>
+        </div>
+        <button type="button" class="btn-attach-photo" id="btnAttachPhoto" onclick="document.getElementById('notePhotoInput').click()">
+          📷 Adjuntar Foto (Opcional)
+        </button>
       </div>
 
       <!-- Sección de Alertas Temporales Rápidas (Dinámicas con Frecuencia de Uso) -->
@@ -216,26 +201,21 @@
     </div>
   </div>
 
-  <!-- MODAL DE ENTRADA POR VOZ O TEXTO PARA TIEMPO / LUGAR -->
+  <!-- MODAL DE ENTRADA POR VOZ O TEXTO PARA TIEMPO / LUGAR (ESTILO CLINIK_LOCAL) -->
   <div id="voicePromptModal" class="modal-backdrop hidden">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 id="voicePromptTitle">Agregar Alerta por Voz</h3>
+        <h3 id="voicePromptTitle">Agregar Alerta</h3>
         <button class="close-x-btn" onclick="closeVoicePromptModal()">✕</button>
       </div>
 
-      <div class="voice-box">
-        <button type="button" class="mic-primary-btn" id="btnPromptMic" onclick="triggerVoicePromptDictation()">
-          <span class="mic-icon">🎙️</span>
-          <span id="promptMicCaption">PULSAR PARA HABLAR</span>
-        </button>
-        <p class="voice-hint" id="voicePromptHint">Dicte el tiempo o nombre del lugar</p>
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+        <label class="trigger-label" id="voicePromptInputLabel">Escriba o dicte el valor:</label>
+        <button type="button" class="btn-voice-mini" id="btnVoicePromptDictar" title="Dictar por voz">🎙️ Dictar</button>
       </div>
 
-      <div style="display: flex; flex-direction: column; gap: 6px;">
-        <label class="trigger-label" id="voicePromptInputLabel">O escriba directamente:</label>
-        <input type="text" id="voicePromptTextInput" class="custom-input" placeholder="Ej: 45 min o Farmacia">
-      </div>
+      <input type="text" id="voicePromptTextInput" class="custom-input" placeholder="Ej: 45 min o Farmacia">
+      <p class="voice-hint" id="voicePromptHint" style="margin-top: 4px;">Presione '🎙️ Dictar' para dictar por voz o escriba directamente.</p>
 
       <div class="modal-footer">
         <button class="btn-cancel" onclick="closeVoicePromptModal()">Cancelar</button>
