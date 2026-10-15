@@ -1,15 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# start.sh • Servidor local para la maqueta móvil interactiva de PostyLocal
+# start.sh • Previsualización Estática Local de PostyLocal (MicroApp 2)
+# Arquitectura: 100% Stand-Alone Embebido (Sin Backend ni Servidor de Aplicaciones)
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PORT=8092
 
 echo "=========================================================="
-echo "  PostyLocal • Maqueta Móvil Interactiva (MicroApp 2)     "
+echo "  PostyLocal • Aplicación Móvil 100% Local-First          "
+echo "  (Arquitectura Stand-Alone Embebida - Cero Backend)      "
 echo "=========================================================="
-echo "Iniciando servidor local en: http://localhost:$PORT"
-echo "Presione Ctrl+C para detener."
+echo "Abriendo la interfaz móvil estática en: http://localhost:$PORT"
+echo "Todos los datos (SQLite/LocalStorage, audio y voz) corren"
+echo "directamente en el dispositivo/cliente sin llamadas de red."
+echo "Presione Ctrl+C para finalizar la previsualización."
 echo "=========================================================="
 
 cd "$SCRIPT_DIR"
