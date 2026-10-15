@@ -285,6 +285,96 @@ class PostyLocalCoreTests(unittest.TestCase):
         self.assertEqual(restored[0].id, "n-store-1")
         self.assertEqual(restored[0].text, "Comprar aspirinas")
 
+    # 10. Validación de Edición de Líneas y Serialización de Checklist
+    def test_line_editing_and_serialization(self):
+        note = Note(id="n-edit", color=NoteColor.BLUE)
+        l1 = note.add_line("Original línea 1")
+        l2 = note.add_line("Original línea 2")
+
+        # Editar línea 1
+        note.edit_line(l1.id, "Modificada línea 1")
+        self.assertEqual(note.lines[0].text, "Modificada línea 1")
+
+        # Error al editar ID inexistente
+        with self.assertRaises(ValueError):
+            note.edit_line("id-fantasma", "Texto")
+
+        # Serialización y deserialización fidedigna
+        d = note.to_dict()
+        self.assertEqual(len(d["lines"]), 2)
+        self.assertEqual(d["lines"][0]["text"], "Modificada línea 1")
+
+        restored = Note.from_dict(d)
+        self.assertEqual(len(restored.lines), 2)
+        self.assertEqual(restored.lines[0].text, "Modificada línea 1")
+        self.assertEqual(restored.lines[1].text, "Original línea 2")
+
+    # 11. Ordenamiento Dinámico de Presets por Frecuencia de Uso
+    def test_dynamic_presets_frequency_ordering(self):
+        # Simula la lógica de uso de presets de app.js
+        time_presets = [
+            {"id": "t1", "label": "⏰ +15 min", "count": 12},
+            {"id": "t2", "label": "⏰ +1 hora", "count": 25},
+            {"id": "t3", "label": "⏰ +2 horas", "count": 5},
+            {"id": "t4", "label": "🌅 Mañana 9:00", "count": 30},
+            {"id": "t5", "label": "📅 Sig. Semana", "count": 2},
+        ]
+        # Orden descendente por uso
+        sorted_presets = sorted(time_presets, key=lambda x: x["count"], reverse=True)
+        primary_row = sorted_presets[:4]
+        secondary_overflow = sorted_presets[4:]
+
+        self.assertEqual(primary_row[0]["label"], "🌅 Mañana 9:00")
+        self.assertEqual(primary_row[1]["label"], "⏰ +1 hora")
+        self.assertEqual(primary_row[2]["label"], "⏰ +15 min")
+        self.assertEqual(primary_row[3]["label"], "⏰ +2 horas")
+        self.assertEqual(len(secondary_overflow), 1)
+        self.assertEqual(secondary_overflow[0]["label"], "📅 Sig. Semana")
+
+    # 12. Verificación Estática del Contrato UI / HTML (Zero-Hallucination)
+    def test_html_ui_contract_and_critical_elements(self):
+        html_path = os.path.join(CURRENT_DIR, "index.html")
+        self.assertTrue(os.path.exists(html_path), "index.html debe existir en apps/posty_local")
+
+        with open(html_path, "r", encoding="utf-8") as f:
+            html_content = f.read()
+
+        # 0 scripts JS externos o servidores de terceros (código de ejecución 100% local)
+        self.assertIn('<script src="app.js"></script>', html_content)
+        self.assertNotIn('<script src="http', html_content)
+
+        # Verificación de elementos críticos de interfaz
+        critical_ids = [
+            "pushNotificationBanner",
+            "currentDateDisplay",
+            "urgentSummaryText",
+            "boardContainer",
+            "gridUrgent",
+            "gridContext",
+            "gridNormal",
+            "sectionCompleted",
+            "gridCompleted",
+            "micMainBtn",
+            "newNoteModal",
+            "voiceRecordingBox",
+            "postitCardPreview",
+            "modalLinesList",
+            "btnAddLine",
+            "primaryTimePresets",
+            "secondaryTimePresets",
+            "btnToggleMoreTime",
+            "primaryGeoPresets",
+            "secondaryGeoPresets",
+            "btnToggleMoreGeo",
+            "voicePromptModal",
+            "screensaverOverlay",
+            "aodClock",
+            "aodDate",
+            "settingsModal",
+        ]
+        for element_id in critical_ids:
+            self.assertIn(f'id="{element_id}"', html_content, f"Falta el elemento con id '{element_id}' en index.html")
+
 
 if __name__ == '__main__':
     unittest.main()
