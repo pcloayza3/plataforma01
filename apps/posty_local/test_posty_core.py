@@ -131,25 +131,73 @@ class PostyLocalCoreTests(unittest.TestCase):
         self.assertEqual(res_enter["geofence_place"], "Supermercado")
         self.assertEqual(res_enter["geofence_transition"], "ENTER")
 
-    # 6. Clasificador del Semáforo Diario
+    # 6. Clasificador del Semáforo Diario (Mañana y Siguiente Semana son Próximas)
     def test_daily_urgency_classifier(self):
         now = datetime.now()
 
-        # Vence en 30 minutos -> ROJO (Urgente)
-        urg_red = self.classifier.classify(due_datetime=now + timedelta(minutes=30), has_geofence=False)
+        # Vence hoy dentro del día -> ROJO (Urgente / Vence Hoy)
+        urg_red = self.classifier.classify(due_datetime=now, has_geofence=False)
         self.assertEqual(urg_red, UrgencyLevel.URGENT_TODAY)
+
+        # Vence MAÑANA -> AMARILLO (Próxima) - NUNCA ROJO
+        tomorrow = now + timedelta(days=1)
+        urg_tomorrow = self.classifier.classify(due_datetime=tomorrow, has_geofence=False)
+        self.assertEqual(urg_tomorrow, UrgencyLevel.UPCOMING)
+
+        # Vence LA SIGUIENTE SEMANA -> AMARILLO (Próxima) - NUNCA ROJO
+        next_week = now + timedelta(days=7)
+        urg_next_week = self.classifier.classify(due_datetime=next_week, has_geofence=False)
+        self.assertEqual(urg_next_week, UrgencyLevel.UPCOMING)
 
         # Tiene Geocerca activa -> AMARILLO (Contexto)
         urg_yellow_geo = self.classifier.classify(due_datetime=None, has_geofence=True)
         self.assertEqual(urg_yellow_geo, UrgencyLevel.UPCOMING)
 
-        # Vence mañana (en 30 horas) -> AMARILLO (Próximas 24-48h)
-        urg_yellow_time = self.classifier.classify(due_datetime=now + timedelta(hours=30), has_geofence=False)
-        self.assertEqual(urg_yellow_time, UrgencyLevel.UPCOMING)
-
         # Sin fecha ni geocerca -> VERDE (Libre)
         urg_green = self.classifier.classify(due_datetime=None, has_geofence=False)
         self.assertEqual(urg_green, UrgencyLevel.NORMAL)
+
+    # 6.1. Validación de Lista/Checklist con Máximo 5 Líneas y Audio por Línea
+    def test_multiline_checklist_and_max_5_lines(self):
+        note = Note(id="n-multi", color=NoteColor.YELLOW)
+        self.assertEqual(len(note.lines), 0)
+
+        # Agregar hasta 5 líneas con audio opcional
+        l1 = note.add_line("Comprar pan", audio_attachment=AudioAttachment("/a/1.m4a", 4000, 30000))
+        l2 = note.add_line("Comprar leche")
+        l3 = note.add_line("Comprar queso", audio_attachment=AudioAttachment("/a/3.m4a", 5000, 35000))
+        l4 = note.add_line("Pagar factura")
+        l5 = note.add_line("Llamar al médico")
+
+        self.assertEqual(len(note.lines), 5)
+        self.assertTrue(l1.has_audio)
+        self.assertFalse(l2.has_audio)
+        self.assertTrue(l3.has_audio)
+        self.assertEqual(l1.audio_attachment.formatted_duration(), "0:04")
+
+        # Intentar agregar la 6ta línea debe fallar con ValueError
+        with self.assertRaises(ValueError):
+            note.add_line("Sexta línea no permitida")
+
+        # Tachar y hacer check de líneas
+        note.toggle_line_check(l1.id)
+        self.assertTrue(l1.completed)
+        self.assertFalse(note.completed)  # Las demás no están completas aún
+
+    # 6.2. Protección de Solo Lectura para Notas Realizadas/Cumplidas
+    def test_completed_note_read_only_protection(self):
+        note = Note(id="n-done", text="Tarea terminada", color=NoteColor.GREEN)
+        note.mark_completed()
+        self.assertTrue(note.completed)
+        self.assertIsNotNone(note.completed_at)
+
+        # Intentar editar el texto de una nota cumplida debe estar bloqueado
+        with self.assertRaises(ValueError):
+            note.text = "Modificación ilegal"
+
+        # Intentar añadir una línea a una nota cumplida debe estar bloqueado
+        with self.assertRaises(ValueError):
+            note.add_line("Nueva línea")
 
     # 7. Motor de Geocercas Haversine Offline
     def test_geofence_haversine_engine(self):

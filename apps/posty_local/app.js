@@ -1,87 +1,97 @@
 // app.js • PostyLocal Interactive Mobile Logic
 // Stand-Alone Embebido • Cero Servidores • 100% Local-First
+// Soporte de Edición, Listas de hasta 5 líneas con audio, Transición de 1s a Realizadas y Dictado por voz de alertas
 
-// Estado en memoria y datos iniciales de notas
+// Datos iniciales de demostración con líneas estructuradas
 const DEFAULT_NOTES = [
   {
     id: 'n1',
-    text: 'Pagar factura de luz antes de las 18:00 en ventanilla o banca',
     color: 'yellow',
     urgency: 'urgent',
     triggerType: 'time',
     triggerLabel: '⏰ Vence Hoy 18:00',
-    hasAudio: true,
-    audioDuration: '0:12',
     completed: false,
-    createdAt: Date.now() - 3600000
+    completedAt: null,
+    createdAt: Date.now() - 3600000,
+    lines: [
+      { id: 'n1-l1', text: 'Pagar factura de luz antes de las 18:00', completed: false, hasAudio: true, audioDuration: '0:12' },
+      { id: 'n1-l2', text: 'Descargar comprobante en PDF', completed: false, hasAudio: false, audioDuration: null }
+    ]
   },
   {
     id: 'n2',
-    text: 'Cerrar la llave de paso de gas de la cocina al salir de casa',
     color: 'pink',
     urgency: 'context',
     triggerType: 'geo',
     triggerLabel: '🏠 Al salir de casa (150m)',
-    hasAudio: true,
-    audioDuration: '0:07',
     completed: false,
-    createdAt: Date.now() - 7200000
+    completedAt: null,
+    createdAt: Date.now() - 7200000,
+    lines: [
+      { id: 'n2-l1', text: 'Cerrar la llave de paso de gas', completed: false, hasAudio: true, audioDuration: '0:07' },
+      { id: 'n2-l2', text: 'Desconectar cargadores de pared', completed: false, hasAudio: false, audioDuration: null }
+    ]
   },
   {
     id: 'n3',
-    text: 'Comprar leche descremada, manzanas verdes y avena en grano',
     color: 'green',
     urgency: 'context',
     triggerType: 'geo',
     triggerLabel: '🛒 Cerca del supermercado',
-    hasAudio: true,
-    audioDuration: '0:09',
     completed: false,
-    createdAt: Date.now() - 10800000
+    completedAt: null,
+    createdAt: Date.now() - 10800000,
+    lines: [
+      { id: 'n3-l1', text: 'Comprar leche descremada', completed: false, hasAudio: false, audioDuration: null },
+      { id: 'n3-l2', text: 'Manzanas verdes y plátanos', completed: false, hasAudio: true, audioDuration: '0:09' },
+      { id: 'n3-l3', text: 'Avena en grano sin azúcar', completed: false, hasAudio: false, audioDuration: null }
+    ]
   },
   {
     id: 'n4',
-    text: 'Llamar a carpintero para cotización de repisa de libros',
     color: 'blue',
     urgency: 'normal',
     triggerType: 'none',
     triggerLabel: '🟢 Sin alarma estricta',
-    hasAudio: false,
-    audioDuration: null,
     completed: false,
-    createdAt: Date.now() - 14400000
+    completedAt: null,
+    createdAt: Date.now() - 14400000,
+    lines: [
+      { id: 'n4-l1', text: 'Llamar a carpintero para repisa de libros', completed: false, hasAudio: false, audioDuration: null }
+    ]
   },
   {
     id: 'n5',
-    text: 'Revisar apuntes de clase y resumen de economía',
     color: 'purple',
     urgency: 'normal',
     triggerType: 'none',
     triggerLabel: '🟢 Sin alarma estricta',
-    hasAudio: true,
-    audioDuration: '0:14',
     completed: false,
-    createdAt: Date.now() - 18000000
+    completedAt: null,
+    createdAt: Date.now() - 18000000,
+    lines: [
+      { id: 'n5-l1', text: 'Revisar apuntes de economía', completed: false, hasAudio: true, audioDuration: '0:14' }
+    ]
   }
 ];
 
-// Presets dinámicos con contador de frecuencia de uso (más utilizados en primer plano)
+// Presets dinámicos con frecuencia de uso (más utilizados en primer plano)
 const DEFAULT_TIME_PRESETS = [
-  { id: 't15', label: '+15 min', minutes: 15, uses: 20 },
-  { id: 't30', label: '+30 min', minutes: 30, uses: 15 },
-  { id: 't60', label: '+1 hora', minutes: 60, uses: 12 },
+  { id: 't15', label: '+15 min', minutes: 15, uses: 22 },
+  { id: 't30', label: '+30 min', minutes: 30, uses: 16 },
+  { id: 't60', label: '+1 hora', minutes: 60, uses: 13 },
   { id: 't120', label: '+2 horas', minutes: 120, uses: 9 },
-  { id: 't18', label: 'Hoy 18:00', timeStr: '18:00', uses: 7 },
-  { id: 't20', label: 'Hoy 20:00', timeStr: '20:00', uses: 5 },
-  { id: 't_m9', label: 'Mañana 09:00', timeStr: '09:00', uses: 3 }
+  { id: 't_hoy18', label: 'Hoy 18:00', timeStr: '18:00', isToday: true, uses: 8 },
+  { id: 't_manana', label: 'Mañana 09:00', timeStr: '09:00', isTomorrow: true, uses: 7 },
+  { id: 't_sig_semana', label: 'Siguiente Semana', isNextWeek: true, uses: 6 }
 ];
 
 const DEFAULT_GEO_PRESETS = [
-  { id: 'g_casa', label: '🏠 Al salir de casa', place: 'Casa', transition: 'EXIT', uses: 25 },
-  { id: 'g_super', label: '🛒 Cerca del súper', place: 'Supermercado', transition: 'ENTER', uses: 18 },
-  { id: 'g_trabajo', label: '🏢 En el trabajo', place: 'Trabajo', transition: 'ENTER', uses: 14 },
-  { id: 'g_farmacia', label: '💊 Cerca de la farmacia', place: 'Farmacia', transition: 'ENTER', uses: 8 },
-  { id: 'g_gym', label: '🏋️ Al llegar al gym', place: 'Gimnasio', transition: 'ENTER', uses: 4 },
+  { id: 'g_casa', label: '🏠 Al salir de casa', place: 'Casa', transition: 'EXIT', uses: 28 },
+  { id: 'g_super', label: '🛒 Cerca del súper', place: 'Supermercado', transition: 'ENTER', uses: 20 },
+  { id: 'g_trabajo', label: '🏢 En el trabajo', place: 'Trabajo', transition: 'ENTER', uses: 15 },
+  { id: 'g_farmacia', label: '💊 Cerca de la farmacia', place: 'Farmacia', transition: 'ENTER', uses: 9 },
+  { id: 'g_gym', label: '🏋️ Al llegar al gym', place: 'Gimnasio', transition: 'ENTER', uses: 5 },
   { id: 'g_banco', label: '🏦 Cerca del banco', place: 'Banco', transition: 'ENTER', uses: 2 }
 ];
 
@@ -93,8 +103,12 @@ let currentFilter = 'all';
 let selectedModalColor = 'yellow';
 let selectedTriggerType = 'none';
 let selectedTriggerLabel = 'Ninguna asignada';
-let activeAudioNoteId = null;
+let editingNoteId = null; // null si es nueva, string si se está editando
+let modalLines = []; // Líneas en el modal (máx 5)
+
+let activeAudioId = null;
 let audioInterval = null;
+let currentVoicePromptType = 'time'; // 'time' o 'geo'
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
@@ -105,17 +119,17 @@ document.addEventListener('DOMContentLoaded', () => {
   startClockUpdater();
 });
 
-// Cargar o Inicializar Notas
+// Cargar o Inicializar
 function loadNotes() {
   const saved = localStorage.getItem('postylocal_notes');
   if (saved) {
     try {
       notes = JSON.parse(saved);
     } catch (e) {
-      notes = [...DEFAULT_NOTES];
+      notes = JSON.parse(JSON.stringify(DEFAULT_NOTES));
     }
   } else {
-    notes = [...DEFAULT_NOTES];
+    notes = JSON.parse(JSON.stringify(DEFAULT_NOTES));
     saveToStorage();
   }
 }
@@ -124,13 +138,12 @@ function saveToStorage() {
   localStorage.setItem('postylocal_notes', JSON.stringify(notes));
 }
 
-// Cargar Presets de Alertas Dinámicas
 function loadPresets() {
   const savedTime = localStorage.getItem('postylocal_time_presets');
-  timePresets = savedTime ? JSON.parse(savedTime) : [...DEFAULT_TIME_PRESETS];
+  timePresets = savedTime ? JSON.parse(savedTime) : JSON.parse(JSON.stringify(DEFAULT_TIME_PRESETS));
 
   const savedGeo = localStorage.getItem('postylocal_geo_presets');
-  geoPresets = savedGeo ? JSON.parse(savedGeo) : [...DEFAULT_GEO_PRESETS];
+  geoPresets = savedGeo ? JSON.parse(savedGeo) : JSON.parse(JSON.stringify(DEFAULT_GEO_PRESETS));
 }
 
 function savePresets() {
@@ -138,7 +151,21 @@ function savePresets() {
   localStorage.setItem('postylocal_geo_presets', JSON.stringify(geoPresets));
 }
 
-// Renderizado de Presets con Prioridad a los Más Utilizados
+// Clasificador de Urgencia (Mañana y Siguiente Semana son PRÓXIMAS / AMARILLO)
+function classifyUrgency(triggerType, presetObj) {
+  if (triggerType === 'geo') {
+    return 'context'; // Amarillo
+  }
+  if (triggerType === 'time') {
+    if (presetObj && (presetObj.isTomorrow || presetObj.isNextWeek || (presetObj.label && (presetObj.label.includes('Mañana') || presetObj.label.includes('Semana'))))) {
+      return 'context'; // Amarillo (Próxima)
+    }
+    return 'urgent'; // Rojo (Hoy / en minutos)
+  }
+  return 'normal'; // Verde
+}
+
+// Renderizado de Presets Dinámicos con prioridad a los más usados
 function renderTriggerPresets() {
   const primaryTimeBox = document.getElementById('primaryTimePresets');
   const secondaryTimeBox = document.getElementById('secondaryTimePresets');
@@ -152,37 +179,25 @@ function renderTriggerPresets() {
   primaryGeoBox.innerHTML = '';
   secondaryGeoBox.innerHTML = '';
 
-  // Ordenar por uso descendente
   const sortedTimes = [...timePresets].sort((a, b) => b.uses - a.uses);
   const sortedGeos = [...geoPresets].sort((a, b) => b.uses - a.uses);
 
-  // Primer término: 3 o 4 más utilizados. El resto como segunda opción
   const mainTimes = sortedTimes.slice(0, 4);
   const extraTimes = sortedTimes.slice(4);
 
-  mainTimes.forEach(p => {
-    primaryTimeBox.appendChild(createTimePresetButton(p));
-  });
-  extraTimes.forEach(p => {
-    secondaryTimeBox.appendChild(createTimePresetButton(p));
-  });
+  mainTimes.forEach(p => primaryTimeBox.appendChild(createPresetButton(p, 'time')));
+  extraTimes.forEach(p => secondaryTimeBox.appendChild(createPresetButton(p, 'time')));
 
-  // Ocultar botón "Ver más" si no hay extras
   const btnToggleMoreTime = document.getElementById('btnToggleMoreTime');
   if (btnToggleMoreTime) {
     btnToggleMoreTime.style.display = extraTimes.length > 0 ? 'inline-flex' : 'none';
   }
 
-  // Lugares: Primer término: 3 más utilizados
   const mainGeos = sortedGeos.slice(0, 3);
   const extraGeos = sortedGeos.slice(3);
 
-  mainGeos.forEach(g => {
-    primaryGeoBox.appendChild(createGeoPresetButton(g));
-  });
-  extraGeos.forEach(g => {
-    secondaryGeoBox.appendChild(createGeoPresetButton(g));
-  });
+  mainGeos.forEach(g => primaryGeoBox.appendChild(createPresetButton(g, 'geo')));
+  extraGeos.forEach(g => secondaryGeoBox.appendChild(createPresetButton(g, 'geo')));
 
   const btnToggleMoreGeo = document.getElementById('btnToggleMoreGeo');
   if (btnToggleMoreGeo) {
@@ -190,25 +205,18 @@ function renderTriggerPresets() {
   }
 }
 
-function createTimePresetButton(p) {
+function createPresetButton(item, type) {
   const btn = document.createElement('button');
   btn.type = 'button';
-  btn.className = 'preset-btn';
-  btn.textContent = p.label;
-  btn.onclick = () => selectTimePreset(p, btn);
+  btn.className = `preset-btn ${type === 'geo' ? 'geo-btn' : ''}`;
+  btn.textContent = item.label;
+  btn.onclick = () => {
+    if (type === 'time') selectTimePreset(item, btn);
+    else selectGeoPreset(item, btn);
+  };
   return btn;
 }
 
-function createGeoPresetButton(g) {
-  const btn = document.createElement('button');
-  btn.type = 'button';
-  btn.className = 'preset-btn geo-btn';
-  btn.textContent = g.label;
-  btn.onclick = () => selectGeoPreset(g, btn);
-  return btn;
-}
-
-// Selección de Presets con Aumento de Frecuencia de Uso
 function selectTimePreset(preset, btnElement) {
   selectedTriggerType = 'time';
   selectedTriggerLabel = `⏰ ${preset.label}`;
@@ -231,7 +239,6 @@ function selectGeoPreset(preset, btnElement) {
   if (btnElement) btnElement.classList.add('active');
 }
 
-// Alternar Secciones Secundarias ("Ver más")
 function toggleMoreTimePresets() {
   const box = document.getElementById('secondaryTimePresets');
   const btn = document.getElementById('btnToggleMoreTime');
@@ -250,55 +257,94 @@ function toggleMoreGeoPresets() {
   btn.querySelector('.arrow-icon').textContent = isHidden ? '▼' : '▲';
 }
 
-// Adición Sencilla de Más Tiempos de Alerta
-function promptCustomTime() {
-  const val = prompt('Indique el tiempo para la alerta:\nEjemplo: "45 min", "3 horas", "Hoy 19:30", "Mañana 08:00":');
-  if (!val || !val.trim()) return;
+// Modal de Dictado / Texto para Crear Otro Tiempo o Lugar
+function openVoicePromptModal(type) {
+  currentVoicePromptType = type;
+  const modal = document.getElementById('voicePromptModal');
+  const title = document.getElementById('voicePromptTitle');
+  const hint = document.getElementById('voicePromptHint');
+  const inputLabel = document.getElementById('voicePromptInputLabel');
+  const input = document.getElementById('voicePromptTextInput');
 
-  const clean = val.trim();
-  const newPreset = {
-    id: 't_custom_' + Date.now(),
-    label: clean.startsWith('+') ? clean : (clean.includes(':') ? clean : `+${clean}`),
-    uses: 30 // Prioridad alta inmediata por ser creado por el usuario
-  };
+  input.value = '';
+  modal.classList.remove('hidden');
 
-  timePresets.push(newPreset);
-  savePresets();
-  renderTriggerPresets();
-
-  // Seleccionar automáticamente el nuevo preset
-  selectedTriggerType = 'time';
-  selectedTriggerLabel = `⏰ ${newPreset.label}`;
-  document.getElementById('selectedTriggerText').textContent = `Alerta programada: ${selectedTriggerLabel}`;
+  if (type === 'time') {
+    title.textContent = '⏰ Agregar Horario por Voz';
+    hint.textContent = 'Dicte el tiempo (ej: "45 minutos", "3 horas", "mañana a las diez")';
+    inputLabel.textContent = 'O escriba el tiempo directamente:';
+    input.placeholder = 'Ej: +45 min, Mañana 10:00';
+  } else {
+    title.textContent = '📍 Agregar Nuevo Lugar por Voz';
+    hint.textContent = 'Dicte el nombre del sitio (ej: "Farmacia", "Colegio", "Gimnasio")';
+    inputLabel.textContent = 'O escriba el nombre del lugar:';
+    input.placeholder = 'Ej: Farmacia Central, Colegio San Martín';
+  }
 }
 
-// Adición Sencilla de Nuevos Lugares de Ubicación
-function promptCustomLocation() {
-  const placeName = prompt('Ingrese el nombre del nuevo lugar para la alerta:\nEjemplo: Farmacia, Colegio, Gimnasio, Banco:');
-  if (!placeName || !placeName.trim()) return;
+function closeVoicePromptModal() {
+  document.getElementById('voicePromptModal').classList.add('hidden');
+}
 
-  const clean = placeName.trim();
-  const icon = clean.toLowerCase().includes('farmacia') ? '💊' :
-               clean.toLowerCase().includes('gym') || clean.toLowerCase().includes('gimnasio') ? '🏋️' :
-               clean.toLowerCase().includes('colegio') || clean.toLowerCase().includes('escuela') ? '🏫' :
-               clean.toLowerCase().includes('banco') ? '🏦' : '📍';
+function triggerVoicePromptDictation() {
+  const input = document.getElementById('voicePromptTextInput');
+  const caption = document.getElementById('promptMicCaption');
+  caption.textContent = 'ESCUCHANDO...';
 
-  const newGeo = {
-    id: 'g_custom_' + Date.now(),
-    label: `${icon} Cerca de ${clean}`,
-    place: clean,
-    transition: 'ENTER',
-    uses: 35 // Prioridad alta inmediata
-  };
+  // Simulación fonética o reconocimiento real
+  setTimeout(() => {
+    if (currentVoicePromptType === 'time') {
+      const times = ['+45 min', 'Mañana 10:00', 'Siguiente Lunes', '+3 horas'];
+      input.value = times[Math.floor(Math.random() * times.length)];
+    } else {
+      const places = ['Farmacia San Lucas', 'Gimnasio Olimpo', 'Colegio Alemán', 'Banco Central'];
+      input.value = places[Math.floor(Math.random() * places.length)];
+    }
+    caption.textContent = 'PULSAR PARA HABLAR';
+  }, 1200);
+}
 
-  geoPresets.push(newGeo);
-  savePresets();
-  renderTriggerPresets();
+function confirmVoicePrompt() {
+  const input = document.getElementById('voicePromptTextInput');
+  const val = input.value.trim();
+  if (!val) {
+    alert('Por favor dicte o escriba un valor.');
+    return;
+  }
 
-  // Seleccionar automáticamente el nuevo lugar
-  selectedTriggerType = 'geo';
-  selectedTriggerLabel = `📍 ${newGeo.label}`;
-  document.getElementById('selectedTriggerText').textContent = `Alerta de Ubicación: ${newGeo.label}`;
+  if (currentVoicePromptType === 'time') {
+    const isTomorrow = val.toLowerCase().includes('mañana');
+    const isNextWeek = val.toLowerCase().includes('semana') || val.toLowerCase().includes('lunes');
+    const newPreset = {
+      id: 't_c_' + Date.now(),
+      label: val.startsWith('+') || val.includes(':') || isTomorrow || isNextWeek ? val : `+${val}`,
+      isTomorrow: isTomorrow,
+      isNextWeek: isNextWeek,
+      uses: 35 // Alta prioridad
+    };
+    timePresets.push(newPreset);
+    savePresets();
+    renderTriggerPresets();
+    selectTimePreset(newPreset);
+  } else {
+    const icon = val.toLowerCase().includes('farmacia') ? '💊' :
+                 val.toLowerCase().includes('gym') || val.toLowerCase().includes('gimnasio') ? '🏋️' :
+                 val.toLowerCase().includes('colegio') ? '🏫' :
+                 val.toLowerCase().includes('banco') ? '🏦' : '📍';
+    const newGeo = {
+      id: 'g_c_' + Date.now(),
+      label: `${icon} Cerca de ${val}`,
+      place: val,
+      transition: 'ENTER',
+      uses: 40 // Alta prioridad
+    };
+    geoPresets.push(newGeo);
+    savePresets();
+    renderTriggerPresets();
+    selectGeoPreset(newGeo);
+  }
+
+  closeVoicePromptModal();
 }
 
 // Renderizado del Tablero
@@ -306,89 +352,192 @@ function renderBoard() {
   const gridUrgent = document.getElementById('gridUrgent');
   const gridContext = document.getElementById('gridContext');
   const gridNormal = document.getElementById('gridNormal');
+  const gridCompleted = document.getElementById('gridCompleted');
 
   gridUrgent.innerHTML = '';
   gridContext.innerHTML = '';
   gridNormal.innerHTML = '';
+  gridCompleted.innerHTML = '';
 
-  const filtered = notes.filter(n => {
-    if (currentFilter === 'all') return true;
-    return n.urgency === currentFilter;
+  const activeNotes = notes.filter(n => !n.completed);
+  const completedNotes = notes.filter(n => n.completed);
+
+  // Renderizar Notas Activas
+  activeNotes.forEach(note => {
+    const card = createNoteCardElement(note, false);
+    if (note.urgency === 'urgent') gridUrgent.appendChild(card);
+    else if (note.urgency === 'context') gridContext.appendChild(card);
+    else gridNormal.appendChild(card);
   });
 
-  filtered.forEach(note => {
-    const card = createNoteCardElement(note);
-    if (note.urgency === 'urgent') {
-      gridUrgent.appendChild(card);
-    } else if (note.urgency === 'context') {
-      gridContext.appendChild(card);
-    } else {
-      gridNormal.appendChild(card);
-    }
+  // Renderizar Notas Cumplidas (Solo lectura y escucha)
+  completedNotes.forEach(note => {
+    const card = createNoteCardElement(note, true);
+    gridCompleted.appendChild(card);
   });
 
-  document.getElementById('sectionUrgent').style.display = (currentFilter === 'all' || currentFilter === 'urgent') ? 'flex' : 'none';
-  document.getElementById('sectionContext').style.display = (currentFilter === 'all' || currentFilter === 'context') ? 'flex' : 'none';
-  document.getElementById('sectionNormal').style.display = (currentFilter === 'all' || currentFilter === 'normal') ? 'flex' : 'none';
+  // Filtrado de Secciones
+  const showAll = currentFilter === 'all';
+  document.getElementById('sectionUrgent').style.display = (showAll || currentFilter === 'urgent') ? 'flex' : 'none';
+  document.getElementById('sectionContext').style.display = (showAll || currentFilter === 'context') ? 'flex' : 'none';
+  document.getElementById('sectionNormal').style.display = (showAll || currentFilter === 'normal') ? 'flex' : 'none';
+  document.getElementById('sectionCompleted').style.display = (currentFilter === 'completed') ? 'flex' : 'none';
 
-  const activeCount = notes.filter(n => !n.completed).length;
-  const urgentActive = notes.filter(n => n.urgency === 'urgent' && !n.completed).length;
-  document.getElementById('urgentSummaryText').textContent = `${activeCount} actividades pendientes • ${urgentActive} urgente`;
+  // Contadores en pestañas
+  const urgentCount = activeNotes.filter(n => n.urgency === 'urgent').length;
+  const contextCount = activeNotes.filter(n => n.urgency === 'context').length;
+  const normalCount = activeNotes.filter(n => n.urgency === 'normal').length;
+
+  document.getElementById('chipAll').textContent = `Todas (${activeNotes.length})`;
+  document.getElementById('chipUrgent').textContent = `🔴 Urgente (${urgentCount})`;
+  document.getElementById('chipContext').textContent = `🟡 Próximas (${contextCount})`;
+  document.getElementById('chipNormal').textContent = `🟢 Libres (${normalCount})`;
+  document.getElementById('chipDone').textContent = `✓ Realizadas (${completedNotes.length})`;
+
+  document.getElementById('urgentSummaryText').textContent = `${activeNotes.length} actividades pendientes • ${urgentCount} urgente`;
 }
 
-// Crear Elemento HTML de Nota con Selector de Color Inmediato
-function createNoteCardElement(note) {
+// Crear Elemento HTML de Nota (Activa o Cumplida de Solo Lectura)
+function createNoteCardElement(note, isCompletedView) {
   const card = document.createElement('div');
   card.className = `postit-card ${note.color} ${note.completed ? 'completed' : ''}`;
   card.id = `card-${note.id}`;
 
-  let audioSection = '';
-  if (note.hasAudio) {
-    audioSection = `
-      <div class="mini-audio-player">
-        <button class="audio-play-btn" id="playbtn-${note.id}" onclick="playNoteAudio('${note.id}')" title="Escuchar audio original">▶️</button>
-        <div class="audio-track">
-          <div class="audio-progress-bar">
-            <div class="audio-progress-fill" id="prog-${note.id}"></div>
-          </div>
-          <span class="audio-time-label" id="time-${note.id}">Audio original • ${note.audioDuration}</span>
+  // Checklist de líneas (hasta 5)
+  let linesHtml = '<div class="postit-checklist">';
+  if (note.lines && note.lines.length > 0) {
+    note.lines.forEach(line => {
+      const audioBtn = line.hasAudio ? `
+        <button class="audio-play-btn" style="width: 22px; height: 22px; font-size: 10px;" onclick="playAudioClip('${line.id}', '${escapeHtml(line.text)}', '${line.audioDuration}')" title="Escuchar audio">▶️</button>
+      ` : '';
+
+      const checkAttr = isCompletedView ? 'disabled checked' : (line.completed ? 'checked' : '');
+      const clickHandler = isCompletedView ? '' : `onclick="toggleLineCheck('${note.id}', '${line.id}')"`;
+
+      linesHtml += `
+        <div class="checklist-item ${line.completed ? 'done' : ''}">
+          <input type="checkbox" class="checklist-checkbox" ${checkAttr} ${clickHandler}>
+          <span class="checklist-text">${escapeHtml(line.text)}</span>
+          ${audioBtn}
         </div>
-        <span class="audio-badge">Voz</span>
+      `;
+    });
+  } else {
+    linesHtml += `<div class="checklist-item"><span class="checklist-text">${escapeHtml(note.text || 'Sin texto')}</span></div>`;
+  }
+  linesHtml += '</div>';
+
+  // Botones de Cabecera (Editar solo si no está completada)
+  let topActions = '';
+  if (!isCompletedView) {
+    topActions = `
+      <div style="display: flex; gap: 6px;">
+        <button class="btn-card-action" onclick="openEditNoteModal('${note.id}')" title="Editar nota y lista">✏️</button>
+        <button class="btn-card-action" onclick="completeNoteWithDelay('${note.id}')" title="Marcar toda la nota como cumplida">✓</button>
       </div>
+    `;
+  } else {
+    topActions = `
+      <span class="completed-badge-pill">✓ Realizada</span>
     `;
   }
 
-  card.innerHTML = `
-    <div class="postit-top-row">
-      <div class="postit-text">${escapeHtml(note.text)}</div>
-      <button class="btn-check-done" onclick="toggleCompleteNote('${note.id}')" title="Marcar como cumplida">
-        ${note.completed ? '✓' : '○'}
-      </button>
-    </div>
-    ${audioSection}
-    <div class="postit-footer">
-      <div class="card-color-strip" title="Cambiar color de toda la nota de forma inmediata">
+  // Paleta de Color Inmediata (Solo en activas)
+  let colorStrip = '';
+  if (!isCompletedView) {
+    colorStrip = `
+      <div class="card-color-strip" title="Cambiar color de toda la nota inmediatamente">
         <span class="card-dot-opt opt-yellow" onclick="changeCardColor('${note.id}', 'yellow')"></span>
         <span class="card-dot-opt opt-green" onclick="changeCardColor('${note.id}', 'green')"></span>
         <span class="card-dot-opt opt-blue" onclick="changeCardColor('${note.id}', 'blue')"></span>
         <span class="card-dot-opt opt-pink" onclick="changeCardColor('${note.id}', 'pink')"></span>
         <span class="card-dot-opt opt-purple" onclick="changeCardColor('${note.id}', 'purple')"></span>
       </div>
-      <span class="alarm-pill">${escapeHtml(note.triggerLabel)}</span>
+    `;
+  } else {
+    colorStrip = `<span class="read-only-notice">Solo lectura y escucha</span>`;
+  }
+
+  card.innerHTML = `
+    <div class="postit-top-row">
+      <div style="flex: 1;">${linesHtml}</div>
+      ${topActions}
+    </div>
+    <div class="postit-footer">
+      ${colorStrip}
+      <span class="alarm-pill">${escapeHtml(note.triggerLabel || '🟢 Sin alarma')}</span>
     </div>
   `;
 
   return card;
 }
 
-// CAMBIO INMEDIATO DE COLOR DE TODA LA NOTA (En el Tablero)
+// 4. TRANSICIÓN DE 1 SEGUNDO HACIA TAREAS REALIZADAS
+function completeNoteWithDelay(noteId) {
+  const card = document.getElementById(`card-${noteId}`);
+  if (card) {
+    // 1. Mostrar visualmente la animación y tachado
+    card.classList.add('task-completing');
+    playSuccessChime();
+
+    // 2. Esperar exactamente 1 segundo (1000ms)
+    setTimeout(() => {
+      const note = notes.find(n => n.id === noteId);
+      if (note) {
+        note.completed = true;
+        note.completedAt = new Date().toISOString();
+        if (note.lines) {
+          note.lines.forEach(l => l.completed = true);
+        }
+        saveToStorage();
+        renderBoard();
+      }
+    }, 1000);
+  }
+}
+
+function toggleLineCheck(noteId, lineId) {
+  const note = notes.find(n => n.id === noteId);
+  if (!note || note.completed) return;
+
+  const line = note.lines.find(l => l.id === lineId);
+  if (line) {
+    line.completed = !line.completed;
+    // Si todas las líneas se completaron, disparar la transición de 1 segundo
+    if (note.lines.length > 0 && note.lines.every(l => l.completed)) {
+      completeNoteWithDelay(noteId);
+      return;
+    }
+    saveToStorage();
+    renderBoard();
+  }
+}
+
+// Sonido sutil de éxito al completar
+function playSuccessChime() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+    osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1); // E5
+    osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2); // G5
+    gain.gain.setValueAtTime(0.12, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.4);
+  } catch (e) {}
+}
+
+// Cambio Inmediato de Color
 function changeCardColor(noteId, newColor) {
   const note = notes.find(n => n.id === noteId);
-  if (note) {
+  if (note && !note.completed) {
     note.color = newColor;
     saveToStorage();
-
-    // Actualizar inmediatamente las clases de la tarjeta en el DOM sin recargar
     const card = document.getElementById(`card-${noteId}`);
     if (card) {
       card.className = `postit-card ${newColor} ${note.completed ? 'completed' : ''}`;
@@ -396,11 +545,9 @@ function changeCardColor(noteId, newColor) {
   }
 }
 
-// CAMBIO INMEDIATO DE COLOR EN EL MODAL DE CREACIÓN
 function selectColor(color) {
   selectedModalColor = color;
   const preview = document.getElementById('postitCardPreview');
-  // Aplica inmediatamente el color al 100% de la tarjeta de previsualización
   preview.className = `postit-preview ${color}`;
 
   document.querySelectorAll('.color-opt').forEach(opt => opt.classList.remove('active'));
@@ -408,162 +555,147 @@ function selectColor(color) {
   if (activeOpt) activeOpt.classList.add('active');
 }
 
-// Reproducción de Audio
-function playNoteAudio(noteId) {
-  const note = notes.find(n => n.id === noteId);
-  if (!note) return;
-
-  const btn = document.getElementById(`playbtn-${noteId}`);
-  const prog = document.getElementById(`prog-${noteId}`);
-  const timeLabel = document.getElementById(`time-${noteId}`);
-
-  if (activeAudioNoteId === noteId) {
-    stopAudio();
-    return;
-  }
-
-  stopAudio();
-  activeAudioNoteId = noteId;
-  btn.textContent = '⏸️';
-
-  let progress = 0;
-  const durationSec = parseInt(note.audioDuration.split(':')[1]) || 8;
-  const intervalStep = 100;
-  const totalSteps = (durationSec * 1000) / intervalStep;
-
-  if ('speechSynthesis' in window) {
-    const utterance = new SpeechSynthesisUtterance(note.text);
-    utterance.lang = 'es-ES';
-    utterance.rate = 1.0;
-    utterance.onend = () => stopAudio();
-    window.speechSynthesis.speak(utterance);
-  }
-
-  audioInterval = setInterval(() => {
-    progress++;
-    const percent = Math.min(100, (progress / totalSteps) * 100);
-    if (prog) prog.style.width = `${percent}%`;
-    const curSec = Math.floor((progress * intervalStep) / 1000);
-    if (timeLabel) timeLabel.textContent = `Reproduciendo... 0:0${curSec} / ${note.audioDuration}`;
-
-    if (progress >= totalSteps) {
-      stopAudio();
-    }
-  }, intervalStep);
-}
-
-function stopAudio() {
-  if (audioInterval) {
-    clearInterval(audioInterval);
-    audioInterval = null;
-  }
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-  }
-  if (activeAudioNoteId) {
-    const btn = document.getElementById(`playbtn-${activeAudioNoteId}`);
-    const prog = document.getElementById(`prog-${activeAudioNoteId}`);
-    const note = notes.find(n => n.id === activeAudioNoteId);
-    if (btn) btn.textContent = '▶️';
-    if (prog) prog.style.width = '0%';
-    if (note) {
-      const timeLabel = document.getElementById(`time-${activeAudioNoteId}`);
-      if (timeLabel) timeLabel.textContent = `Audio original • ${note.audioDuration}`;
-    }
-    activeAudioNoteId = null;
-  }
-}
-
-// Completar Nota
-function toggleCompleteNote(noteId) {
-  const note = notes.find(n => n.id === noteId);
-  if (note) {
-    note.completed = !note.completed;
-    saveToStorage();
-    renderBoard();
-  }
-}
-
-// Filtros
-function setFilter(filter) {
-  currentFilter = filter;
-  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-  const chipMap = { all: 0, urgent: 1, context: 2, normal: 3 };
-  const chips = document.querySelectorAll('.filter-chip');
-  if (chips[chipMap[filter]]) chips[chipMap[filter]].classList.add('active');
-  renderBoard();
-}
-
-// Modal de Creación
+// 1. EDICIÓN DE NOTAS Y GESTIÓN DE LÍNEAS (MÁXIMO 5 LÍNEAS)
 function openNewNoteModal(mode) {
+  editingNoteId = null;
+  modalLines = [{ id: 'ml-1', text: '', completed: false, hasAudio: false, audioDuration: null }];
   const modal = document.getElementById('newNoteModal');
   const voiceBox = document.getElementById('voiceRecordingBox');
-  const audioPreview = document.getElementById('audioPreviewPlayer');
   const modalTitle = document.getElementById('modalTitle');
-  const textInput = document.getElementById('noteTextInput');
 
   modal.classList.remove('hidden');
   resetModalForm();
+  renderModalLines();
   renderTriggerPresets();
 
   if (mode === 'voice') {
-    modalTitle.textContent = '🎙️ Dictado por Voz (Transcripción)';
+    modalTitle.textContent = '🎙️ Dictar Nota Rápida';
     voiceBox.style.display = 'flex';
-    audioPreview.style.display = 'flex';
-    simulateSpeechRecognition();
+    simulateSpeechRecognitionForModal();
   } else {
-    modalTitle.textContent = '✏️ Nueva Nota Manual';
+    modalTitle.textContent = '✏️ Nueva Nota (Lista)';
     voiceBox.style.display = 'none';
-    audioPreview.style.display = 'none';
-    textInput.placeholder = 'Escriba su nota aquí...';
-    textInput.focus();
   }
 }
 
-function simulateSpeechRecognition() {
-  const textInput = document.getElementById('noteTextInput');
+function openEditNoteModal(noteId) {
+  const note = notes.find(n => n.id === noteId);
+  if (!note || note.completed) return; // Solo lectura para completadas
+
+  editingNoteId = noteId;
+  modalLines = (note.lines && note.lines.length > 0)
+    ? JSON.parse(JSON.stringify(note.lines))
+    : [{ id: 'ml-1', text: note.text || '', completed: false, hasAudio: false, audioDuration: null }];
+
+  const modal = document.getElementById('newNoteModal');
+  const voiceBox = document.getElementById('voiceRecordingBox');
+  const modalTitle = document.getElementById('modalTitle');
+
+  modal.classList.remove('hidden');
+  voiceBox.style.display = 'none';
+  modalTitle.textContent = '✏️ Editar Nota y Lista';
+
+  selectColor(note.color || 'yellow');
+  selectedTriggerType = note.triggerType || 'none';
+  selectedTriggerLabel = note.triggerLabel || 'Ninguna asignada';
+  document.getElementById('selectedTriggerText').textContent = `Alerta: ${selectedTriggerLabel}`;
+
+  renderModalLines();
+  renderTriggerPresets();
+}
+
+function renderModalLines() {
+  const container = document.getElementById('modalLinesList');
+  const btnAdd = document.getElementById('btnAddLine');
+  const counter = document.getElementById('lineCountDisplay');
+  container.innerHTML = '';
+
+  counter.textContent = `${modalLines.length}/5`;
+  btnAdd.disabled = modalLines.length >= 5;
+
+  modalLines.forEach((line, idx) => {
+    const row = document.createElement('div');
+    row.className = 'modal-line-row';
+
+    const audioPill = line.hasAudio ? `
+      <span class="line-audio-badge" onclick="playAudioClip('${line.id}', '${escapeHtml(line.text)}', '${line.audioDuration}')" title="Escuchar audio">▶️ Audio ${line.audioDuration}</span>
+    ` : '';
+
+    row.innerHTML = `
+      <span style="font-size: 12px; font-weight: 700; opacity: 0.6;">${idx + 1}.</span>
+      <input type="text" class="line-text-input" placeholder="Escriba o dicte el ítem ${idx + 1}..." value="${escapeHtml(line.text)}" oninput="updateModalLineText(${idx}, this.value)">
+      ${audioPill}
+      <button type="button" class="btn-line-action" title="Grabar audio para esta línea" onclick="recordAudioForLine(${idx})">🎙️</button>
+      ${modalLines.length > 1 ? `<button type="button" class="btn-line-action" title="Eliminar línea" onclick="removeLineFromModal(${idx})">✕</button>` : ''}
+    `;
+    container.appendChild(row);
+  });
+}
+
+function updateModalLineText(idx, val) {
+  if (modalLines[idx]) {
+    modalLines[idx].text = val;
+  }
+}
+
+function addNewLineToModal(initialText = '', audioDur = null) {
+  if (modalLines.length >= 5) {
+    alert('Límite alcanzado: máximo 5 líneas por nota.');
+    return;
+  }
+  modalLines.push({
+    id: 'ml-' + Date.now() + '-' + modalLines.length,
+    text: initialText,
+    completed: false,
+    hasAudio: !!audioDur,
+    audioDuration: audioDur
+  });
+  renderModalLines();
+}
+
+function removeLineFromModal(idx) {
+  if (modalLines.length > 1) {
+    modalLines.splice(idx, 1);
+    renderModalLines();
+  }
+}
+
+function recordAudioForLine(idx) {
+  const phrase = prompt('Dicte o simule la grabación de audio para esta línea:');
+  if (phrase && phrase.trim()) {
+    modalLines[idx].text = phrase.trim();
+    modalLines[idx].hasAudio = true;
+    modalLines[idx].audioDuration = '0:06';
+    renderModalLines();
+  }
+}
+
+function simulateSpeechRecognitionForModal() {
   const timer = document.getElementById('recordingTimer');
-  textInput.value = '';
-
-  const sampleVoicePhrases = [
-    { text: 'Comprar pan dulce y café en 15 minutos', label: '+15 min', type: 'time' },
-    { text: 'Revisar cerradura y apagar luces al salir de casa', label: '🏠 Al salir de casa', type: 'geo' },
-    { text: 'Comprar detergente y toallas cuando esté cerca del súper', label: '🛒 Cerca del súper', type: 'geo' }
-  ];
-
-  const pick = sampleVoicePhrases[Math.floor(Math.random() * sampleVoicePhrases.length)];
-
   let sec = 1;
   const intv = setInterval(() => {
     sec++;
     timer.textContent = `0:0${sec}`;
     if (sec >= 4) {
       clearInterval(intv);
-      textInput.value = pick.text;
-      if (pick.type === 'time') {
-        const found = timePresets.find(t => t.label === pick.label);
-        if (found) selectTimePreset(found);
-      } else {
-        const foundGeo = geoPresets.find(g => g.label === pick.label);
-        if (foundGeo) selectGeoPreset(foundGeo);
-      }
+      modalLines[0].text = 'Comprar leche y pan fresco';
+      modalLines[0].hasAudio = true;
+      modalLines[0].audioDuration = '0:08';
+
+      // Segunda línea opcional por voz
+      addNewLineToModal('Pagar en ventanilla rápida', '0:05');
+      renderModalLines();
+      selectTimePreset(timePresets[0]);
     }
   }, 700);
 }
 
 function resetModalForm() {
-  document.getElementById('noteTextInput').value = '';
   selectColor('yellow');
   selectedTriggerType = 'none';
   selectedTriggerLabel = 'Ninguna asignada';
   document.getElementById('selectedTriggerText').textContent = 'Alerta: Ninguna asignada';
   document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-
-  // Asegurar que las secciones secundarias estén cerradas inicialmente
-  const secTime = document.getElementById('secondaryTimePresets');
-  if (secTime) secTime.classList.add('hidden');
-  const secGeo = document.getElementById('secondaryGeoPresets');
-  if (secGeo) secGeo.classList.add('hidden');
 }
 
 function closeModal() {
@@ -572,51 +704,99 @@ function closeModal() {
 }
 
 function saveNoteFromModal() {
-  const text = document.getElementById('noteTextInput').value.trim();
-  if (!text) {
-    alert('Por favor ingrese o dicte el contenido de la nota.');
+  // Filtrar líneas vacías
+  const validLines = modalLines.filter(l => l.text.trim().length > 0);
+  if (validLines.length === 0) {
+    alert('Por favor ingrese al menos una línea en la nota.');
     return;
   }
 
-  const voiceBox = document.getElementById('voiceRecordingBox');
-  const isVoice = voiceBox.style.display !== 'none';
+  // Evaluar urgencia con el clasificador
+  const activePreset = timePresets.find(t => `⏰ ${t.label}` === selectedTriggerLabel);
+  const urgency = classifyUrgency(selectedTriggerType, activePreset);
 
-  let urgency = 'normal';
-  if (selectedTriggerType === 'time') {
-    urgency = 'urgent';
-  } else if (selectedTriggerType === 'geo') {
-    urgency = 'context';
+  if (editingNoteId) {
+    // Modo Edición
+    const note = notes.find(n => n.id === editingNoteId);
+    if (note) {
+      note.lines = validLines;
+      note.color = selectedModalColor;
+      note.urgency = urgency;
+      note.triggerType = selectedTriggerType;
+      note.triggerLabel = selectedTriggerLabel;
+    }
+  } else {
+    // Modo Creación
+    const newNote = {
+      id: 'n' + (Date.now() % 100000),
+      color: selectedModalColor,
+      urgency: urgency,
+      triggerType: selectedTriggerType,
+      triggerLabel: selectedTriggerLabel === 'Ninguna asignada' ? '🟢 Sin alarma' : selectedTriggerLabel,
+      completed: false,
+      completedAt: null,
+      createdAt: Date.now(),
+      lines: validLines
+    };
+    notes.unshift(newNote);
   }
 
-  const newNote = {
-    id: 'n' + (Date.now() % 10000),
-    text: text,
-    color: selectedModalColor,
-    urgency: urgency,
-    triggerType: selectedTriggerType,
-    triggerLabel: selectedTriggerLabel === 'Ninguna asignada' ? '🟢 Sin alarma' : selectedTriggerLabel,
-    hasAudio: isVoice,
-    audioDuration: isVoice ? '0:07' : null,
-    completed: false,
-    createdAt: Date.now()
-  };
-
-  notes.unshift(newNote);
   saveToStorage();
   renderBoard();
   closeModal();
 
   if (selectedTriggerType !== 'none') {
     setTimeout(() => {
-      triggerPushBanner(newNote.triggerLabel, newNote.text);
-    }, 1500);
+      triggerPushBanner(selectedTriggerLabel, validLines[0].text);
+    }, 1200);
   }
 }
 
-// MODO PROTECTOR DE PANTALLA (Screensaver / AOD)
+// Reproducción de Audios
+function playAudioClip(clipId, text, durationStr) {
+  if (activeAudioId === clipId) {
+    stopAudio();
+    return;
+  }
+  stopAudio();
+  activeAudioId = clipId;
+
+  if ('speechSynthesis' in window) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'es-ES';
+    utterance.onend = () => stopAudio();
+    window.speechSynthesis.speak(utterance);
+  }
+
+  const durationSec = durationStr ? (parseInt(durationStr.split(':')[1]) || 6) : 6;
+  audioInterval = setTimeout(() => {
+    stopAudio();
+  }, durationSec * 1000);
+}
+
+function stopAudio() {
+  if (audioInterval) {
+    clearTimeout(audioInterval);
+    audioInterval = null;
+  }
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
+  activeAudioId = null;
+}
+
+// Filtros del Tablero
+function setFilter(filter) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  const map = { all: 'chipAll', urgent: 'chipUrgent', context: 'chipContext', normal: 'chipNormal', completed: 'chipDone' };
+  if (map[filter]) document.getElementById(map[filter]).classList.add('active');
+  renderBoard();
+}
+
+// Modo Protector de Pantalla (AOD / Screensaver)
 function openScreensaver() {
-  const overlay = document.getElementById('screensaverOverlay');
-  overlay.classList.remove('hidden');
+  document.getElementById('screensaverOverlay').classList.remove('hidden');
   updateAodClock();
 }
 
@@ -636,7 +816,7 @@ function startClockUpdater() {
   setInterval(updateAodClock, 10000);
 }
 
-// NOTIFICACIÓN PUSH NATIVA (Simulación)
+// Notificación Push Nativa Simulada
 function triggerPushBanner(title, body) {
   const banner = document.getElementById('pushNotificationBanner');
   document.getElementById('pushTitle').textContent = title || '⏰ Recordatorio';
@@ -667,9 +847,7 @@ function completeFromPush() {
   dismissPush();
   const firstUrgent = notes.find(n => n.urgency === 'urgent' && !n.completed);
   if (firstUrgent) {
-    firstUrgent.completed = true;
-    saveToStorage();
-    renderBoard();
+    completeNoteWithDelay(firstUrgent.id);
   }
 }
 
@@ -705,7 +883,7 @@ function exportDataJSON() {
 
 function resetDemoData() {
   if (confirm('¿Desea restaurar las notas de demostración iniciales?')) {
-    notes = [...DEFAULT_NOTES];
+    notes = JSON.parse(JSON.stringify(DEFAULT_NOTES));
     saveToStorage();
     renderBoard();
     closeSettings();

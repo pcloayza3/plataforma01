@@ -44,10 +44,11 @@
 
     <!-- Pestañas de Filtro Rápido -->
     <nav class="filter-bar">
-      <button class="filter-chip active" onclick="setFilter('all')">Todas (5)</button>
-      <button class="filter-chip chip-red" onclick="setFilter('urgent')">🔴 Urgente (1)</button>
-      <button class="filter-chip chip-yellow" onclick="setFilter('context')">🟡 Próximas (2)</button>
-      <button class="filter-chip chip-green" onclick="setFilter('normal')">🟢 Libres (2)</button>
+      <button class="filter-chip active" id="chipAll" onclick="setFilter('all')">Todas (5)</button>
+      <button class="filter-chip chip-red" id="chipUrgent" onclick="setFilter('urgent')">🔴 Urgente (1)</button>
+      <button class="filter-chip chip-yellow" id="chipContext" onclick="setFilter('context')">🟡 Próximas (2)</button>
+      <button class="filter-chip chip-green" id="chipNormal" onclick="setFilter('normal')">🟢 Libres (2)</button>
+      <button class="filter-chip chip-gray" id="chipDone" onclick="setFilter('completed')">✓ Realizadas (0)</button>
     </nav>
 
     <!-- Tablero de Post-its Diarios (Semáforo de Urgencia) -->
@@ -66,7 +67,7 @@
       <section class="board-section" id="sectionContext">
         <div class="section-label yellow-label">
           <span class="label-dot"></span>
-          <span>CONTEXTO & GEOCERCAS ACTIVAS</span>
+          <span>CONTEXTO & PRÓXIMAS (MAÑANA / GEOFENCE)</span>
         </div>
         <div class="cards-grid" id="gridContext"></div>
       </section>
@@ -75,9 +76,18 @@
       <section class="board-section" id="sectionNormal">
         <div class="section-label green-label">
           <span class="label-dot"></span>
-          <span>PENDIENTES LIBRES</span>
+          <span>PENDIENTES LIBRES (SIN PLAZO FIJO)</span>
         </div>
         <div class="cards-grid" id="gridNormal"></div>
+      </section>
+
+      <!-- Sección 4: Tareas Realizadas / Cumplidas (Solo Lectura y Escucha) -->
+      <section class="board-section" id="sectionCompleted" style="display: none;">
+        <div class="section-label gray-label">
+          <span class="label-dot"></span>
+          <span>TAREAS REALIZADAS (SOLO LECTURA Y ESCUCHA)</span>
+        </div>
+        <div class="cards-grid" id="gridCompleted"></div>
       </section>
 
     </main>
@@ -101,7 +111,7 @@
 
   </div>
 
-  <!-- MODAL DE CAPTURA RÁPIDA (Voz + Texto + Alertas) -->
+  <!-- MODAL DE CREACIÓN / EDICIÓN (Lista hasta 5 líneas, audio por línea y alertas) -->
   <div id="newNoteModal" class="modal-backdrop hidden">
     <div class="modal-card">
       <div class="modal-header">
@@ -114,7 +124,7 @@
         <div class="voice-status">
           <span class="rec-dot"></span>
           <span id="recordingTimer">0:05</span>
-          <span class="rec-label">Grabando audio original...</span>
+          <span class="rec-label">Grabando audio...</span>
         </div>
         <div class="audio-waves">
           <div class="bar b1"></div>
@@ -126,25 +136,23 @@
           <div class="bar b7"></div>
           <div class="bar b8"></div>
         </div>
-        <p class="voice-hint">Hable naturalmente (ej: <em>"Comprar pan en 15 minutos"</em> o <em>"Cerrar gas al salir de casa"</em>)</p>
+        <p class="voice-hint">Hable con naturalidad (ej: <em>"Comprar leche y pan en 15 minutos"</em>)</p>
       </div>
 
-      <!-- Tarjeta Post-it Editable -->
+      <!-- Tarjeta Post-it Editable en Lista (Hasta 5 líneas) -->
       <div class="postit-preview yellow" id="postitCardPreview">
-        <textarea id="noteTextInput" placeholder="Escriba o dicte su recordatorio aquí..." rows="3"></textarea>
-        
-        <!-- Reproductor de Audio Adjunto -->
-        <div id="audioPreviewPlayer" class="mini-audio-player">
-          <button class="audio-play-btn" type="button" onclick="togglePreviewAudio()">▶️</button>
-          <div class="audio-track">
-            <div class="audio-progress" style="width: 45%;"></div>
-            <span class="audio-time">Audio guardado • 0:08</span>
-          </div>
-          <span class="audio-badge">Voz original</span>
+        <div class="lines-container" id="modalLinesList">
+          <!-- Las líneas estructuradas se inyectan dinámicamente aquí -->
+        </div>
+
+        <div class="add-line-control">
+          <button type="button" class="btn-add-line" id="btnAddLine" onclick="addNewLineToModal()">
+            ➕ Aumentar nueva línea de lista (<span id="lineCountDisplay">1/5</span>)
+          </button>
         </div>
       </div>
 
-      <!-- Selector de Color del Post-it -->
+      <!-- Selector de Color del Post-it (Cambio Inmediato) -->
       <div class="color-picker-row">
         <span class="picker-label">Color:</span>
         <div class="color-options">
@@ -160,7 +168,7 @@
       <div class="trigger-group">
         <div class="trigger-header-row">
           <label class="trigger-label">⏰ ¿Cuándo alertar con Push?</label>
-          <button type="button" class="btn-text-action" onclick="promptCustomTime()">➕ Otro tiempo</button>
+          <button type="button" class="btn-text-action" onclick="openVoicePromptModal('time')">➕ Otro tiempo</button>
         </div>
         
         <!-- Fila Principal (Los más utilizados) -->
@@ -181,7 +189,7 @@
       <div class="trigger-group">
         <div class="trigger-header-row">
           <label class="trigger-label">📍 ¿O alertar por Ubicación (Geocerca local)?</label>
-          <button type="button" class="btn-text-action" onclick="promptCustomLocation()">➕ Nuevo lugar</button>
+          <button type="button" class="btn-text-action" onclick="openVoicePromptModal('geo')">➕ Nuevo lugar</button>
         </div>
 
         <!-- Fila Principal (Lugares más utilizados) -->
@@ -204,6 +212,34 @@
       <div class="modal-footer">
         <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
         <button class="btn-save" onclick="saveNoteFromModal()">✓ Guardar Nota</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE ENTRADA POR VOZ O TEXTO PARA TIEMPO / LUGAR -->
+  <div id="voicePromptModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="voicePromptTitle">Agregar Alerta por Voz</h3>
+        <button class="close-x-btn" onclick="closeVoicePromptModal()">✕</button>
+      </div>
+
+      <div class="voice-box">
+        <button type="button" class="mic-primary-btn" id="btnPromptMic" onclick="triggerVoicePromptDictation()">
+          <span class="mic-icon">🎙️</span>
+          <span id="promptMicCaption">PULSAR PARA HABLAR</span>
+        </button>
+        <p class="voice-hint" id="voicePromptHint">Dicte el tiempo o nombre del lugar</p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <label class="trigger-label" id="voicePromptInputLabel">O escriba directamente:</label>
+        <input type="text" id="voicePromptTextInput" class="custom-input" placeholder="Ej: 45 min o Farmacia">
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeVoicePromptModal()">Cancelar</button>
+        <button class="btn-save" onclick="confirmVoicePrompt()">✓ Aceptar</button>
       </div>
     </div>
   </div>

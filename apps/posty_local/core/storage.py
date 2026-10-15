@@ -1,16 +1,15 @@
 """
 NoteRepository: Repositorio de persistencia local SQLite y respaldo JSON
 Garantiza transaccionalidad ACID y soberanía de datos sin conexión externa.
+Soporta persistencia de listas de líneas estructuradas y fecha de cumplimiento.
 """
 
 import sqlite3
 import json
 from typing import List, Optional
 from datetime import datetime
-from core.models import Note, AudioAttachment, ReminderTrigger, NoteColor, UrgencyLevel
-
-
 from contextlib import contextmanager
+from core.models import Note, AudioAttachment, ReminderTrigger, NoteColor, UrgencyLevel, NoteLine
 
 
 class NoteRepository:
@@ -40,6 +39,8 @@ class NoteRepository:
                     audio_attachment TEXT,
                     trigger_data TEXT,
                     completed INTEGER NOT NULL DEFAULT 0,
+                    completed_at TEXT,
+                    lines_data TEXT,
                     created_at TEXT NOT NULL
                 )
             """)
@@ -48,14 +49,17 @@ class NoteRepository:
     def save(self, note: Note):
         audio_json = json.dumps(note.audio_attachment.to_dict()) if note.audio_attachment else None
         trigger_json = json.dumps(note.trigger.to_dict()) if note.trigger else None
+        lines_json = json.dumps([l.to_dict() for l in note.lines]) if note.lines else None
         due_iso = note.due_datetime.isoformat() if note.due_datetime else None
+        comp_iso = note.completed_at.isoformat() if note.completed_at else None
         created_iso = note.created_at.isoformat() if note.created_at else datetime.now().isoformat()
 
         with self._get_connection() as conn:
             conn.execute("""
                 INSERT OR REPLACE INTO notes (
-                    id, text, color, urgency, due_datetime, audio_attachment, trigger_data, completed, created_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    id, text, color, urgency, due_datetime, audio_attachment, trigger_data,
+                    completed, completed_at, lines_data, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 note.id,
                 note.text,
@@ -65,6 +69,8 @@ class NoteRepository:
                 audio_json,
                 trigger_json,
                 1 if note.completed else 0,
+                comp_iso,
+                lines_json,
                 created_iso
             ))
             conn.commit()
@@ -96,7 +102,7 @@ class NoteRepository:
     def export_json(self) -> str:
         all_notes = self.list_all()
         data = {
-            "version": "1.0.0",
+            "version": "1.1.0",
             "exported_at": datetime.now().isoformat(),
             "notes": [n.to_dict() for n in all_notes]
         }
@@ -118,8 +124,17 @@ class NoteRepository:
         if row["trigger_data"]:
             trigger = ReminderTrigger.from_dict(json.loads(row["trigger_data"]))
 
+        lines = None
+        # Validar si existe lines_data
+        try:
+            if "lines_data" in row.keys() and row["lines_data"]:
+                lines = [NoteLine.from_dict(ld) for ld in json.loads(row["lines_data"])]
+        except Exception:
+            lines = None
+
         due = datetime.fromisoformat(row["due_datetime"]) if row["due_datetime"] else None
         created = datetime.fromisoformat(row["created_at"]) if row["created_at"] else None
+        comp_at = datetime.fromisoformat(row["completed_at"]) if ("completed_at" in row.keys() and row["completed_at"]) else None
 
         return Note(
             id=row["id"],
@@ -130,5 +145,7 @@ class NoteRepository:
             audio_attachment=audio,
             trigger=trigger,
             completed=bool(row["completed"]),
-            created_at=created
+            completed_at=comp_at,
+            created_at=created,
+            lines=lines
         )
