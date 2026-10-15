@@ -13,4 +13,4 @@ echo "Presione Ctrl+C para detener."
 echo "=========================================================="
 
 cd "$SCRIPT_DIR"
-python3 -m http.server "$PORT"
+python3 server.py "$PORT"

@@ -16,3 +16,4 @@ backend/node_modules/
 backups/
 apps/clinik_local/android_build/
 *.idsig
+*.db
