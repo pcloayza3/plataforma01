@@ -1,0 +1,17 @@
+{
+  "name": "PostyLocal • Notas Visuales y Recordatorios",
+  "short_name": "PostyLocal",
+  "description": "App de post-its visuales y recordatorios 100% offline y local",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#ffd54f",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

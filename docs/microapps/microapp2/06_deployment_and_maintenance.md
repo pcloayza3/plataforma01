@@ -16,10 +16,12 @@ PostyLocal está diseñado bajo el paradigma **100% Local-First y Stand-Alone**,
 graph TD
     User["Usuario (Smartphone / Tablet / PC)"]
     
-    subgraph "Modalidades de Despliegue"
-        PWA["1. PWA Standalone (Android / iOS)<br/>• Service Worker Offline (sw.js)<br/>• Manifest Web App (manifest.json)<br/>• 0 Red requerida tras instalación"]
-        Docker["2. Contenedor Docker Local<br/>• Servidor de archivos estáticos Nginx Alpine<br/>• Puerto local 8082<br/>• docker compose up -d"]
-        Direct["3. Ejecución Directa Stand-Alone<br/>• Doble clic en apps/posty_local/index.html<br/>• 0 dependencias instaladas"]
+    subgraph "Modalidades de Despliegue Nativo & Móvil"
+        APK["1. Android APK Nativo (PostyLocal.apk)<br/>• Compilado con Gradle & Java 21<br/>• WebView acelerado por hardware<br/>• Permisos nativos: Micrófono, GPS, Push<br/>• Instalación directa en cualquier Android"]
+        IOSApp["2. iOS App Nativa (PostyLocal.app / ZIP)<br/>• Compilado con Swift & Xcode<br/>• WKWebView offline aislado<br/>• Permisos en Info.plist: Micrófono y Geocercas"]
+        PWA["3. PWA Standalone (Android / iOS)<br/>• Service Worker Offline (sw.js)<br/>• Manifest Web App (manifest.json)<br/>• 0 Red requerida tras instalación"]
+        Docker["4. Contenedor Docker Local<br/>• Servidor de archivos estáticos Nginx Alpine<br/>• Puerto local 8082<br/>• docker compose up -d"]
+        Direct["5. Ejecución Directa Stand-Alone<br/>• Doble clic en apps/posty_local/index.html<br/>• 0 dependencias instaladas"]
     end
     
     subgraph "Capa de Almacenamiento Local (Dispositivo)"
@@ -27,10 +29,14 @@ graph TD
         SQLiteLocal["SQLite Transaccional (Opcional Core)<br/>• posty_local.db"]
     end
     
+    User --> APK
+    User --> IOSApp
     User --> PWA
     User --> Docker
     User --> Direct
     
+    APK --> LocalStorage
+    IOSApp --> LocalStorage
     PWA --> LocalStorage
     Docker --> LocalStorage
     Direct --> LocalStorage
@@ -39,9 +45,48 @@ graph TD
 
 ---
 
-## 2. Modalidades de Despliegue Paso a Paso
+## 2. Modalidades de Despliegue e Instalación Móvil Paso a Paso
 
-### Modalidad A: Instalación como PWA en Smartphone (Recomendada para Móviles)
+### Modalidad 1: Instalación del APK Nativo en Android (Generado)
+* **Archivo Binario Compilado:** [`apps/posty_local/PostyLocal.apk`](file:///Users/paul/develop/platform01/apps/posty_local/PostyLocal.apk) (3.2 MB).
+* **Instalación Directa:**
+  1. Transferir `PostyLocal.apk` al teléfono Android (vía cable USB, AirDrop/Nearby Share o descarga local).
+  2. Pulsar sobre el archivo `.apk` y conceder permiso de instalación ("Permitir desde esta fuente").
+  3. La aplicación se instala con el icono y nombre **PostyLocal**.
+* **Recompilación Automatizada (desde terminal):**
+  ```bash
+  ./apps/posty_local/android/build_apk.sh
+  ```
+* **Apertura en Android Studio:**
+  ```bash
+  open -a "/Applications/Android Studio.app" apps/posty_local/android
+  ```
+
+---
+
+### Modalidad 2: Despliegue de la Aplicación Nativa para iOS (Generado)
+* **Paquete Compilado:** [`apps/posty_local/PostyLocal-iOS.zip`](file:///Users/paul/develop/platform01/apps/posty_local/PostyLocal-iOS.zip) y bundle [`apps/posty_local/ios/build/PostyLocal.app`](file:///Users/paul/develop/platform01/apps/posty_local/ios/build/PostyLocal.app).
+* **Ejecución en Simulador iOS (macOS):**
+  ```bash
+  # Iniciar simulador de iPhone
+  open -a Simulator
+  
+  # Instalar y ejecutar el bundle compilado
+  xcrun simctl install booted apps/posty_local/ios/build/PostyLocal.app
+  xcrun simctl launch booted com.postylocal.app
+  ```
+* **Recompilación Automatizada (desde terminal):**
+  ```bash
+  ./apps/posty_local/ios/build_ios.sh
+  ```
+* **Apertura y Despliegue en iPhone Real con Xcode:**
+  1. Conectar el iPhone a la Mac con cable.
+  2. Abrir el proyecto en Xcode y seleccionar el dispositivo en la barra superior.
+  3. Pulsar el botón **Play (Run)** para instalar en el iPhone personal.
+
+---
+
+### Modalidad 3: Instalación como PWA en Smartphone (Alternativa Web Sin Tienda)
 1. **Acceso Inicial:** Abrir la URL local o IP de red local (ej. `http://<ip-local>:8082` o desplegado en hosting estático).
 2. **Instalación Nativa:**
    * En **Android (Chrome):** Pulsar el menú `⋮` y seleccionar **"Instalar aplicación"** o **"Añadir a pantalla de inicio"**.
