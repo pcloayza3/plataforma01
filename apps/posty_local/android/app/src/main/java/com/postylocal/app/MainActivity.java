@@ -70,23 +70,25 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Ajusta la ventana para que NO se superponga con la barra de navegación de Android (||| O <) ni barra superior
-        WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
-
-        webView = new WebView(this);
-        setContentView(webView);
+        setContentView(R.layout.activity_main);
+        android.widget.FrameLayout rootLayout = findViewById(R.id.root_layout);
+        webView = findViewById(R.id.webview);
 
         // Previene de forma infalible que la barra de botones (||| O <) o barra de estado solapen la aplicación
-        ViewCompat.setOnApplyWindowInsetsListener(webView, (v, insets) -> {
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        ViewCompat.setOnApplyWindowInsetsListener(rootLayout, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
+            return WindowInsetsCompat.CONSUMED;
         });
 
         // Inicializar motor de voz Text-To-Speech en español para reproducción infalible
         textToSpeech = new TextToSpeech(this, status -> {
             if (status == TextToSpeech.SUCCESS) {
-                textToSpeech.setLanguage(new Locale("es", "ES"));
+                int res = textToSpeech.setLanguage(new Locale("es", "ES"));
+                if (res == TextToSpeech.LANG_MISSING_DATA || res == TextToSpeech.LANG_NOT_SUPPORTED) {
+                    textToSpeech.setLanguage(Locale.getDefault());
+                }
             }
         });
 

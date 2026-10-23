@@ -85,12 +85,7 @@ def create_happy_postit_icon(size=512):
     dimple_r = [center_x + mouth_radius_x - dimple_size, mouth_y - dimple_size, center_x + mouth_radius_x + dimple_size, mouth_y + dimple_size]
     draw.arc(dimple_r, start=240, end=60, fill=ink_color, width=max(2, line_w - 2))
 
-    # Mejillas sonrojadas rosadas suaves
-    blush_color = (251, 113, 133, 90)
-    blush_r = int(size * 0.055)
-    draw.ellipse([center_x - eye_offset_x - blush_r - 8, eye_y + int(size * 0.08) - blush_r, center_x - eye_offset_x + blush_r - 8, eye_y + int(size * 0.08) + blush_r], fill=blush_color)
-    draw.ellipse([center_x + eye_offset_x - blush_r + 8, eye_y + int(size * 0.08) - blush_r, center_x + eye_offset_x + blush_r + 8, eye_y + int(size * 0.08) + blush_r], fill=blush_color)
-
+    # Se eliminan los cachetes rosados a solicitud del usuario (carita limpia)
     return img
 
 if __name__ == "__main__":

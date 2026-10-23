@@ -102,8 +102,6 @@
       </button>
     </footer>
 
-  </div>
-
   <!-- MODAL DE CREACIÓN / EDICIÓN (Lista hasta 5 líneas, audio por línea, foto opcional y alertas) -->
   <div id="newNoteModal" class="modal-backdrop hidden">
     <div class="modal-card">
@@ -266,31 +264,13 @@
 
         <!-- Requerimiento 5: Actualización de GPS Real con Geolocation / Puente Nativo -->
         <h4>📍 Mis Lugares de Georreferenciación (Radio 150m)</h4>
-        <p class="settings-desc">Las alertas se activan mediante GPS local en su celular sin enviar coordenadas a internet.</p>
+        <p class="settings-desc">Las alertas se activan mediante GPS local en su celular al estar en la zona.</p>
 
-        <div class="location-item">
-          <div>
-            <strong>🏠 Casa</strong>
-            <div class="coords-text" id="coordsTextCasa">Lat: -16.5024, Lng: -68.1311</div>
-          </div>
-          <button class="chip-action" id="btnUpdateCasa" onclick="updateGeoCoord('Casa')">Actualizar Aquí</button>
+        <div id="settingsLocationsList" class="settings-locations-list">
+          <!-- Se inyectan dinámicamente todos los lugares configurados con botón para fijar GPS en la zona -->
         </div>
 
-        <div class="location-item">
-          <div>
-            <strong>🛒 Supermercado</strong>
-            <div class="coords-text" id="coordsTextSupermercado">Lat: -16.5089, Lng: -68.1275</div>
-          </div>
-          <button class="chip-action" id="btnUpdateSupermercado" onclick="updateGeoCoord('Supermercado')">Actualizar Aquí</button>
-        </div>
-
-        <div class="location-item">
-          <div>
-            <strong>🏢 Trabajo / Oficina</strong>
-            <div class="coords-text" id="coordsTextTrabajo">Lat: -16.5140, Lng: -68.1210</div>
-          </div>
-          <button class="chip-action" id="btnUpdateTrabajo" onclick="updateGeoCoord('Trabajo')">Actualizar Aquí</button>
-        </div>
+        <button type="button" class="btn-text-action" onclick="openVoicePromptModal('geo')" style="margin-top: 8px;">➕ Agregar nuevo lugar</button>
 
         <hr class="settings-divider">
 
@@ -310,6 +290,8 @@
       </div>
     </div>
   </div>
+
+  </div> <!-- Fin de .app-viewport -->
 
   <script src="app.js"></script>
   <script>

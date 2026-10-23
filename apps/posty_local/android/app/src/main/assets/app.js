@@ -267,19 +267,19 @@ function renderBoard() {
   const normalCount = activeNotes.filter(n => n.urgency === 'normal').length;
 
   if (chipMap.urgent) {
-    chipMap.urgent.textContent = `🔴 Urgente (${urgentCount})`;
+    chipMap.urgent.textContent = (currentFilter === 'urgent') ? `🔴 Urgente (${urgentCount})` : '🔴';
     chipMap.urgent.classList.toggle('active', currentFilter === 'urgent');
   }
   if (chipMap.context) {
-    chipMap.context.textContent = `🟡 Próximas (${contextCount})`;
+    chipMap.context.textContent = (currentFilter === 'context') ? `🟡 Próximas (${contextCount})` : '🟡';
     chipMap.context.classList.toggle('active', currentFilter === 'context');
   }
   if (chipMap.normal) {
-    chipMap.normal.textContent = `🟢 Libres (${normalCount})`;
+    chipMap.normal.textContent = (currentFilter === 'normal') ? `🟢 Libres (${normalCount})` : '🟢';
     chipMap.normal.classList.toggle('active', currentFilter === 'normal');
   }
   if (chipMap.completed) {
-    chipMap.completed.textContent = `✓ Realizadas (${completedNotes.length})`;
+    chipMap.completed.textContent = (currentFilter === 'completed') ? `✓ Realizadas (${completedNotes.length})` : '✓';
     chipMap.completed.classList.toggle('active', currentFilter === 'completed');
   }
 
@@ -749,6 +749,7 @@ function confirmVoicePrompt() {
     geoPresets.unshift(newGeo);
     localStorage.setItem('posty_geo_presets', JSON.stringify(geoPresets));
     renderTriggerPresets();
+    renderSettingsLocations();
     selectGeoPreset(newGeo);
   }
 
@@ -930,6 +931,12 @@ function classifyUrgency(triggerType, preset) {
 
 // Reproducción de Audios Infalible (Android TTS Nativo + Audio + Web Speech)
 function playLineAudioById(noteId, lineId) {
+  const btn = event ? event.currentTarget : null;
+  if (btn) {
+    btn.textContent = '🔊';
+    setTimeout(() => { if (btn) btn.textContent = '▶️'; }, 2500);
+  }
+
   const note = notes.find(n => n.id === noteId);
   if (!note) return;
   const line = (note.lines && note.lines.length > 0) ? note.lines.find(l => l.id === lineId) : null;
@@ -1055,9 +1062,57 @@ function snoozeFromPush() {
   alert('⏱️ Recordatorio pospuesto automáticamente por 15 minutos.');
 }
 
-// 5. ACTUALIZACIÓN DE GPS REAL ("ACTUALIZAR AQUÍ")
+// 5. ACTUALIZACIÓN DE GPS REAL ("ACTUALIZAR AQUÍ") PARA CUALQUIER LUGAR
+function renderSettingsLocations() {
+  const container = document.getElementById('settingsLocationsList');
+  if (!container) return;
+
+  const uniquePlaces = [];
+  const seen = new Set();
+  (geoPresets || []).forEach(g => {
+    const p = g.place || g.label;
+    if (p && !seen.has(p)) {
+      seen.add(p);
+      uniquePlaces.push({
+        place: p,
+        label: g.label || `📍 ${p}`
+      });
+    }
+  });
+
+  ['Casa', 'Supermercado', 'Trabajo'].forEach(p => {
+    if (!seen.has(p)) {
+      seen.add(p);
+      uniquePlaces.push({ place: p, label: `📍 ${p}` });
+    }
+  });
+
+  container.innerHTML = uniquePlaces.map(item => {
+    const p = item.place;
+    const safeId = p.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const savedCoord = localStorage.getItem(`posty_geo_coords_${p}`) || 'Sin georreferencia fijada (toque Actualizar Aquí al estar en la zona)';
+    const isFixed = savedCoord.includes('Lat:');
+    const escapedPlace = escapeHtml(p);
+    const escapedLabel = escapeHtml(item.label);
+    return `
+      <div class="location-item">
+        <div style="flex: 1 1 auto; min-width: 0; padding-right: 8px;">
+          <strong>${escapedLabel}</strong>
+          <div class="coords-text ${isFixed ? 'coords-fixed' : ''}" id="coordsText_${safeId}">
+            ${escapeHtml(savedCoord)}
+          </div>
+        </div>
+        <button class="chip-action" id="btnUpdate_${safeId}" onclick="updateGeoCoord('${escapedPlace}')">
+          Actualizar Aquí
+        </button>
+      </div>
+    `;
+  }).join('');
+}
+
 function updateGeoCoord(place) {
-  const btn = event ? event.currentTarget : null;
+  const safeId = place.replace(/[^a-zA-Z0-9_-]/g, '_');
+  const btn = document.getElementById(`btnUpdate_${safeId}`) || (event ? event.currentTarget : null);
   const originalText = btn ? btn.innerHTML : 'Actualizar Aquí';
   if (btn) {
     btn.innerHTML = '🛰️ Obteniendo GPS...';
@@ -1072,7 +1127,7 @@ function updateGeoCoord(place) {
         btn.innerHTML = originalText;
         btn.disabled = false;
       }
-    }, 3000);
+    }, 4000);
     return;
   }
 
@@ -1106,7 +1161,7 @@ function updateGeoCoord(place) {
           }
         },
         (err2) => {
-          alert('No se pudo obtener el GPS: ' + (err.message || 'Verifique que la ubicación esté activada en su celular.'));
+          alert('No se pudo obtener el GPS: ' + (err.message || 'Active la ubicación en su celular.'));
           if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
         },
         { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
@@ -1119,15 +1174,23 @@ function updateGeoCoord(place) {
 // Callback global invocado por AndroidBridge cuando el GPS nativo responde
 window.onNativeGPSReceived = function(place, lat, lng, accuracy) {
   saveRealLocationCoordinates(place, lat.toFixed(6), lng.toFixed(6), Math.round(accuracy));
+  const safeId = place.replace(/[^a-zA-Z0-9_-]/g, '_');
+  const btn = document.getElementById(`btnUpdate_${safeId}`);
+  if (btn) {
+    btn.innerHTML = '✓ Actualizado';
+    setTimeout(() => { btn.innerHTML = 'Actualizar Aquí'; btn.disabled = false; }, 2000);
+  }
 };
 
 function saveRealLocationCoordinates(place, lat, lng, accuracy) {
   const coordStr = `Lat: ${lat}, Lng: ${lng} (±${accuracy}m GPS Real)`;
   localStorage.setItem(`posty_geo_coords_${place}`, coordStr);
 
-  const displayEl = document.getElementById(`coordsText${place}`);
+  const safeId = place.replace(/[^a-zA-Z0-9_-]/g, '_');
+  const displayEl = document.getElementById(`coordsText_${safeId}`);
   if (displayEl) {
     displayEl.textContent = coordStr;
+    displayEl.classList.add('coords-fixed');
     displayEl.style.color = '#10B981';
     displayEl.style.fontWeight = '600';
   }
@@ -1184,6 +1247,7 @@ function closeScreensaver() {
 
 // Configuración & Respaldo
 function openSettings() {
+  renderSettingsLocations();
   document.getElementById('settingsModal').classList.remove('hidden');
 }
 
