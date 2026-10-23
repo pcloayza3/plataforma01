@@ -1,6 +1,27 @@
 // app.js • Nota Feliz (PostyLocal) Interactive Mobile Logic
 // Stand-Alone Embebido • Cero Servidores • 100% Local-First
-// Dictado de voz real, grabación de audio real, filtros múltiples con pulsación larga, GPS satelital y alertas automáticas
+// Sistema de Íconos Minimalistas 2D Planos y Monocromáticos (Negro en claro / Blanco en oscuro)
+
+const ICONS = {
+  screensaver: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`,
+  settings: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`,
+  close: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
+  plus: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
+  check: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+  trash: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`,
+  edit: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`,
+  play: `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`,
+  speaker: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`,
+  microphone: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>`,
+  camera: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>`,
+  clock: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`,
+  pin: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`,
+  urgentDot: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`,
+  listIcon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>`,
+  download: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`,
+  upload: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>`,
+  gpsTarget: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>`
+};
 
 // Datos iniciales de demostración
 const DEFAULT_NOTES = [
@@ -9,7 +30,8 @@ const DEFAULT_NOTES = [
     color: 'yellow',
     urgency: 'urgent',
     triggerType: 'time',
-    triggerLabel: '⏰ Vence Hoy 18:00',
+    triggerLabel: 'Hoy 18:00',
+    alertDateTimeStr: 'Hoy 18:00',
     completed: false,
     completedAt: null,
     createdAt: Date.now() - 3600000,
@@ -23,7 +45,8 @@ const DEFAULT_NOTES = [
     color: 'pink',
     urgency: 'context',
     triggerType: 'geo',
-    triggerLabel: '🏠 Al salir de casa (150m)',
+    triggerLabel: 'Al salir de casa',
+    alertDateTimeStr: 'Al salir de casa',
     completed: false,
     completedAt: null,
     createdAt: Date.now() - 7200000,
@@ -37,7 +60,8 @@ const DEFAULT_NOTES = [
     color: 'green',
     urgency: 'context',
     triggerType: 'geo',
-    triggerLabel: '🛒 Cerca del supermercado',
+    triggerLabel: 'Cerca del súper',
+    alertDateTimeStr: 'Cerca del súper',
     completed: false,
     completedAt: null,
     createdAt: Date.now() - 10800000,
@@ -52,7 +76,8 @@ const DEFAULT_NOTES = [
     color: 'blue',
     urgency: 'normal',
     triggerType: 'none',
-    triggerLabel: '🟢 Sin alarma estricta',
+    triggerLabel: 'Sin alarma',
+    alertDateTimeStr: 'Sin alarma',
     completed: false,
     completedAt: null,
     createdAt: Date.now() - 14400000,
@@ -65,7 +90,8 @@ const DEFAULT_NOTES = [
     color: 'purple',
     urgency: 'normal',
     triggerType: 'none',
-    triggerLabel: '🟢 Sin alarma estricta',
+    triggerLabel: 'Sin alarma',
+    alertDateTimeStr: 'Sin alarma',
     completed: false,
     completedAt: null,
     createdAt: Date.now() - 18000000,
@@ -75,24 +101,18 @@ const DEFAULT_NOTES = [
   }
 ];
 
-// Presets dinámicos con frecuencia de uso
+// Presets dinámicos: Exactamente las 3 opciones requeridas por defecto
 const DEFAULT_TIME_PRESETS = [
-  { id: 't15', label: '+15 min', minutes: 15, uses: 22 },
-  { id: 't30', label: '+30 min', minutes: 30, uses: 16 },
-  { id: 't60', label: '+1 hora', minutes: 60, uses: 13 },
-  { id: 't120', label: '+2 horas', minutes: 120, uses: 9 },
-  { id: 't_hoy18', label: 'Hoy 18:00', timeStr: '18:00', isToday: true, uses: 8 },
-  { id: 't_manana', label: 'Mañana 09:00', timeStr: '09:00', isTomorrow: true, uses: 7 },
-  { id: 't_sig_semana', label: 'Siguiente Semana', isNextWeek: true, uses: 6 }
+  { id: 't60', label: '+1 hora', minutes: 60, uses: 10 },
+  { id: 't_hoy18', label: 'Hoy a las 18:00', timeStr: '18:00', isToday: true, uses: 8 },
+  { id: 't_manana12', label: 'Mañana medio día', timeStr: '12:00', isTomorrow: true, uses: 6 }
 ];
 
+// Georreferencias por defecto: Exactamente las 3 requeridas
 const DEFAULT_GEO_PRESETS = [
-  { id: 'g_casa', label: '🏠 Al salir de casa', place: 'Casa', transition: 'EXIT', uses: 28 },
-  { id: 'g_super', label: '🛒 Cerca del súper', place: 'Supermercado', transition: 'ENTER', uses: 20 },
-  { id: 'g_trabajo', label: '🏢 En el trabajo', place: 'Trabajo', transition: 'ENTER', uses: 15 },
-  { id: 'g_farmacia', label: '💊 Cerca de la farmacia', place: 'Farmacia', transition: 'ENTER', uses: 9 },
-  { id: 'g_gym', label: '🏋️ Al llegar al gym', place: 'Gimnasio', transition: 'ENTER', uses: 5 },
-  { id: 'g_banco', label: '🏦 Cerca del banco', place: 'Banco', transition: 'ENTER', uses: 2 }
+  { id: 'g_casa', label: 'Al salir de casa', place: 'Casa', transition: 'EXIT', uses: 10 },
+  { id: 'g_super', label: 'Cerca del súper', place: 'Supermercado', transition: 'ENTER', uses: 8 },
+  { id: 'g_trabajo', label: 'En el trabajo', place: 'Trabajo', transition: 'ENTER', uses: 6 }
 ];
 
 let notes = [];
@@ -106,12 +126,15 @@ let modalPhotoData = null;
 let selectedModalColor = 'yellow';
 let selectedTriggerType = 'none';
 let selectedTriggerLabel = 'Ninguna asignada';
+let selectedTargetTimestamp = null;
+let selectedAlertDateTimeStr = null;
 let editingNoteId = null;
 let modalLines = [];
 
 let activeAudioElement = null;
 let activeAudioId = null;
 let currentVoicePromptType = 'time';
+let pendingNewPlaceCoords = null;
 
 // Reconocimiento de Voz Web (Web Speech API)
 let postyRecognitionInstance = null;
@@ -184,10 +207,10 @@ function saveToStorage() {
 }
 
 function loadPresets() {
-  const savedTime = localStorage.getItem('posty_time_presets');
+  const savedTime = localStorage.getItem('posty_time_presets_v2');
   timePresets = savedTime ? JSON.parse(savedTime) : JSON.parse(JSON.stringify(DEFAULT_TIME_PRESETS));
 
-  const savedGeo = localStorage.getItem('posty_geo_presets');
+  const savedGeo = localStorage.getItem('posty_geo_presets_v2');
   geoPresets = savedGeo ? JSON.parse(savedGeo) : JSON.parse(JSON.stringify(DEFAULT_GEO_PRESETS));
 
   // Cargar coordenadas de lugares guardadas
@@ -267,19 +290,19 @@ function renderBoard() {
   const normalCount = activeNotes.filter(n => n.urgency === 'normal').length;
 
   if (chipMap.urgent) {
-    chipMap.urgent.textContent = (currentFilter === 'urgent') ? `🔴 Urgente (${urgentCount})` : '🔴';
+    chipMap.urgent.innerHTML = (currentFilter === 'urgent') ? `${ICONS.urgentDot} <span>Urgente (${urgentCount})</span>` : ICONS.urgentDot;
     chipMap.urgent.classList.toggle('active', currentFilter === 'urgent');
   }
   if (chipMap.context) {
-    chipMap.context.textContent = (currentFilter === 'context') ? `🟡 Próximas (${contextCount})` : '🟡';
+    chipMap.context.innerHTML = (currentFilter === 'context') ? `${ICONS.clock} <span>Próximas (${contextCount})</span>` : ICONS.clock;
     chipMap.context.classList.toggle('active', currentFilter === 'context');
   }
   if (chipMap.normal) {
-    chipMap.normal.textContent = (currentFilter === 'normal') ? `🟢 Libres (${normalCount})` : '🟢';
+    chipMap.normal.innerHTML = (currentFilter === 'normal') ? `${ICONS.listIcon} <span>Libres (${normalCount})</span>` : ICONS.listIcon;
     chipMap.normal.classList.toggle('active', currentFilter === 'normal');
   }
   if (chipMap.completed) {
-    chipMap.completed.textContent = (currentFilter === 'completed') ? `✓ Realizadas (${completedNotes.length})` : '✓';
+    chipMap.completed.innerHTML = (currentFilter === 'completed') ? `${ICONS.check} <span>Realizadas (${completedNotes.length})</span>` : ICONS.check;
     chipMap.completed.classList.toggle('active', currentFilter === 'completed');
   }
 
@@ -299,7 +322,7 @@ function createNoteCardElement(note, isCompletedView) {
   if (note.lines && note.lines.length > 0) {
     note.lines.forEach((line, lIdx) => {
       const audioBtn = `
-        <button type="button" class="audio-play-btn" style="width: 24px; height: 24px; font-size: 11px; margin-left: 6px; cursor: pointer; border-radius: 50%; border: none; background: rgba(0,0,0,0.08);" onclick="playLineAudioById('${note.id}', '${line.id}')" title="Escuchar audio">▶️</button>
+        <button type="button" class="audio-play-btn" style="width: 24px; height: 24px; margin-left: 6px; cursor: pointer; border-radius: 50%; border: none; background: rgba(0,0,0,0.08); display: inline-flex; align-items: center; justify-content: center; color: inherit;" onclick="playLineAudioById('${note.id}', '${line.id}')" title="Escuchar audio">${ICONS.play}</button>
       `;
 
       const checkAttr = isCompletedView ? 'disabled checked' : (line.completed ? 'checked' : '');
@@ -327,12 +350,12 @@ function createNoteCardElement(note, isCompletedView) {
   if (!isCompletedView) {
     topActions = `
       <div style="display: flex; gap: 6px;">
-        <button class="btn-card-action" onclick="openEditNoteModal('${note.id}')" title="Editar nota y lista">✏️</button>
-        <button class="btn-card-action" onclick="completeNoteWithDelay('${note.id}')" title="Marcar toda la nota como cumplida">✓</button>
+        <button class="btn-card-action" onclick="openEditNoteModal('${note.id}')" title="Editar nota y lista">${ICONS.edit}</button>
+        <button class="btn-card-action" onclick="completeNoteWithDelay('${note.id}')" title="Marcar toda la nota como cumplida">${ICONS.check}</button>
       </div>
     `;
   } else {
-    topActions = `<span class="completed-badge-pill">✓ Realizada</span>`;
+    topActions = `<span class="completed-badge-pill">${ICONS.check} Realizada</span>`;
   }
 
   let colorStrip = '';
@@ -350,6 +373,9 @@ function createNoteCardElement(note, isCompletedView) {
     colorStrip = `<span class="read-only-notice">Solo lectura y escucha</span>`;
   }
 
+  const trigIcon = note.triggerType === 'geo' ? ICONS.pin : (note.triggerType === 'time' ? ICONS.clock : ICONS.listIcon);
+  const trigText = note.alertDateTimeStr || note.triggerLabel || 'Sin alarma';
+
   card.innerHTML = `
     <div class="postit-top-row">
       <div style="flex: 1;">
@@ -360,7 +386,7 @@ function createNoteCardElement(note, isCompletedView) {
     </div>
     <div class="postit-footer">
       ${colorStrip}
-      <span class="alarm-pill">${escapeHtml(note.triggerLabel || '🟢 Sin alarma')}</span>
+      <span class="alarm-pill">${trigIcon} <span>${escapeHtml(trigText)}</span></span>
     </div>
   `;
 
@@ -505,8 +531,8 @@ function renderModalLines() {
     row.innerHTML = `
       <span style="font-size: 12px; font-weight: 700; opacity: 0.6;">${idx + 1}.</span>
       <input type="text" id="modalLineInput_${idx}" class="line-text-input" placeholder="Escriba o dicte el ítem ${idx + 1}..." value="${escapeHtml(line.text)}" oninput="updateModalLineText(${idx}, this.value)">
-      <button type="button" class="btn-voice-mini" id="btnVoiceLine_${idx}" title="Dictar por voz">🎙️ Dictar</button>
-      ${modalLines.length > 1 ? `<button type="button" class="btn-line-action" title="Eliminar línea" onclick="removeLineFromModal(${idx})">✕</button>` : ''}
+      <button type="button" class="btn-voice-mini icon-only" id="btnVoiceLine_${idx}" title="Dictar por voz">${ICONS.microphone}</button>
+      ${modalLines.length > 1 ? `<button type="button" class="btn-line-action" title="Eliminar línea" onclick="removeLineFromModal(${idx})">${ICONS.close}</button>` : ''}
     `;
     container.appendChild(row);
 
@@ -561,7 +587,6 @@ function setupVoiceDictation(buttonOrId, targetInputOrId, lineIdx = null) {
         try { postyRecognitionInstance.stop(); } catch (err) {}
       }
       btn.classList.remove('listening');
-      btn.innerHTML = '🎙️ Dictar';
       return;
     }
 
@@ -574,7 +599,6 @@ function setupVoiceDictation(buttonOrId, targetInputOrId, lineIdx = null) {
 
         recognition.onstart = () => {
           btn.classList.add('listening');
-          btn.innerHTML = '🔴 Escuchando...';
         };
 
         recognition.onresult = (event) => {
@@ -592,12 +616,10 @@ function setupVoiceDictation(buttonOrId, targetInputOrId, lineIdx = null) {
 
         recognition.onerror = () => {
           btn.classList.remove('listening');
-          btn.innerHTML = '🎙️ Dictar';
         };
 
         recognition.onend = () => {
           btn.classList.remove('listening');
-          btn.innerHTML = '🎙️ Dictar';
         };
 
         postyRecognitionInstance = recognition;
@@ -611,7 +633,6 @@ function setupVoiceDictation(buttonOrId, targetInputOrId, lineIdx = null) {
     // Fallback nativo para Android WebView cuando WebSpeech no está soportado internamente
     if (window.AndroidBridge && window.AndroidBridge.startVoiceDictation) {
       btn.classList.add('listening');
-      btn.innerHTML = '🔴 Escuchando...';
       window.activeDictationInput = input;
       window.activeDictationBtn = btn;
       window.activeDictationLineIdx = lineIdx;
@@ -635,7 +656,6 @@ window.onNativeVoiceDictated = function(targetIndexStr, recognizedText) {
   }
   if (window.activeDictationBtn) {
     window.activeDictationBtn.classList.remove('listening');
-    window.activeDictationBtn.innerHTML = '🎙️ Dictar';
   }
 };
 
@@ -677,12 +697,18 @@ function renderPhotoPreview() {
   const btnAttach = document.getElementById('btnAttachPhoto');
   if (modalPhotoData) {
     if (img) img.src = modalPhotoData;
-    if (box) box.classList.remove('hidden');
+    if (box) {
+      box.classList.remove('hidden');
+      box.style.display = 'flex';
+    }
     if (btnAttach) btnAttach.style.display = 'none';
   } else {
     if (img) img.src = '';
-    if (box) box.classList.add('hidden');
-    if (btnAttach) btnAttach.style.display = 'block';
+    if (box) {
+      box.classList.add('hidden');
+      box.style.display = 'none';
+    }
+    if (btnAttach) btnAttach.style.display = 'inline-flex';
   }
 }
 
@@ -693,61 +719,142 @@ function removeAttachedPhoto() {
   renderPhotoPreview();
 }
 
-// Dictado para "➕ Otro tiempo" / "➕ Nuevo lugar"
+// Modal para "➕ Otro tiempo" / "➕ Nuevo lugar"
 function openVoicePromptModal(type) {
   currentVoicePromptType = type;
   const modal = document.getElementById('voicePromptModal');
   const title = document.getElementById('voicePromptTitle');
-  const hint = document.getElementById('voicePromptHint');
-  const label = document.getElementById('voicePromptInputLabel');
-  const input = document.getElementById('voicePromptTextInput');
+  const timeSection = document.getElementById('voicePromptTimeSection');
+  const geoSection = document.getElementById('voicePromptGeoSection');
+  const dtInput = document.getElementById('voicePromptDateTimeInput');
+  const geoInput = document.getElementById('voicePromptTextInput');
 
-  input.value = '';
+  pendingNewPlaceCoords = null;
+  const statusEl = document.getElementById('newPlaceCoordsStatus');
+  if (statusEl) {
+    statusEl.textContent = 'Sin fijar (puede fijarse luego al estar en la zona).';
+    statusEl.style.color = 'var(--text-muted)';
+  }
+
   modal.classList.remove('hidden');
 
   if (type === 'time') {
-    title.textContent = '⏰ Agregar Alerta de Tiempo';
-    hint.textContent = 'Presione "🎙️ Dictar" para hablar (ej: "45 minutos", "Hoy a las 20:00") o escriba directamente.';
-    label.textContent = 'Escriba o dicte el tiempo:';
-    input.placeholder = 'Ej: 45 min o 20:00';
+    title.textContent = 'Programar Fecha y Hora';
+    if (timeSection) timeSection.classList.remove('hidden');
+    if (geoSection) geoSection.classList.add('hidden');
+
+    const defDate = new Date(Date.now() + 3600000);
+    const yr = defDate.getFullYear();
+    const mo = String(defDate.getMonth() + 1).padStart(2, '0');
+    const da = String(defDate.getDate()).padStart(2, '0');
+    const ho = String(defDate.getHours()).padStart(2, '0');
+    const mi = String(defDate.getMinutes()).padStart(2, '0');
+    if (dtInput) dtInput.value = `${yr}-${mo}-${da}T${ho}:${mi}`;
   } else {
-    title.textContent = '📍 Agregar Alerta de Lugar';
-    hint.textContent = 'Presione "🎙️ Dictar" para hablar (ej: "Farmacia", "Oficina") o escriba directamente.';
-    label.textContent = 'Escriba o dicte el lugar:';
-    input.placeholder = 'Ej: Farmacia central';
+    title.textContent = 'Agregar Nuevo Lugar';
+    if (timeSection) timeSection.classList.add('hidden');
+    if (geoSection) geoSection.classList.remove('hidden');
+    if (geoInput) geoInput.value = '';
   }
 }
 
-function confirmVoicePrompt() {
-  const val = document.getElementById('voicePromptTextInput').value.trim();
-  if (!val) {
-    alert('Por favor ingrese o dicte un valor válido.');
+// Fijar ubicación GPS satelital opcional al crear un nuevo lugar
+function captureGPSForNewPlace() {
+  const statusEl = document.getElementById('newPlaceCoordsStatus');
+  const btn = document.getElementById('btnCaptureGeoNewPlace');
+  if (statusEl) statusEl.textContent = '🛰️ Obteniendo posición GPS satelital...';
+  if (btn) btn.disabled = true;
+
+  if (window.AndroidBridge && window.AndroidBridge.getRealGPSLocation) {
+    window.AndroidBridge.getRealGPSLocation('__pending_new_place__');
+    setTimeout(() => {
+      if (btn) btn.disabled = false;
+    }, 4000);
     return;
   }
 
+  if (!navigator.geolocation) {
+    if (statusEl) statusEl.textContent = 'Geolocalización no disponible en este dispositivo.';
+    if (btn) btn.disabled = false;
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const lat = pos.coords.latitude.toFixed(6);
+      const lng = pos.coords.longitude.toFixed(6);
+      const acc = Math.round(pos.coords.accuracy || 10);
+      pendingNewPlaceCoords = `Lat: ${lat}, Lng: ${lng} (±${acc}m GPS Real)`;
+      if (statusEl) {
+        statusEl.textContent = `✓ Ubicación fijada: ${pendingNewPlaceCoords}`;
+        statusEl.style.color = '#10B981';
+      }
+      if (btn) btn.disabled = false;
+    },
+    (err) => {
+      if (statusEl) {
+        statusEl.textContent = 'No se pudo obtener GPS directo. Puede fijarse luego.';
+        statusEl.style.color = 'var(--text-muted)';
+      }
+      if (btn) btn.disabled = false;
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+  );
+}
+
+function confirmVoicePrompt() {
   if (currentVoicePromptType === 'time') {
-    const minsMatch = val.match(/(\d+)\s*(m|min)/i);
-    const mins = minsMatch ? parseInt(minsMatch[1]) : 45;
+    const dtInput = document.getElementById('voicePromptDateTimeInput');
+    const val = dtInput ? dtInput.value : '';
+    if (!val) {
+      alert('Por favor seleccione fecha y hora.');
+      return;
+    }
+    const targetDate = new Date(val);
+    const ts = targetDate.getTime();
+    if (isNaN(ts)) {
+      alert('Fecha u hora inválida.');
+      return;
+    }
+    const day = String(targetDate.getDate()).padStart(2, '0');
+    const mon = String(targetDate.getMonth() + 1).padStart(2, '0');
+    const yr = targetDate.getFullYear();
+    const hrs = String(targetDate.getHours()).padStart(2, '0');
+    const mins = String(targetDate.getMinutes()).padStart(2, '0');
+    const exactFormatted = `${day}/${mon}/${yr} ${hrs}:${mins}`;
+
     const newPreset = {
       id: 't_custom_' + Date.now(),
-      label: val.startsWith('+') ? val : `+${val}`,
-      minutes: mins,
+      label: exactFormatted,
+      targetTimestamp: ts,
+      alertDateTimeStr: exactFormatted,
       uses: 10
     };
     timePresets.unshift(newPreset);
-    localStorage.setItem('posty_time_presets', JSON.stringify(timePresets));
+    localStorage.setItem('posty_time_presets_v2', JSON.stringify(timePresets));
     renderTriggerPresets();
     selectTimePreset(newPreset);
   } else {
+    const geoInput = document.getElementById('voicePromptTextInput');
+    const val = geoInput ? geoInput.value.trim() : '';
+    if (!val) {
+      alert('Por favor ingrese o dicte el nombre del nuevo lugar.');
+      return;
+    }
     const newGeo = {
       id: 'g_custom_' + Date.now(),
-      label: `📍 ${val}`,
+      label: val,
       place: val,
       transition: 'ENTER',
       uses: 10
     };
     geoPresets.unshift(newGeo);
-    localStorage.setItem('posty_geo_presets', JSON.stringify(geoPresets));
+    localStorage.setItem('posty_geo_presets_v2', JSON.stringify(geoPresets));
+
+    if (pendingNewPlaceCoords) {
+      localStorage.setItem(`posty_geo_coords_${val}`, pendingNewPlaceCoords);
+    }
+
     renderTriggerPresets();
     renderSettingsLocations();
     selectGeoPreset(newGeo);
@@ -760,19 +867,72 @@ function closeVoicePromptModal() {
   document.getElementById('voicePromptModal').classList.add('hidden');
 }
 
-// Presets Dinámicos de Tiempo y Lugar (Top 4 más usados al frente)
+// Cálculo Exacto de Fecha y Hora de Alarma
+function calculateAlertDateTime(preset) {
+  const now = new Date();
+  if (preset.minutes) {
+    const target = new Date(now.getTime() + preset.minutes * 60 * 1000);
+    const hrs = String(target.getHours()).padStart(2, '0');
+    const mins = String(target.getMinutes()).padStart(2, '0');
+    const day = String(target.getDate()).padStart(2, '0');
+    const mon = String(target.getMonth() + 1).padStart(2, '0');
+    return {
+      timestamp: target.getTime(),
+      label: `Hoy ${hrs}:${mins} (${day}/${mon})`
+    };
+  }
+  if (preset.isToday && preset.timeStr) {
+    const [h, m] = preset.timeStr.split(':').map(Number);
+    const target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0);
+    const day = String(target.getDate()).padStart(2, '0');
+    const mon = String(target.getMonth() + 1).padStart(2, '0');
+    return {
+      timestamp: target.getTime(),
+      label: `Hoy ${preset.timeStr} (${day}/${mon})`
+    };
+  }
+  if (preset.isTomorrow && preset.timeStr) {
+    const [h, m] = preset.timeStr.split(':').map(Number);
+    const target = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, h, m, 0);
+    const day = String(target.getDate()).padStart(2, '0');
+    const mon = String(target.getMonth() + 1).padStart(2, '0');
+    return {
+      timestamp: target.getTime(),
+      label: `Mañana ${preset.timeStr} (${day}/${mon})`
+    };
+  }
+  if (preset.targetTimestamp) {
+    const target = new Date(preset.targetTimestamp);
+    const hrs = String(target.getHours()).padStart(2, '0');
+    const mins = String(target.getMinutes()).padStart(2, '0');
+    const day = String(target.getDate()).padStart(2, '0');
+    const mon = String(target.getMonth() + 1).padStart(2, '0');
+    const yr = target.getFullYear();
+    return {
+      timestamp: target.getTime(),
+      label: `${day}/${mon}/${yr} ${hrs}:${mins}`
+    };
+  }
+  return {
+    timestamp: null,
+    label: preset.label
+  };
+}
+
+// Presets Dinámicos de Tiempo y Lugar (Íconos Minimalistas Planos 2D)
 function renderTriggerPresets() {
   const sortedTime = [...timePresets].sort((a, b) => (b.uses || 0) - (a.uses || 0));
-  const primaryTime = sortedTime.slice(0, 4);
-  const secondaryTime = sortedTime.slice(4);
+  const primaryTime = sortedTime.slice(0, 3);
+  const secondaryTime = sortedTime.slice(3);
 
   const priTimeCont = document.getElementById('primaryTimePresets');
   const secTimeCont = document.getElementById('secondaryTimePresets');
+  const btnMoreTime = document.getElementById('btnToggleMoreTime');
 
   if (priTimeCont) {
     priTimeCont.innerHTML = primaryTime.map(p => `
       <button type="button" class="preset-btn" onclick="selectTimePresetById('${p.id}')">
-        ⏰ ${escapeHtml(p.label)}
+        ${ICONS.clock} <span>${escapeHtml(p.label)}</span>
       </button>
     `).join('');
   }
@@ -780,9 +940,12 @@ function renderTriggerPresets() {
   if (secTimeCont) {
     secTimeCont.innerHTML = secondaryTime.map(p => `
       <button type="button" class="preset-btn" onclick="selectTimePresetById('${p.id}')">
-        ⏰ ${escapeHtml(p.label)}
+        ${ICONS.clock} <span>${escapeHtml(p.label)}</span>
       </button>
     `).join('');
+    if (btnMoreTime) {
+      btnMoreTime.style.display = secondaryTime.length > 0 ? 'inline-flex' : 'none';
+    }
   }
 
   const sortedGeo = [...geoPresets].sort((a, b) => (b.uses || 0) - (a.uses || 0));
@@ -791,11 +954,12 @@ function renderTriggerPresets() {
 
   const priGeoCont = document.getElementById('primaryGeoPresets');
   const secGeoCont = document.getElementById('secondaryGeoPresets');
+  const btnMoreGeo = document.getElementById('btnToggleMoreGeo');
 
   if (priGeoCont) {
     priGeoCont.innerHTML = primaryGeo.map(g => `
       <button type="button" class="preset-btn" onclick="selectGeoPresetById('${g.id}')">
-        ${escapeHtml(g.label)}
+        ${ICONS.pin} <span>${escapeHtml(g.label)}</span>
       </button>
     `).join('');
   }
@@ -803,9 +967,12 @@ function renderTriggerPresets() {
   if (secGeoCont) {
     secGeoCont.innerHTML = secondaryGeo.map(g => `
       <button type="button" class="preset-btn" onclick="selectGeoPresetById('${g.id}')">
-        ${escapeHtml(g.label)}
+        ${ICONS.pin} <span>${escapeHtml(g.label)}</span>
       </button>
     `).join('');
+    if (btnMoreGeo) {
+      btnMoreGeo.style.display = secondaryGeo.length > 0 ? 'inline-flex' : 'none';
+    }
   }
 }
 
@@ -821,27 +988,38 @@ function selectGeoPresetById(id) {
 
 function selectTimePreset(preset) {
   selectedTriggerType = 'time';
-  selectedTriggerLabel = `⏰ ${preset.label}`;
-  document.getElementById('selectedTriggerText').textContent = `Alerta: ${selectedTriggerLabel}`;
+  const calc = calculateAlertDateTime(preset);
+  selectedTargetTimestamp = calc.timestamp;
+  selectedAlertDateTimeStr = calc.label;
+  selectedTriggerLabel = calc.label;
+  document.getElementById('selectedTriggerText').textContent = `Alerta: ${selectedAlertDateTimeStr}`;
 
   preset.uses = (preset.uses || 0) + 1;
-  localStorage.setItem('posty_time_presets', JSON.stringify(timePresets));
+  localStorage.setItem('posty_time_presets_v2', JSON.stringify(timePresets));
 
-  document.querySelectorAll('.preset-btn').forEach(b => {
+  document.querySelectorAll('#primaryTimePresets .preset-btn, #secondaryTimePresets .preset-btn').forEach(b => {
     b.classList.toggle('active', b.textContent.includes(preset.label));
+  });
+  document.querySelectorAll('#primaryGeoPresets .preset-btn, #secondaryGeoPresets .preset-btn').forEach(b => {
+    b.classList.remove('active');
   });
 }
 
 function selectGeoPreset(preset) {
   selectedTriggerType = 'geo';
+  selectedTargetTimestamp = null;
+  selectedAlertDateTimeStr = preset.label;
   selectedTriggerLabel = preset.label;
-  document.getElementById('selectedTriggerText').textContent = `Alerta: ${selectedTriggerLabel}`;
+  document.getElementById('selectedTriggerText').textContent = `Alerta: ${preset.label}`;
 
   preset.uses = (preset.uses || 0) + 1;
-  localStorage.setItem('posty_geo_presets', JSON.stringify(geoPresets));
+  localStorage.setItem('posty_geo_presets_v2', JSON.stringify(geoPresets));
 
-  document.querySelectorAll('.preset-btn').forEach(b => {
+  document.querySelectorAll('#primaryGeoPresets .preset-btn, #secondaryGeoPresets .preset-btn').forEach(b => {
     b.classList.toggle('active', b.textContent.includes(preset.label));
+  });
+  document.querySelectorAll('#primaryTimePresets .preset-btn, #secondaryTimePresets .preset-btn').forEach(b => {
+    b.classList.remove('active');
   });
 }
 
@@ -863,22 +1041,34 @@ function resetModalForm() {
   selectColor('yellow');
   selectedTriggerType = 'none';
   selectedTriggerLabel = 'Ninguna asignada';
+  selectedTargetTimestamp = null;
+  selectedAlertDateTimeStr = null;
   document.getElementById('selectedTriggerText').textContent = 'Alerta: Ninguna asignada';
   document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
 }
 
 function closeModal() {
-  if (isRecordingActive) {
-    stopRealVoiceRecording();
+  if (postyRecognitionInstance) {
+    try { postyRecognitionInstance.stop(); } catch (err) {}
+    postyRecognitionInstance = null;
   }
   document.getElementById('newNoteModal').classList.add('hidden');
   stopAudio();
 }
 
 function saveNoteFromModal() {
-  if (isRecordingActive) {
-    stopRealVoiceRecording();
+  if (postyRecognitionInstance) {
+    try { postyRecognitionInstance.stop(); } catch (err) {}
+    postyRecognitionInstance = null;
   }
+
+  // Sincronizar todos los inputs de texto del DOM hacia modalLines
+  const lineInputs = document.querySelectorAll('#modalLinesList .line-text-input');
+  lineInputs.forEach((inp, idx) => {
+    if (modalLines[idx]) {
+      modalLines[idx].text = inp.value;
+    }
+  });
 
   const validLines = modalLines.filter(l => l.text.trim().length > 0);
   if (validLines.length === 0) {
@@ -886,8 +1076,8 @@ function saveNoteFromModal() {
     return;
   }
 
-  const activePreset = timePresets.find(t => `⏰ ${t.label}` === selectedTriggerLabel);
-  const urgency = classifyUrgency(selectedTriggerType, activePreset);
+  const activePreset = timePresets.find(t => t.label === selectedTriggerLabel || (t.alertDateTimeStr && t.alertDateTimeStr === selectedTriggerLabel));
+  const urgency = classifyUrgency(selectedTriggerType, activePreset || { targetTimestamp: selectedTargetTimestamp });
 
   if (editingNoteId) {
     const note = notes.find(n => n.id === editingNoteId);
@@ -896,7 +1086,9 @@ function saveNoteFromModal() {
       note.color = selectedModalColor;
       note.urgency = urgency;
       note.triggerType = selectedTriggerType;
-      note.triggerLabel = selectedTriggerLabel;
+      note.triggerLabel = selectedAlertDateTimeStr || selectedTriggerLabel;
+      note.alertTimestamp = selectedTargetTimestamp;
+      note.alertDateTimeStr = selectedAlertDateTimeStr;
       note.photo = modalPhotoData;
     }
   } else {
@@ -905,7 +1097,9 @@ function saveNoteFromModal() {
       color: selectedModalColor,
       urgency: urgency,
       triggerType: selectedTriggerType,
-      triggerLabel: selectedTriggerLabel === 'Ninguna asignada' ? '🟢 Sin alarma' : selectedTriggerLabel,
+      triggerLabel: selectedAlertDateTimeStr || (selectedTriggerLabel === 'Ninguna asignada' ? 'Sin alarma' : selectedTriggerLabel),
+      alertTimestamp: selectedTargetTimestamp,
+      alertDateTimeStr: selectedAlertDateTimeStr,
       completed: false,
       completedAt: null,
       createdAt: Date.now(),
@@ -1075,15 +1269,17 @@ function renderSettingsLocations() {
       seen.add(p);
       uniquePlaces.push({
         place: p,
-        label: g.label || `📍 ${p}`
+        label: g.label || p
       });
     }
   });
 
+  // Asegurar los 3 lugares por defecto requeridos
   ['Casa', 'Supermercado', 'Trabajo'].forEach(p => {
     if (!seen.has(p)) {
       seen.add(p);
-      uniquePlaces.push({ place: p, label: `📍 ${p}` });
+      const label = p === 'Casa' ? 'Al salir de casa' : (p === 'Supermercado' ? 'Cerca del súper' : 'En el trabajo');
+      uniquePlaces.push({ place: p, label: label });
     }
   });
 
@@ -1097,7 +1293,10 @@ function renderSettingsLocations() {
     return `
       <div class="location-item">
         <div style="flex: 1 1 auto; min-width: 0; padding-right: 8px;">
-          <strong>${escapedLabel}</strong>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            ${ICONS.pin}
+            <strong>${escapedLabel}</strong>
+          </div>
           <div class="coords-text ${isFixed ? 'coords-fixed' : ''}" id="coordsText_${safeId}">
             ${escapeHtml(savedCoord)}
           </div>
@@ -1224,16 +1423,16 @@ function openScreensaver() {
   const overlay = document.getElementById('screensaverOverlay');
   if (overlay) overlay.classList.remove('hidden');
 
-  // Inyectar dinámicamente las 3 tareas más prioritarias
+  // Inyectar dinámicamente las 3 tareas más prioritarias con íconos vectoriales planos
   const tasksCont = document.getElementById('screensaverTasksDynamic');
   if (tasksCont) {
     const active = notes.filter(n => !n.completed).slice(0, 3);
     tasksCont.innerHTML = active.map(n => `
       <div class="aod-task ${n.urgency === 'urgent' ? 'red' : 'yellow'}">
-        <span class="aod-icon">${n.urgency === 'urgent' ? '🔴' : '🟡'}</span>
+        <span class="aod-icon">${n.urgency === 'urgent' ? ICONS.urgentDot : ICONS.clock}</span>
         <div class="aod-info">
           <span class="aod-task-title">${escapeHtml(n.lines ? n.lines[0].text : n.text)}</span>
-          <span class="aod-task-meta">${escapeHtml(n.triggerLabel || 'Alarma activa')}</span>
+          <span class="aod-task-meta">${escapeHtml(n.alertDateTimeStr || n.triggerLabel || 'Alarma')}</span>
         </div>
       </div>
     `).join('');
@@ -1255,19 +1454,84 @@ function closeSettings() {
   document.getElementById('settingsModal').classList.add('hidden');
 }
 
+// Requerimiento 3: Exportar notas, audios, fotos y videos a archivo JSON
 function exportDataJSON() {
-  const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(notes, null, 2));
+  const exportPayload = {
+    appName: 'Nota Feliz',
+    version: '2.0',
+    exportDate: new Date().toISOString(),
+    totalNotes: notes.length,
+    notes: notes,
+    geoPresets: geoPresets,
+    timePresets: timePresets
+  };
+  const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportPayload, null, 2));
   const dlAnchor = document.createElement('a');
+  const d = new Date();
+  const dateTag = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}_${String(d.getHours()).padStart(2, '0')}${String(d.getMinutes()).padStart(2, '0')}`;
   dlAnchor.setAttribute('href', dataStr);
-  dlAnchor.setAttribute('download', `notafeliz_respaldo_${Date.now()}.json`);
+  dlAnchor.setAttribute('download', `notafeliz_respaldo_${dateTag}.json`);
   dlAnchor.click();
+}
+
+// Requerimiento 3: Restaurar notas, audios, fotos y configuraciones desde archivo JSON
+function importDataJSON(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      let importedNotes = null;
+
+      if (Array.isArray(data)) {
+        importedNotes = data;
+      } else if (data && typeof data === 'object') {
+        if (Array.isArray(data.notes)) {
+          importedNotes = data.notes;
+        }
+        if (Array.isArray(data.geoPresets)) {
+          geoPresets = data.geoPresets;
+          localStorage.setItem('posty_geo_presets_v2', JSON.stringify(geoPresets));
+        }
+        if (Array.isArray(data.timePresets)) {
+          timePresets = data.timePresets;
+          localStorage.setItem('posty_time_presets_v2', JSON.stringify(timePresets));
+        }
+      }
+
+      if (!importedNotes || !Array.isArray(importedNotes)) {
+        throw new Error('El archivo no contiene un formato de notas válido.');
+      }
+
+      notes = importedNotes;
+      saveToStorage();
+      renderBoard();
+      renderTriggerPresets();
+      renderSettingsLocations();
+      alert(`✓ Respaldo restaurado exitosamente: ${notes.length} notas con sus audios y fotos recuperadas.`);
+      closeSettings();
+    } catch (err) {
+      alert('Error al restaurar respaldo JSON: ' + (err.message || 'Formato de archivo inválido.'));
+    } finally {
+      event.target.value = '';
+    }
+  };
+  reader.readAsText(file);
 }
 
 function resetDemoData() {
   if (confirm('¿Desea restaurar las notas de demostración iniciales de Nota Feliz?')) {
     notes = JSON.parse(JSON.stringify(DEFAULT_NOTES));
+    timePresets = JSON.parse(JSON.stringify(DEFAULT_TIME_PRESETS));
+    geoPresets = JSON.parse(JSON.stringify(DEFAULT_GEO_PRESETS));
+    localStorage.removeItem('posty_time_presets_v2');
+    localStorage.removeItem('posty_geo_presets_v2');
     saveToStorage();
     renderBoard();
+    renderTriggerPresets();
+    renderSettingsLocations();
     closeSettings();
   }
 }

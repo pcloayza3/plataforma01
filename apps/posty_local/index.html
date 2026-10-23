@@ -41,8 +41,12 @@
         <p class="header-subtitle" id="urgentSummaryText">3 actividades pendientes • 1 urgente</p>
       </div>
       <div class="header-actions">
-        <!-- Icono de luna eliminado según requerimiento; el protector de pantalla se configura en el sistema o via DreamService -->
-        <button class="icon-btn" title="Configurar Lugares, Tema & Respaldo" onclick="openSettings()">⚙️</button>
+        <button class="icon-btn" id="btnScreensaver" onclick="openScreensaver()" title="Protector de pantalla">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        </button>
+        <button class="icon-btn" onclick="openSettings()" title="Configuración de Nota Feliz">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </button>
       </div>
     </header>
 
@@ -140,17 +144,24 @@
         <input type="file" id="notePhotoInput" accept="image/*" style="display:none;" onchange="handlePhotoSelected(event)">
         <div id="photoPreviewBox" class="photo-preview-box hidden">
           <img id="photoPreviewImg" src="" alt="Foto adjunta" class="photo-preview-thumb">
-          <button type="button" class="btn-remove-photo" onclick="removeAttachedPhoto()" title="Eliminar foto">✕ Quitar foto</button>
+          <button type="button" class="btn-remove-photo" onclick="removeAttachedPhoto()" title="Eliminar foto">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            Quitar foto
+          </button>
         </div>
         <button type="button" class="btn-attach-photo" id="btnAttachPhoto" onclick="document.getElementById('notePhotoInput').click()">
-          📷 Adjuntar Foto (Opcional)
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+          Adjuntar Foto (Opcional)
         </button>
       </div>
 
       <!-- Sección de Alertas Temporales Rápidas (Dinámicas con Frecuencia de Uso) -->
       <div class="trigger-group">
         <div class="trigger-header-row">
-          <label class="trigger-label">⏰ ¿Cuándo alertar automáticamente?</label>
+          <label class="trigger-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            ¿Cuándo alertar automáticamente?
+          </label>
           <button type="button" class="btn-text-action" onclick="openVoicePromptModal('time')">➕ Otro tiempo</button>
         </div>
         
@@ -171,7 +182,10 @@
       <!-- Sección de Alertas por Geofencing (Dinámicas con Frecuencia de Uso) -->
       <div class="trigger-group">
         <div class="trigger-header-row">
-          <label class="trigger-label">📍 ¿O alertar por Ubicación (Geocerca local)?</label>
+          <label class="trigger-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            ¿O alertar por Ubicación (Geocerca local)?
+          </label>
           <button type="button" class="btn-text-action" onclick="openVoicePromptModal('geo')">➕ Nuevo lugar</button>
         </div>
 
@@ -199,21 +213,41 @@
     </div>
   </div>
 
-  <!-- MODAL DE ENTRADA POR VOZ O TEXTO PARA TIEMPO / LUGAR (ESTILO CLINIK_LOCAL) -->
+  <!-- MODAL DE ENTRADA PARA FECHA/HORA O NUEVO LUGAR -->
   <div id="voicePromptModal" class="modal-backdrop hidden">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 id="voicePromptTitle">Agregar Alerta</h3>
+        <h3 id="voicePromptTitle">Programar Alerta</h3>
         <button class="close-x-btn" onclick="closeVoicePromptModal()">✕</button>
       </div>
 
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
-        <label class="trigger-label" id="voicePromptInputLabel">Escriba o dicte el valor:</label>
-        <button type="button" class="btn-voice-mini" id="btnVoicePromptDictar" title="Dictar por voz">🎙️ Dictar</button>
+      <!-- Sección específica para Tiempo (Fecha y Hora Exacta) -->
+      <div id="voicePromptTimeSection">
+        <label class="trigger-label">Seleccione fecha y hora exacta de la alarma:</label>
+        <input type="datetime-local" id="voicePromptDateTimeInput" class="custom-input" style="font-size: 15px; padding: 10px; margin-top: 6px;">
+        <p class="voice-hint" style="margin-top: 6px;">La alarma se guardará con fecha y hora exacta y se mostrará en la nota.</p>
       </div>
 
-      <input type="text" id="voicePromptTextInput" class="custom-input" placeholder="Ej: 45 min o Farmacia">
-      <p class="voice-hint" id="voicePromptHint" style="margin-top: 4px;">Presione '🎙️ Dictar' para dictar por voz o escriba directamente.</p>
+      <!-- Sección específica para Lugar (Nombre y GPS opcional) -->
+      <div id="voicePromptGeoSection" class="hidden">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+          <label class="trigger-label">Nombre del nuevo lugar:</label>
+          <button type="button" class="btn-voice-mini icon-only" id="btnVoicePromptDictar" title="Dictar por voz">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+          </button>
+        </div>
+        <input type="text" id="voicePromptTextInput" class="custom-input" placeholder="Ej: Gimnasio, Farmacia...">
+
+        <div class="geo-optional-box" style="margin-top: 10px; padding: 12px; background: var(--bg-primary); border: 1px solid var(--border-subtle); border-radius: 12px;">
+          <div style="font-size: 12px; font-weight: 700; margin-bottom: 4px;">📍 Coordenadas Georreferenciales (Opcional):</div>
+          <div id="newPlaceCoordsStatus" style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">
+            Sin fijar (puede fijarse luego al estar en la zona).
+          </div>
+          <button type="button" class="chip-action" id="btnCaptureGeoNewPlace" onclick="captureGPSForNewPlace()">
+            Fijar posición GPS actual ahora
+          </button>
+        </div>
+      </div>
 
       <div class="modal-footer">
         <button class="btn-cancel" onclick="closeVoicePromptModal()">Cancelar</button>
@@ -248,40 +282,72 @@
     <div class="modal-card">
       <div class="modal-header">
         <h3>Configuración de Nota Feliz</h3>
-        <button class="close-x-btn" onclick="closeSettings()">✕</button>
+        <button class="close-x-btn" onclick="closeSettings()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
       </div>
 
       <div class="settings-content">
-        <!-- Requerimiento 11: Opciones de tema Oscuro, Claro y Sistema -->
-        <h4>🎨 Tema Visual de Fondo</h4>
+        <!-- Requerimiento: Opciones de tema Oscuro, Claro y Sistema con íconos vectoriales planos -->
+        <h4>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 0 0 20z"></path></svg>
+          Tema Visual de Fondo
+        </h4>
         <div class="theme-selector-row">
-          <button type="button" class="theme-btn" id="themeBtnDark" onclick="setAppTheme('dark')">🌙 Oscuro</button>
-          <button type="button" class="theme-btn" id="themeBtnLight" onclick="setAppTheme('light')">☀️ Claro</button>
-          <button type="button" class="theme-btn" id="themeBtnSystem" onclick="setAppTheme('system')">📱 Sistema</button>
+          <button type="button" class="theme-btn" id="themeBtnDark" onclick="setAppTheme('dark')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            Oscuro
+          </button>
+          <button type="button" class="theme-btn" id="themeBtnLight" onclick="setAppTheme('light')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+            Claro
+          </button>
+          <button type="button" class="theme-btn" id="themeBtnSystem" onclick="setAppTheme('system')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+            Sistema
+          </button>
         </div>
 
         <hr class="settings-divider">
 
-        <!-- Requerimiento 5: Actualización de GPS Real con Geolocation / Puente Nativo -->
-        <h4>📍 Mis Lugares de Georreferenciación (Radio 150m)</h4>
+        <!-- Requerimiento: Actualización de GPS Real con Geolocation / Puente Nativo -->
+        <h4>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          Mis Lugares de Georreferenciación (Radio 150m)
+        </h4>
         <p class="settings-desc">Las alertas se activan mediante GPS local en su celular al estar en la zona.</p>
 
         <div id="settingsLocationsList" class="settings-locations-list">
-          <!-- Se inyectan dinámicamente todos los lugares configurados con botón para fijar GPS en la zona -->
+          <!-- Se inyectan dinámicamente los lugares configurados con botón para fijar GPS en la zona -->
         </div>
 
         <button type="button" class="btn-text-action" onclick="openVoicePromptModal('geo')" style="margin-top: 8px;">➕ Agregar nuevo lugar</button>
 
         <hr class="settings-divider">
 
-        <h4>💾 Respaldo y Soberanía Local</h4>
+        <!-- Requerimiento 3: Respaldo y Soberanía Local (Exportar e Importar JSON) -->
+        <h4>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+          Respaldo y Soberanía Local
+        </h4>
+        <input type="file" id="jsonFileInput" accept=".json,application/json" style="display: none;" onchange="importDataJSON(event)">
         <div class="backup-actions">
-          <button class="backup-btn" onclick="exportDataJSON()">📥 Exportar Notas & Audios (JSON)</button>
-          <button class="backup-btn" onclick="resetDemoData()">🔄 Restaurar Datos Iniciales</button>
+          <button type="button" class="backup-btn" onclick="exportDataJSON()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Exportar Notas, Audios, Fotos y Videos (JSON)
+          </button>
+          <button type="button" class="backup-btn" onclick="document.getElementById('jsonFileInput').click()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            Restaurar desde archivo JSON
+          </button>
+          <button type="button" class="backup-btn" onclick="resetDemoData()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+            Restaurar Datos Iniciales
+          </button>
         </div>
 
         <div class="privacy-callout">
-          🛡️ <strong>100% Local-First:</strong> Todos los audios, textos y ubicaciones residen únicamente en este dispositivo.
+          🛡️ <strong>100% Local-First:</strong> Todos los audios, textos, fotos y ubicaciones residen únicamente en este dispositivo.
         </div>
       </div>
 

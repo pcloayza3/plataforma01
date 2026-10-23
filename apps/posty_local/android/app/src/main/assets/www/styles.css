@@ -1,4 +1,19 @@
 /* styles.css • Nota Feliz (PostyLocal) UI Minimalist Mobile */
+.hidden {
+  display: none !important;
+}
+
+svg {
+  stroke: currentColor;
+  fill: none;
+  vertical-align: middle;
+}
+
+svg.fill-current {
+  fill: currentColor;
+  stroke: none;
+}
+
 :root {
   --bg-primary: #F8FAFC;
   --bg-surface: #FFFFFF;
@@ -466,13 +481,22 @@ body[data-theme="dark"] .filter-chip.active {
 }
 
 .alarm-pill {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
-  background: rgba(255, 255, 255, 0.7);
+  gap: 5px;
+  background: rgba(0, 0, 0, 0.06);
   padding: 3px 8px;
-  border-radius: 10px;
+  border-radius: 8px;
   border: 1px solid rgba(0, 0, 0, 0.06);
+  color: inherit;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+body[data-theme="dark"] .alarm-pill {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: inherit;
 }
 
 /* Barra Inferior de Captura Rápida (Flex natural al pie, nunca sobrepasa la pantalla ni los botones de Android) */
@@ -652,13 +676,23 @@ body[data-theme="dark"] .filter-chip.active {
 }
 
 .close-x-btn {
-  background: #F1F5F9;
-  border: none;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
   width: 32px;
   height: 32px;
   border-radius: 50%;
   cursor: pointer;
-  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.close-x-btn:hover {
+  background: #EF4444;
+  color: #FFFFFF;
+  border-color: #EF4444;
 }
 
 /* Caja de Voz */
@@ -1319,8 +1353,9 @@ body[data-theme="dark"] .color-opt.active {
 }
 
 .btn-card-action {
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: transparent;
+  border: none;
+  color: inherit;
   border-radius: 50%;
   width: 28px;
   height: 28px;
@@ -1328,13 +1363,16 @@ body[data-theme="dark"] .color-opt.active {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
-  transition: transform 0.15s;
+  transition: transform 0.15s, background 0.15s;
 }
 
 .btn-card-action:hover {
   transform: scale(1.15);
-  background: #FFFFFF;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+body[data-theme="dark"] .btn-card-action:hover {
+  background: rgba(255, 255, 255, 0.15);
 }
 
 /* Líneas en el Modal de Edición/Creación */
@@ -1370,7 +1408,7 @@ body[data-theme="dark"] .modal-line-row {
   color: inherit;
 }
 
-/* Dictado por Voz Idéntico a Clinik Local */
+/* Dictado por Voz Idéntico a Clinik Local (Modo Ícono Minimalista) */
 .btn-voice-mini {
   background: rgba(255, 255, 255, 0.85);
   border: 1px solid var(--border-subtle);
@@ -1378,14 +1416,21 @@ body[data-theme="dark"] .modal-line-row {
   padding: 4px 10px;
   font-size: 12px;
   font-weight: 600;
-  color: #0F172A;
+  color: var(--text-main);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
   transition: all 0.2s ease;
   flex-shrink: 0;
   white-space: nowrap;
+}
+
+.btn-voice-mini.icon-only {
+  width: 32px;
+  height: 32px;
+  padding: 0;
 }
 
 .btn-voice-mini:hover {
@@ -1404,6 +1449,12 @@ body[data-theme="dark"] .btn-voice-mini {
   background: rgba(255, 255, 255, 0.12);
   border-color: rgba(255, 255, 255, 0.2);
   color: #F8FAFC;
+}
+
+body[data-theme="dark"] .btn-voice-mini.listening {
+  background-color: #7F1D1D !important;
+  border-color: #EF4444 !important;
+  color: #FCA5A5 !important;
 }
 
 /* Lista de Lugares Dinámicos en Configuración */
@@ -1487,6 +1538,10 @@ body[data-theme="dark"] .btn-voice-mini {
   border-radius: 12px;
   border: 1px solid var(--border-subtle);
   margin-bottom: 6px;
+}
+
+.photo-preview-box.hidden {
+  display: none !important;
 }
 
 .photo-preview-thumb {
