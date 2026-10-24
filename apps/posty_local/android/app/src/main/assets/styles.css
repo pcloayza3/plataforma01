@@ -1779,18 +1779,46 @@ body[data-theme="dark"] .btn-voice-mini {
   background: var(--bg-surface);
 }
 
+.map-type-bar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.btn-map-type {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 4px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s ease;
+}
+
+.btn-map-type.active,
+.btn-map-type:hover {
+  background: #0284C7 !important;
+  color: #FFFFFF !important;
+  border-color: #0284C7 !important;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.35);
+}
+
 #geoMapContainer {
   width: 100% !important;
-  height: 200px !important;
-  min-height: 200px !important;
+  height: 220px !important;
+  min-height: 220px !important;
   display: block !important;
   position: relative !important;
   z-index: 10;
   touch-action: pan-x pan-y;
-  background-color: #E2E8F0;
+  background-color: #1a202c;
   background-image: 
-    linear-gradient(rgba(148, 163, 184, 0.25) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.25) 1px, transparent 1px);
+    linear-gradient(rgba(56, 189, 248, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56, 189, 248, 0.1) 1px, transparent 1px);
   background-size: 20px 20px;
 }
 

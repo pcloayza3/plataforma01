@@ -388,13 +388,18 @@
 
           <!-- Mapa Interactivo Táctil para fijar centro y radio visualmente -->
           <div class="geo-map-box" id="geoMapBox" style="margin-top: 10px;">
+            <div class="map-type-bar">
+              <button type="button" class="btn-map-type active" id="btnMapDark" onclick="switchMapLayer('dark')">🌙 Oscuro (Mapa)</button>
+              <button type="button" class="btn-map-type" id="btnMapGoogle" onclick="switchMapLayer('google')">🗺️ Google Maps</button>
+              <button type="button" class="btn-map-type" id="btnMapSat" onclick="switchMapLayer('satellite')">🛰️ Satélite</button>
+            </div>
             <div id="geoMapContainer"></div>
             <div class="geo-slider-box">
               <div class="geo-slider-header">
                 <span>🎯 Cobertura Geocerca:</span>
-                <span id="geoRadiusLabel" style="color: #0284C7; font-weight: 700;">150 m</span>
+                <span id="geoRadiusLabel" style="color: #0284C7; font-weight: 700;">50 m</span>
               </div>
-              <input type="range" id="geoRadiusSlider" class="geo-radius-slider" min="50" max="1000" step="25" value="150" oninput="updateGeoMapRadius(this.value)">
+              <input type="range" id="geoRadiusSlider" class="geo-radius-slider" min="50" max="1000" step="25" value="50" oninput="updateGeoMapRadius(this.value)">
               <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); margin-top: 2px;">
                 <span>50m</span>
                 <span>Arrastre marcador o toque mapa para ubicar centro</span>

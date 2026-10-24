@@ -88,9 +88,38 @@ let pendingNewPlaceCoords = null;
 // Reconocimiento de Voz Web (Web Speech API)
 let postyRecognitionInstance = null;
 
+// Versionado de instalación: Al instalarse, se ejecuta de manera 100% automática la restauración de datos iniciales
+const APP_DATA_VERSION = 'v2_clean_install_fresh';
+
+function checkInitialInstallation() {
+  const currentVer = localStorage.getItem('posty_app_installed_version');
+  if (currentVer !== APP_DATA_VERSION) {
+    initializeDefaultFreshData();
+    localStorage.setItem('posty_app_installed_version', APP_DATA_VERSION);
+  }
+}
+
+function initializeDefaultFreshData() {
+  notes = createDefaultInitialNotes();
+  timePresets = JSON.parse(JSON.stringify(DEFAULT_TIME_PRESETS));
+  geoPresets = JSON.parse(JSON.stringify(DEFAULT_GEO_PRESETS));
+
+  localStorage.removeItem('posty_time_presets_v2');
+  localStorage.removeItem('posty_geo_presets_v2');
+  localStorage.removeItem('posty_deleted_geo_presets');
+
+  // Coordenadas iniciales para los 3 lugares predeterminados (Santa Cruz de la Sierra)
+  localStorage.setItem('posty_geo_coords_Casa', 'Lat: -17.783300, Lng: -63.182100 (Radio: 50m GPS)');
+  localStorage.setItem('posty_geo_coords_Supermercado', 'Lat: -17.781200, Lng: -63.180400 (Radio: 50m GPS)');
+  localStorage.setItem('posty_geo_coords_Trabajo', 'Lat: -17.778609, Lng: -63.175607 (Radio: 50m GPS)');
+
+  saveToStorage();
+}
+
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
   initAppTheme();
+  checkInitialInstallation();
   loadNotes();
   loadPresets();
   setupFilterButtons();
@@ -788,9 +817,61 @@ function openGeoPickerForPlace(placeName) {
 let geoMap = null;
 let geoMarker = null;
 let geoCircle = null;
-let currentMapLat = -16.500000;
-let currentMapLng = -68.150000;
-let currentMapRadius = 150;
+let currentMapLat = -17.783300;
+let currentMapLng = -63.182100;
+let currentMapRadius = 50;
+
+let currentMapLayerType = 'dark';
+let activeTileLayer = null;
+
+// Proveedores de mapas de alta fiabilidad compatibles con Android WebView (Cero bloqueos 403)
+const MAP_TILE_CONFIGS = {
+  dark: {
+    name: 'Oscuro (Imagen 2)',
+    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    options: {
+      subdomains: 'abcd',
+      maxZoom: 20
+    }
+  },
+  google: {
+    name: 'Google Maps',
+    url: 'https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+    options: {
+      subdomains: '0123',
+      maxZoom: 20
+    }
+  },
+  satellite: {
+    name: 'Satélite',
+    url: 'https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+    options: {
+      subdomains: '0123',
+      maxZoom: 20
+    }
+  }
+};
+
+function switchMapLayer(type) {
+  if (!MAP_TILE_CONFIGS[type]) return;
+  currentMapLayerType = type;
+
+  // Actualizar estado visual de los botones de cambio de mapa
+  const btnDark = document.getElementById('btnMapDark');
+  const btnGoogle = document.getElementById('btnMapGoogle');
+  const btnSat = document.getElementById('btnMapSat');
+  if (btnDark) btnDark.classList.toggle('active', type === 'dark');
+  if (btnGoogle) btnGoogle.classList.toggle('active', type === 'google');
+  if (btnSat) btnSat.classList.toggle('active', type === 'satellite');
+
+  if (geoMap) {
+    if (activeTileLayer) {
+      geoMap.removeLayer(activeTileLayer);
+    }
+    const cfg = MAP_TILE_CONFIGS[type];
+    activeTileLayer = L.tileLayer(cfg.url, cfg.options).addTo(geoMap);
+  }
+}
 
 function initOrRefreshGeoMap(customLat, customLng, customRadius) {
   if (typeof L === 'undefined') {
@@ -814,6 +895,12 @@ function initOrRefreshGeoMap(customLat, customLng, customRadius) {
   const mapContainer = document.getElementById('geoMapContainer');
   if (!mapContainer) return;
 
+  // Determinar capa inicial según tema del usuario si no fue cambiada explícitamente
+  const theme = document.body.getAttribute('data-theme') || 'system';
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const isDark = theme === 'dark' || (theme === 'system' && prefersDark);
+  const targetLayer = currentMapLayerType || (isDark ? 'dark' : 'google');
+
   if (!geoMap) {
     try {
       geoMap = L.map('geoMapContainer', {
@@ -823,15 +910,13 @@ function initOrRefreshGeoMap(customLat, customLng, customRadius) {
         attributionControl: false
       });
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19
-      }).addTo(geoMap);
+      switchMapLayer(targetLayer);
 
       const pinIcon = L.divIcon({
         className: 'custom-map-pin',
-        html: `<div style="background: #EF4444; color: white; width: 30px; height: 30px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 8px rgba(0,0,0,0.4); border: 2.5px solid white;"><div style="width: 10px; height: 10px; background: white; border-radius: 50%; transform: rotate(45deg);"></div></div>`,
-        iconSize: [30, 30],
-        iconAnchor: [15, 30]
+        html: `<div style="background: #EF4444; color: white; width: 32px; height: 32px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); border: 2.5px solid white;"><div style="width: 10px; height: 10px; background: white; border-radius: 50%; transform: rotate(45deg);"></div></div>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 32]
       });
 
       geoMarker = L.marker([currentMapLat, currentMapLng], {
@@ -841,9 +926,9 @@ function initOrRefreshGeoMap(customLat, customLng, customRadius) {
 
       geoCircle = L.circle([currentMapLat, currentMapLng], {
         radius: currentMapRadius,
-        color: '#0284C7',
+        color: '#38BDF8',
         fillColor: '#38BDF8',
-        fillOpacity: 0.3,
+        fillOpacity: 0.25,
         weight: 2
       }).addTo(geoMap);
 
@@ -870,14 +955,17 @@ function initOrRefreshGeoMap(customLat, customLng, customRadius) {
   } else {
     try {
       geoMap.setView([currentMapLat, currentMapLng], 16);
-      geoMarker.setLatLng([currentMapLat, currentMapLng]);
-      geoCircle.setLatLng([currentMapLat, currentMapLng]);
-      geoCircle.setRadius(currentMapRadius);
+      if (geoMarker) geoMarker.setLatLng([currentMapLat, currentMapLng]);
+      if (geoCircle) {
+        geoCircle.setLatLng([currentMapLat, currentMapLng]);
+        geoCircle.setRadius(currentMapRadius);
+      }
+      switchMapLayer(targetLayer);
     } catch (e) {}
   }
 
-  // Múltiples invalidaciones para asegurar renderizado tras animaciones de apertura
-  [60, 200, 500].forEach(delay => {
+  // Múltiples invalidaciones para asegurar renderizado perfecto tras transiciones
+  [60, 200, 500, 800].forEach(delay => {
     setTimeout(() => {
       if (geoMap) geoMap.invalidateSize();
     }, delay);
@@ -1941,19 +2029,17 @@ function importDataJSON(event) {
   reader.readAsText(file);
 }
 
-function resetDemoData() {
-  if (confirm('¿Desea restaurar la nota limpia inicial de Nota Feliz?')) {
-    notes = createDefaultInitialNotes();
-    timePresets = JSON.parse(JSON.stringify(DEFAULT_TIME_PRESETS));
-    geoPresets = JSON.parse(JSON.stringify(DEFAULT_GEO_PRESETS));
-    localStorage.removeItem('posty_time_presets_v2');
-    localStorage.removeItem('posty_geo_presets_v2');
-    saveToStorage();
+function resetDemoData(silent = false) {
+  if (silent || confirm('¿Desea restaurar la nota limpia inicial de Nota Feliz?')) {
+    initializeDefaultFreshData();
     renderBoard();
     renderTriggerPresets();
     renderSettingsLocations();
+    renderSettingsTimePresets();
     syncAllAlarmsToNative();
-    closeSettings();
+    if (!silent) {
+      closeSettings();
+    }
   }
 }
 

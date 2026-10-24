@@ -12,6 +12,7 @@ import android.location.LocationManager;
 import android.media.MediaRecorder;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -22,12 +23,15 @@ import android.widget.Toast;
 import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
 import android.webkit.PermissionRequest;
+import android.webkit.SslErrorHandler;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
+import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.content.SharedPreferences;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
@@ -98,6 +102,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // Requerimiento: Al instalarse, inicializar todos los datos limpios al momento de la instalación
+        SharedPreferences prefs = getSharedPreferences("PostyPrefs", Context.MODE_PRIVATE);
+        boolean isFirstLaunch = prefs.getBoolean("is_first_launch_fresh_v2", true);
+        if (isFirstLaunch) {
+            prefs.edit().putBoolean("is_first_launch_fresh_v2", false).apply();
+            WebStorage.getInstance().deleteAllData();
+        }
+
         requestAppPermissions();
         configureWebView();
 
@@ -140,6 +152,10 @@ public class MainActivity extends AppCompatActivity {
         settings.setGeolocationEnabled(true);
         settings.setMediaPlaybackRequiresUserGesture(false);
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        settings.setBlockNetworkImage(false);
+        settings.setBlockNetworkLoads(false);
+        // User agent estándar para evitar bloqueos por parte de servidores de mapas (Google, CartoDB)
+        settings.setUserAgentString("Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36 NotaFelizApp/1.0");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         }
@@ -151,9 +167,17 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
+            public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+                // Proceder para cargar azulejos de mapas seguros sin interrupción
+                handler.proceed();
+            }
+
+            @Override
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                // Fallback de contingencia si falla alguna ruta
-                view.loadUrl("file:///android_asset/index.html");
+                // Fallback de contingencia únicamente si falla la carga del documento HTML principal
+                if (failingUrl != null && failingUrl.startsWith("file:///android_asset/www/index.html")) {
+                    view.loadUrl("file:///android_asset/index.html");
+                }
             }
         });
 
