@@ -10,7 +10,11 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <!-- Consultas de Servicios del Sistema Android (TTS & Reconocimiento de Voz API 30+) -->
     <queries>
@@ -56,6 +60,15 @@
                 android:name="android.service.dream"
                 android:resource="@xml/screensaver_info" />
         </service>
+
+        <!-- Receptor de Alarmas Exactas para Notificaciones Push (incluso con app cerrada) -->
+        <receiver
+            android:name=".AlarmReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.postylocal.app.ACTION_NOTE_ALARM" />
+            </intent-filter>
+        </receiver>
 
     </application>
 </manifest>

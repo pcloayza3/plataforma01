@@ -23,83 +23,32 @@ const ICONS = {
   gpsTarget: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>`
 };
 
-// Datos iniciales de demostración
-const DEFAULT_NOTES = [
-  {
-    id: 'n1',
-    color: 'yellow',
-    urgency: 'urgent',
-    triggerType: 'time',
-    triggerLabel: 'Hoy 18:00',
-    alertDateTimeStr: 'Hoy 18:00',
-    completed: false,
-    completedAt: null,
-    createdAt: Date.now() - 3600000,
-    lines: [
-      { id: 'n1-l1', text: 'Pagar factura de luz antes de las 18:00', completed: false, hasAudio: true, audioDuration: '0:12', audioData: null },
-      { id: 'n1-l2', text: 'Descargar comprobante en PDF', completed: false, hasAudio: false, audioDuration: null, audioData: null }
-    ]
-  },
-  {
-    id: 'n2',
-    color: 'pink',
-    urgency: 'context',
-    triggerType: 'geo',
-    triggerLabel: 'Al salir de casa',
-    alertDateTimeStr: 'Al salir de casa',
-    completed: false,
-    completedAt: null,
-    createdAt: Date.now() - 7200000,
-    lines: [
-      { id: 'n2-l1', text: 'Cerrar la llave de paso de gas', completed: false, hasAudio: true, audioDuration: '0:07', audioData: null },
-      { id: 'n2-l2', text: 'Desconectar cargadores de pared', completed: false, hasAudio: false, audioDuration: null, audioData: null }
-    ]
-  },
-  {
-    id: 'n3',
-    color: 'green',
-    urgency: 'context',
-    triggerType: 'geo',
-    triggerLabel: 'Cerca del súper',
-    alertDateTimeStr: 'Cerca del súper',
-    completed: false,
-    completedAt: null,
-    createdAt: Date.now() - 10800000,
-    lines: [
-      { id: 'n3-l1', text: 'Comprar leche descremada', completed: false, hasAudio: false, audioDuration: null, audioData: null },
-      { id: 'n3-l2', text: 'Manzanas verdes y plátanos', completed: false, hasAudio: true, audioDuration: '0:09', audioData: null },
-      { id: 'n3-l3', text: 'Avena en grano sin azúcar', completed: false, hasAudio: false, audioDuration: null, audioData: null }
-    ]
-  },
-  {
-    id: 'n4',
-    color: 'blue',
-    urgency: 'normal',
-    triggerType: 'none',
-    triggerLabel: 'Sin alarma',
-    alertDateTimeStr: 'Sin alarma',
-    completed: false,
-    completedAt: null,
-    createdAt: Date.now() - 14400000,
-    lines: [
-      { id: 'n4-l1', text: 'Llamar a carpintero para repisa de libros', completed: false, hasAudio: false, audioDuration: null, audioData: null }
-    ]
-  },
-  {
-    id: 'n5',
-    color: 'purple',
-    urgency: 'normal',
-    triggerType: 'none',
-    triggerLabel: 'Sin alarma',
-    alertDateTimeStr: 'Sin alarma',
-    completed: false,
-    completedAt: null,
-    createdAt: Date.now() - 18000000,
-    lines: [
-      { id: 'n5-l1', text: 'Revisar apuntes de economía', completed: false, hasAudio: true, audioDuration: '0:14', audioData: null }
-    ]
-  }
-];
+// Requerimiento: Al instalar la app, se crea limpia con una sola nota urgente (+5 minutos)
+function createDefaultInitialNotes() {
+  const targetTime = Date.now() + 5 * 60 * 1000;
+  const d = new Date(targetTime);
+  const hrs = String(d.getHours()).padStart(2, '0');
+  const mins = String(d.getMinutes()).padStart(2, '0');
+  return [
+    {
+      id: 'n_welcome',
+      color: 'yellow',
+      urgency: 'urgent',
+      triggerType: 'time',
+      triggerLabel: `Hoy ${hrs}:${mins} (+5m)`,
+      alertTimestamp: targetTime,
+      alertDateTimeStr: `Hoy ${hrs}:${mins}`,
+      completed: false,
+      completedAt: null,
+      createdAt: Date.now(),
+      lines: [
+        { id: 'ml-welcome-1', text: 'Bienvenido a mi nota feliz', completed: false, hasAudio: false, audioDuration: null, audioData: null }
+      ]
+    }
+  ];
+}
+
+const DEFAULT_NOTES = createDefaultInitialNotes();
 
 // Presets dinámicos: Exactamente las 3 opciones requeridas por defecto
 const DEFAULT_TIME_PRESETS = [
@@ -145,13 +94,32 @@ document.addEventListener('DOMContentLoaded', () => {
   loadNotes();
   loadPresets();
   setupFilterButtons();
-  renderBoard();
+  
+  // Requerimiento: Iniciar siempre mostrando las notas urgentes
+  handleFilterClick('urgent');
+
   renderTriggerPresets();
   startClockUpdater();
   startAutomaticAlertMonitor();
+  syncAllAlarmsToNative();
+
+  // Asegurar que inicie limpio sin modales abiertos
+  closeModal();
+  closeVoicePromptModal();
+  closeSettings();
 
   // Conectar dictado estilo clinik_local en el modal de otro tiempo / nuevo lugar
   setupVoiceDictation('btnVoicePromptDictar', 'voicePromptTextInput');
+
+  // Ajuste para que el teclado androide no tape el campo de texto del nuevo lugar
+  const geoTextInput = document.getElementById('voicePromptTextInput');
+  if (geoTextInput) {
+    geoTextInput.addEventListener('focus', () => {
+      setTimeout(() => {
+        geoTextInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
+    });
+  }
 
   // Si se abre como protector de pantalla (Daydream en Android: ?screensaver=1)
   const urlParams = new URLSearchParams(window.location.search);
@@ -193,16 +161,21 @@ function loadNotes() {
   if (saved) {
     try {
       notes = JSON.parse(saved);
-      // Reclasificar según regla estricta: hoy -> urgente, otras fechas/geo -> próximas, sin alertas -> libres
-      notes.forEach(note => {
-        note.urgency = classifyUrgency(note.triggerType, null, note.alertTimestamp, note.alertDateTimeStr || note.triggerLabel);
-      });
+      if (!Array.isArray(notes) || notes.length === 0) {
+        notes = createDefaultInitialNotes();
+        saveToStorage();
+      } else {
+        // Reclasificar según regla estricta: hoy -> urgente, otras fechas/geo -> próximas, sin alertas -> libres
+        notes.forEach(note => {
+          note.urgency = classifyUrgency(note.triggerType, null, note.alertTimestamp, note.alertDateTimeStr || note.triggerLabel);
+        });
+      }
     } catch (e) {
-      notes = JSON.parse(JSON.stringify(DEFAULT_NOTES));
+      notes = createDefaultInitialNotes();
       saveToStorage();
     }
   } else {
-    notes = JSON.parse(JSON.stringify(DEFAULT_NOTES));
+    notes = createDefaultInitialNotes();
     saveToStorage();
   }
 }
@@ -412,6 +385,9 @@ function completeNoteWithDelay(noteId) {
         note.completedAt = new Date().toISOString();
         if (note.lines) {
           note.lines.forEach(l => l.completed = true);
+        }
+        if (window.AndroidBridge && window.AndroidBridge.cancelNativeAlarm) {
+          window.AndroidBridge.cancelNativeAlarm(noteId);
         }
         saveToStorage();
         renderBoard();
@@ -766,6 +742,118 @@ function openVoicePromptModal(type) {
       geoInput.value = '';
       setTimeout(() => geoInput.focus(), 150);
     }
+    // Inicializar o refrescar el mapa interactivo de geocerca
+    setTimeout(() => {
+      initOrRefreshGeoMap();
+    }, 250);
+  }
+}
+
+// Variables del Mapa Interactivo Táctil
+let geoMap = null;
+let geoMarker = null;
+let geoCircle = null;
+let currentMapLat = -16.500000;
+let currentMapLng = -68.150000;
+let currentMapRadius = 150;
+
+function initOrRefreshGeoMap(customLat, customLng, customRadius) {
+  if (typeof L === 'undefined') return;
+
+  if (customLat && customLng) {
+    currentMapLat = parseFloat(customLat);
+    currentMapLng = parseFloat(customLng);
+  }
+  if (customRadius) {
+    currentMapRadius = parseInt(customRadius);
+  }
+
+  const slider = document.getElementById('geoRadiusSlider');
+  const label = document.getElementById('geoRadiusLabel');
+  if (slider) slider.value = currentMapRadius;
+  if (label) label.textContent = `${currentMapRadius} m`;
+
+  const mapContainer = document.getElementById('geoMapContainer');
+  if (!mapContainer) return;
+
+  if (!geoMap) {
+    geoMap = L.map('geoMapContainer', {
+      center: [currentMapLat, currentMapLng],
+      zoom: 16,
+      zoomControl: true,
+      attributionControl: false
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19
+    }).addTo(geoMap);
+
+    const pinIcon = L.divIcon({
+      className: 'custom-map-pin',
+      html: `<div style="background: #EF4444; color: white; width: 28px; height: 28px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.35); border: 2px solid white;"><div style="width: 10px; height: 10px; background: white; border-radius: 50%; transform: rotate(45deg);"></div></div>`,
+      iconSize: [28, 28],
+      iconAnchor: [14, 28]
+    });
+
+    geoMarker = L.marker([currentMapLat, currentMapLng], {
+      draggable: true,
+      icon: pinIcon
+    }).addTo(geoMap);
+
+    geoCircle = L.circle([currentMapLat, currentMapLng], {
+      radius: currentMapRadius,
+      color: '#0284C7',
+      fillColor: '#38BDF8',
+      fillOpacity: 0.28,
+      weight: 2
+    }).addTo(geoMap);
+
+    // Permitir arrastrar el marcador con el dedo para mover el centro
+    geoMarker.on('drag', (e) => {
+      const pos = e.target.getLatLng();
+      currentMapLat = pos.lat;
+      currentMapLng = pos.lng;
+      geoCircle.setLatLng(pos);
+      updatePendingCoordsString();
+    });
+
+    // Permitir tocar cualquier punto del mapa para reubicar centro
+    geoMap.on('click', (e) => {
+      currentMapLat = e.latlng.lat;
+      currentMapLng = e.latlng.lng;
+      geoMarker.setLatLng(e.latlng);
+      geoCircle.setLatLng(e.latlng);
+      updatePendingCoordsString();
+    });
+  } else {
+    geoMap.setView([currentMapLat, currentMapLng], 16);
+    geoMarker.setLatLng([currentMapLat, currentMapLng]);
+    geoCircle.setLatLng([currentMapLat, currentMapLng]);
+    geoCircle.setRadius(currentMapRadius);
+    setTimeout(() => {
+      if (geoMap) geoMap.invalidateSize();
+    }, 200);
+  }
+
+  updatePendingCoordsString();
+}
+
+function updateGeoMapRadius(val) {
+  currentMapRadius = parseInt(val);
+  const label = document.getElementById('geoRadiusLabel');
+  if (label) label.textContent = `${currentMapRadius} m`;
+  if (geoCircle) geoCircle.setRadius(currentMapRadius);
+  updatePendingCoordsString();
+}
+
+function updatePendingCoordsString() {
+  const latFixed = currentMapLat.toFixed(6);
+  const lngFixed = currentMapLng.toFixed(6);
+  pendingNewPlaceCoords = `Lat: ${latFixed}, Lng: ${lngFixed} (Radio: ${currentMapRadius}m GPS)`;
+  const statusEl = document.getElementById('newPlaceCoordsStatus');
+  if (statusEl) {
+    statusEl.textContent = `✓ Ubicación: ${pendingNewPlaceCoords}`;
+    statusEl.style.color = '#10B981';
   }
 }
 
@@ -792,19 +880,14 @@ function captureGPSForNewPlace() {
 
   navigator.geolocation.getCurrentPosition(
     (pos) => {
-      const lat = pos.coords.latitude.toFixed(6);
-      const lng = pos.coords.longitude.toFixed(6);
-      const acc = Math.round(pos.coords.accuracy || 10);
-      pendingNewPlaceCoords = `Lat: ${lat}, Lng: ${lng} (±${acc}m GPS Real)`;
-      if (statusEl) {
-        statusEl.textContent = `✓ Ubicación fijada: ${pendingNewPlaceCoords}`;
-        statusEl.style.color = '#10B981';
-      }
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      initOrRefreshGeoMap(lat, lng, currentMapRadius);
       if (btn) btn.disabled = false;
     },
     (err) => {
       if (statusEl) {
-        statusEl.textContent = 'No se pudo obtener GPS directo. Puede fijarse luego.';
+        statusEl.textContent = 'No se pudo obtener GPS directo. Puede fijarse en el mapa.';
         statusEl.style.color = 'var(--text-muted)';
       }
       if (btn) btn.disabled = false;
@@ -1123,6 +1206,7 @@ function saveNoteFromModal() {
   }
 
   saveToStorage();
+  syncAllAlarmsToNative();
   renderBoard();
   closeModal();
 }
@@ -1244,47 +1328,140 @@ function stopAudio() {
   activeAudioId = null;
 }
 
-// 6. ALERTAS AUTOMÁTICAS (CERO SIMULACIÓN MANUAL)
+// Campana armónica resonante y mensaje sonoro de la nota
+function playBellChime(followupText = null) {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (AudioCtx) {
+      const ctx = new AudioCtx();
+      const now = ctx.currentTime;
+
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      const gain2 = ctx.createGain();
+
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(880, now); // A5
+
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(1760, now); // A6 (armónico)
+
+      gain1.gain.setValueAtTime(0.3, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+
+      gain2.gain.setValueAtTime(0.18, now);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+
+      osc1.start(now);
+      osc2.start(now);
+      osc1.stop(now + 1.2);
+      osc2.stop(now + 1.2);
+    }
+  } catch (e) {}
+
+  if (followupText) {
+    setTimeout(() => {
+      if (window.AndroidBridge && window.AndroidBridge.speakText) {
+        window.AndroidBridge.speakText(followupText);
+      } else if ('speechSynthesis' in window) {
+        const utter = new SpeechSynthesisUtterance(followupText);
+        utter.lang = 'es-ES';
+        utter.rate = 1.0;
+        window.speechSynthesis.speak(utter);
+      }
+    }, 750);
+  }
+}
+
+// Sincronización de Alarmas de Sistema con Android AlarmManager (incluso app cerrada)
+function syncAllAlarmsToNative() {
+  if (!window.AndroidBridge || !window.AndroidBridge.scheduleNativeAlarm) return;
+  const now = Date.now();
+  notes.forEach(note => {
+    if (!note.completed && note.alertTimestamp && note.alertTimestamp > now) {
+      const noteText = (note.lines && note.lines.length > 0) ? note.lines.map(l => l.text).join('. ') : (note.text || 'Nota Urgente');
+      window.AndroidBridge.scheduleNativeAlarm(note.id, 'Nota Feliz • Alerta Urgente', noteText, note.alertTimestamp);
+    }
+  });
+}
+
+// Abrir nota directamente al pulsar sobre la notificación push
+window.openNoteFromNotification = function(targetNoteId) {
+  const note = notes.find(n => n.id === targetNoteId);
+  if (!note) return;
+
+  currentFilter = note.urgency || 'urgent';
+  renderBoard();
+
+  const noteCard = document.getElementById(`card_${targetNoteId}`);
+  if (noteCard) {
+    noteCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    noteCard.style.outline = '3px solid #EF4444';
+    noteCard.style.transform = 'scale(1.04)';
+    setTimeout(() => {
+      noteCard.style.outline = '';
+      noteCard.style.transform = '';
+    }, 3000);
+  }
+
+  const noteText = (note.lines && note.lines.length > 0) ? note.lines.map(l => l.text).join('. ') : (note.text || '');
+  playBellChime(noteText);
+};
+
+// 6. ALERTAS AUTOMÁTICAS (Push en pantalla y de sistema nativo)
 function startAutomaticAlertMonitor() {
   setInterval(() => {
-    const now = new Date();
-    const currentHourMin = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const now = Date.now();
+    const d = new Date();
+    const currentHourMin = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 
     notes.forEach(note => {
       if (note.completed || !note.triggerLabel) return;
 
-      // Alerta de hora fija (ej: "18:00")
-      if (note.triggerLabel.includes(currentHourMin) && !note.alreadyAlertedToday) {
+      const matchesTimestamp = note.alertTimestamp && now >= note.alertTimestamp && !note.alreadyAlertedToday;
+      const matchesTimeStr = note.triggerLabel.includes(currentHourMin) && !note.alreadyAlertedToday;
+
+      if (matchesTimestamp || matchesTimeStr) {
         note.alreadyAlertedToday = true;
-        triggerPushBanner(note.triggerLabel, note.lines ? note.lines[0].text : note.text);
+        const noteText = (note.lines && note.lines.length > 0) ? note.lines.map(l => l.text).join('. ') : (note.text || 'Nota Urgente');
+        triggerPushBanner(note.triggerLabel, noteText, note.id);
       }
     });
-  }, 10000); // Chequeo periódico cada 10s
+  }, 8000);
 }
 
-function triggerPushBanner(title, body) {
+function triggerPushBanner(title, body, noteId = null) {
   const banner = document.getElementById('pushNotificationBanner');
-  if (!banner) return;
+  if (banner) {
+    document.getElementById('pushTitle').textContent = title || '⏰ Recordatorio Automático';
+    document.getElementById('pushBody').textContent = body || 'Tiene una nota pendiente por cumplirse.';
+    banner.classList.remove('hidden');
 
-  document.getElementById('pushTitle').textContent = title || '⏰ Recordatorio Automático';
-  document.getElementById('pushBody').textContent = body || 'Tiene una nota pendiente por cumplirse.';
-  banner.classList.remove('hidden');
+    banner.onclick = () => {
+      dismissPush();
+      if (noteId) {
+        window.openNoteFromNotification(noteId);
+      }
+    };
+  }
 
-  // Sonido de alerta
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(587.33, ctx.currentTime);
-    osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1);
-    gain.gain.setValueAtTime(0.15, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.35);
-  } catch (e) {}
+  if ('Notification' in window && Notification.permission === 'granted') {
+    try {
+      new Notification(title || 'Nota Feliz', {
+        body: body || 'Tiene una nota pendiente.',
+        icon: 'icon.png'
+      });
+    } catch (e) {}
+  }
+
+  playBellChime(body);
 }
 
 function dismissPush() {
@@ -1517,24 +1694,46 @@ function closeSettings() {
   document.getElementById('settingsModal').classList.add('hidden');
 }
 
-// Requerimiento 3: Exportar notas, audios, fotos y videos a archivo JSON
+// Requerimiento 3 y 6: Exportar notas a archivo con formato NotaFelizYYYYMMDDHHMMSS.JSON
 function exportDataJSON() {
+  const d = new Date();
+  const YYYY = d.getFullYear();
+  const MM = String(d.getMonth() + 1).padStart(2, '0');
+  const DD = String(d.getDate()).padStart(2, '0');
+  const HH = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  const SS = String(d.getSeconds()).padStart(2, '0');
+  const filename = `NotaFeliz${YYYY}${MM}${DD}${HH}${mm}${SS}.JSON`;
+
   const exportPayload = {
     appName: 'Nota Feliz',
     version: '2.0',
-    exportDate: new Date().toISOString(),
+    exportDate: d.toISOString(),
     totalNotes: notes.length,
     notes: notes,
     geoPresets: geoPresets,
     timePresets: timePresets
   };
-  const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportPayload, null, 2));
+  const jsonContent = JSON.stringify(exportPayload, null, 2);
+
+  // Si estamos en la app Android nativa: guardar directo en la carpeta Descargas del smartphone
+  if (window.AndroidBridge && window.AndroidBridge.saveJsonExport) {
+    window.AndroidBridge.saveJsonExport(filename, jsonContent);
+    return;
+  }
+
+  // En navegador web / PWA: Descarga mediante Blob
+  const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
   const dlAnchor = document.createElement('a');
-  const d = new Date();
-  const dateTag = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}_${String(d.getHours()).padStart(2, '0')}${String(d.getMinutes()).padStart(2, '0')}`;
-  dlAnchor.setAttribute('href', dataStr);
-  dlAnchor.setAttribute('download', `notafeliz_respaldo_${dateTag}.json`);
+  dlAnchor.href = url;
+  dlAnchor.download = filename;
+  document.body.appendChild(dlAnchor);
   dlAnchor.click();
+  setTimeout(() => {
+    document.body.removeChild(dlAnchor);
+    URL.revokeObjectURL(url);
+  }, 1000);
 }
 
 // Requerimiento 3: Restaurar notas, audios, fotos y configuraciones desde archivo JSON
@@ -1585,8 +1784,8 @@ function importDataJSON(event) {
 }
 
 function resetDemoData() {
-  if (confirm('¿Desea restaurar las notas de demostración iniciales de Nota Feliz?')) {
-    notes = JSON.parse(JSON.stringify(DEFAULT_NOTES));
+  if (confirm('¿Desea restaurar la nota limpia inicial de Nota Feliz?')) {
+    notes = createDefaultInitialNotes();
     timePresets = JSON.parse(JSON.stringify(DEFAULT_TIME_PRESETS));
     geoPresets = JSON.parse(JSON.stringify(DEFAULT_GEO_PRESETS));
     localStorage.removeItem('posty_time_presets_v2');
@@ -1595,6 +1794,7 @@ function resetDemoData() {
     renderBoard();
     renderTriggerPresets();
     renderSettingsLocations();
+    syncAllAlarmsToNative();
     closeSettings();
   }
 }

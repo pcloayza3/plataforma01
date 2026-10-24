@@ -20,6 +20,7 @@ cp "$SCRIPT_DIR/../index.html" "$APP_BUNDLE/www/"
 cp "$SCRIPT_DIR/../styles.css" "$APP_BUNDLE/www/"
 cp "$SCRIPT_DIR/../app.js" "$APP_BUNDLE/www/"
 cp "$SCRIPT_DIR/../manifest.json" "$APP_BUNDLE/www/"
+cp -r "$SCRIPT_DIR/../libs" "$APP_BUNDLE/www/"
 
 echo "==> [iOS] Compilando binario nativo Swift (iOS Simulator ARM64)..."
 SDK_PATH="$(xcrun --sdk iphonesimulator --show-sdk-path)"

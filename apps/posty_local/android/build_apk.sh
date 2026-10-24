@@ -16,6 +16,7 @@ cp "$SCRIPT_DIR/../styles.css" "$SCRIPT_DIR/app/src/main/assets/www/"
 cp "$SCRIPT_DIR/../app.js" "$SCRIPT_DIR/app/src/main/assets/www/"
 cp "$SCRIPT_DIR/../manifest.json" "$SCRIPT_DIR/app/src/main/assets/www/"
 cp "$SCRIPT_DIR/../icon.png" "$SCRIPT_DIR/app/src/main/assets/www/"
+cp -r "$SCRIPT_DIR/../libs" "$SCRIPT_DIR/app/src/main/assets/www/"
 
 # Copiar también directamente a assets/ para compatibilidad total
 cp "$SCRIPT_DIR/../index.html" "$SCRIPT_DIR/app/src/main/assets/"
@@ -23,6 +24,7 @@ cp "$SCRIPT_DIR/../styles.css" "$SCRIPT_DIR/app/src/main/assets/"
 cp "$SCRIPT_DIR/../app.js" "$SCRIPT_DIR/app/src/main/assets/"
 cp "$SCRIPT_DIR/../manifest.json" "$SCRIPT_DIR/app/src/main/assets/"
 cp "$SCRIPT_DIR/../icon.png" "$SCRIPT_DIR/app/src/main/assets/"
+cp -r "$SCRIPT_DIR/../libs" "$SCRIPT_DIR/app/src/main/assets/"
 
 echo "==> [Android] Compilando APK con Gradle..."
 ./gradlew assembleDebug

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Nota Feliz • Notas Visuales y Recordatorios Inteligentes</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="libs/leaflet.css">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="icon.png">
   <link rel="apple-touch-icon" href="icon.png">
@@ -347,6 +348,23 @@
           <button type="button" class="chip-action" id="btnCaptureGeoNewPlace" onclick="captureGPSForNewPlace()">
             Fijar posición GPS actual ahora
           </button>
+
+          <!-- Mapa Interactivo Táctil para fijar centro y radio visualmente -->
+          <div class="geo-map-box" id="geoMapBox" style="margin-top: 10px;">
+            <div id="geoMapContainer"></div>
+            <div class="geo-slider-box">
+              <div class="geo-slider-header">
+                <span>🎯 Cobertura Geocerca:</span>
+                <span id="geoRadiusLabel" style="color: #0284C7; font-weight: 700;">150 m</span>
+              </div>
+              <input type="range" id="geoRadiusSlider" class="geo-radius-slider" min="50" max="1000" step="25" value="150" oninput="updateGeoMapRadius(this.value)">
+              <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); margin-top: 2px;">
+                <span>50m</span>
+                <span>Arrastre marcador o toque mapa para ubicar centro</span>
+                <span>1000m (1km)</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -359,6 +377,7 @@
 
   </div> <!-- Fin de .app-viewport -->
 
+  <script src="libs/leaflet.js"></script>
   <script src="app.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

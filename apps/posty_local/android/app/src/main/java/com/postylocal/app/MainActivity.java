@@ -1,6 +1,8 @@
 package com.postylocal.app;
 
 import android.Manifest;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -8,12 +10,15 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.MediaRecorder;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.util.Base64;
+import android.widget.Toast;
 import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
 import android.webkit.PermissionRequest;
@@ -33,6 +38,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -97,6 +103,29 @@ public class MainActivity extends AppCompatActivity {
 
         // Carga 100% local y offline desde los assets del APK (sin dependencia de red)
         webView.loadUrl("file:///android_asset/www/index.html");
+
+        handleDeepLinkNotification(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleDeepLinkNotification(intent);
+    }
+
+    private void handleDeepLinkNotification(Intent intent) {
+        if (intent == null) return;
+        String targetNoteId = intent.getStringExtra("targetNoteId");
+        String speakText = intent.getStringExtra("speakNoteText");
+        if (targetNoteId != null && !targetNoteId.isEmpty()) {
+            webView.postDelayed(() -> {
+                webView.evaluateJavascript("if (window.openNoteFromNotification) { window.openNoteFromNotification('" + targetNoteId + "'); }", null);
+                if (speakText != null && !speakText.isEmpty() && textToSpeech != null) {
+                    textToSpeech.speak(speakText, TextToSpeech.QUEUE_FLUSH, null, "AlertTTS");
+                }
+            }, 1200);
+        }
     }
 
     private void configureWebView() {
@@ -167,13 +196,9 @@ public class MainActivity extends AppCompatActivity {
         permissions.add(Manifest.permission.MODIFY_AUDIO_SETTINGS);
         permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
         permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
-        permissions.add(Manifest.permission.CAMERA);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             permissions.add(Manifest.permission.POST_NOTIFICATIONS);
-            permissions.add(Manifest.permission.READ_MEDIA_IMAGES);
-        } else {
-            permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
         }
 
         List<String> needed = new ArrayList<>();
@@ -311,6 +336,99 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(() -> {
                 if (textToSpeech != null && text != null && !text.isEmpty()) {
                     textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, "PostyTTS");
+                }
+            });
+        }
+
+        // Programar Alarma Nativa de Android (Push en segundo plano aun con la app cerrada)
+        @JavascriptInterface
+        public void scheduleNativeAlarm(String noteId, String title, String body, long triggerTimestamp) {
+            if (triggerTimestamp <= System.currentTimeMillis()) return;
+            try {
+                AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+                if (am == null) return;
+
+                Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
+                intent.setAction("com.postylocal.app.ACTION_NOTE_ALARM");
+                intent.putExtra("noteId", noteId);
+                intent.putExtra("title", title);
+                intent.putExtra("body", body);
+
+                int reqCode = Math.abs(noteId.hashCode());
+                PendingIntent pi = PendingIntent.getBroadcast(
+                    MainActivity.this, reqCode, intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                );
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTimestamp, pi);
+                } else {
+                    am.setExact(AlarmManager.RTC_WAKEUP, triggerTimestamp, pi);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Cancelar Alarma Nativa de Android
+        @JavascriptInterface
+        public void cancelNativeAlarm(String noteId) {
+            try {
+                AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+                if (am == null) return;
+
+                Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
+                intent.setAction("com.postylocal.app.ACTION_NOTE_ALARM");
+                int reqCode = Math.abs(noteId.hashCode());
+                PendingIntent pi = PendingIntent.getBroadcast(
+                    MainActivity.this, reqCode, intent,
+                    PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE
+                );
+                if (pi != null) {
+                    am.cancel(pi);
+                    pi.cancel();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Guardar Respaldo JSON en la Carpeta Descargas del Smartphone
+        @JavascriptInterface
+        public void saveJsonExport(String filename, String jsonContent) {
+            runOnUiThread(() -> {
+                try {
+                    File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                    if (!downloadsDir.exists()) downloadsDir.mkdirs();
+                    File destFile = new File(downloadsDir, filename);
+
+                    try (FileOutputStream fos = new FileOutputStream(destFile)) {
+                        fos.write(jsonContent.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                        fos.flush();
+                    }
+
+                    MediaScannerConnection.scanFile(
+                        MainActivity.this,
+                        new String[]{destFile.getAbsolutePath()},
+                        new String[]{"application/json"},
+                        null
+                    );
+
+                    Toast.makeText(MainActivity.this, "✓ Guardado en Descargas:\n" + filename, Toast.LENGTH_LONG).show();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    try {
+                        File internalDir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+                        if (internalDir == null) internalDir = getFilesDir();
+                        File fallbackFile = new File(internalDir, filename);
+                        try (FileOutputStream fos = new FileOutputStream(fallbackFile)) {
+                            fos.write(jsonContent.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                            fos.flush();
+                        }
+                        Toast.makeText(MainActivity.this, "✓ Guardado en:\n" + fallbackFile.getAbsolutePath(), Toast.LENGTH_LONG).show();
+                    } catch (Exception ex) {
+                        Toast.makeText(MainActivity.this, "Error al exportar: " + ex.getMessage(), Toast.LENGTH_LONG).show();
+                    }
                 }
             });
         }
