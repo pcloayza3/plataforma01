@@ -222,23 +222,39 @@
     </div>
   </div>
 
-  <!-- PANTALLA: MODO PROTECTOR DE PANTALLA (AOD / Screensaver) -->
+  <!-- PANTALLA FELIZ: MODO PROTECTOR DE PANTALLA (AOD / Screensaver) -->
   <div id="screensaverOverlay" class="screensaver-view hidden" onclick="closeScreensaver()">
-    <div class="screensaver-content">
-      <div class="aod-clock" id="aodClock">21:45</div>
-      <div class="aod-date" id="aodDate">Jueves, 15 de Octubre • Nota Feliz</div>
-      
-      <div class="aod-divider"></div>
-      
-      <div class="aod-tasks-container">
-        <div class="aod-subtitle">ACTIVIDADES RELEVANTES POR CUMPLIRSE</div>
-        <div id="screensaverTasksDynamic">
-          <!-- Se inyectan las 3 tareas más prioritarias en tiempo real -->
+    <div class="screensaver-postit">
+      <div class="postit-header">
+        <div class="postit-face-box">
+          <svg width="42" height="42" viewBox="0 0 100 100" fill="none">
+            <rect x="5" y="5" width="90" height="90" rx="16" fill="#FFD54F" stroke="#F59E0B" stroke-width="4"/>
+            <circle cx="34" cy="38" r="6" fill="#1E293B"/>
+            <circle cx="66" cy="38" r="6" fill="#1E293B"/>
+            <path d="M 30 58 Q 50 82 70 58" stroke="#1E293B" stroke-width="6.5" stroke-linecap="round" fill="none"/>
+          </svg>
+        </div>
+        <div class="postit-title-box">
+          <div class="postit-app-title">Nota Feliz</div>
+          <div class="postit-date" id="aodDate">Viernes, 24 de Octubre</div>
         </div>
       </div>
 
-      <div class="aod-footer-hint">
-        <span>Toque la pantalla para volver al tablero</span>
+      <div class="postit-clock" id="aodClock">00:25</div>
+
+      <div class="postit-divider"></div>
+
+      <div class="postit-tasks-box">
+        <div class="postit-tasks-header">
+          <span>📌 Actividades Relevantes:</span>
+        </div>
+        <div id="screensaverTasksDynamic" class="postit-tasks-list">
+          <!-- Actividades inyectadas en tiempo real -->
+        </div>
+      </div>
+
+      <div class="postit-tap-hint">
+        <span>Toque en cualquier parte para volver</span>
       </div>
     </div>
   </div>
@@ -389,8 +405,7 @@
           <!-- Mapa Interactivo Táctil para fijar centro y radio visualmente -->
           <div class="geo-map-box" id="geoMapBox" style="margin-top: 10px;">
             <div class="map-type-bar">
-              <button type="button" class="btn-map-type active" id="btnMapDark" onclick="switchMapLayer('dark')">🌙 Oscuro (Mapa)</button>
-              <button type="button" class="btn-map-type" id="btnMapGoogle" onclick="switchMapLayer('google')">🗺️ Google Maps</button>
+              <button type="button" class="btn-map-type active" id="btnMapGoogle" onclick="switchMapLayer('google')">🗺️ Google Maps</button>
               <button type="button" class="btn-map-type" id="btnMapSat" onclick="switchMapLayer('satellite')">🛰️ Satélite</button>
             </div>
             <div id="geoMapContainer"></div>

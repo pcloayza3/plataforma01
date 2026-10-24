@@ -821,19 +821,11 @@ let currentMapLat = -17.783300;
 let currentMapLng = -63.182100;
 let currentMapRadius = 50;
 
-let currentMapLayerType = 'dark';
+let currentMapLayerType = 'google';
 let activeTileLayer = null;
 
 // Proveedores de mapas de alta fiabilidad compatibles con Android WebView (Cero bloqueos 403)
 const MAP_TILE_CONFIGS = {
-  dark: {
-    name: 'Oscuro (Imagen 2)',
-    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-    options: {
-      subdomains: 'abcd',
-      maxZoom: 20
-    }
-  },
   google: {
     name: 'Google Maps',
     url: 'https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
@@ -853,14 +845,12 @@ const MAP_TILE_CONFIGS = {
 };
 
 function switchMapLayer(type) {
-  if (!MAP_TILE_CONFIGS[type]) return;
+  if (!MAP_TILE_CONFIGS[type]) type = 'google';
   currentMapLayerType = type;
 
   // Actualizar estado visual de los botones de cambio de mapa
-  const btnDark = document.getElementById('btnMapDark');
   const btnGoogle = document.getElementById('btnMapGoogle');
   const btnSat = document.getElementById('btnMapSat');
-  if (btnDark) btnDark.classList.toggle('active', type === 'dark');
   if (btnGoogle) btnGoogle.classList.toggle('active', type === 'google');
   if (btnSat) btnSat.classList.toggle('active', type === 'satellite');
 
@@ -895,11 +885,7 @@ function initOrRefreshGeoMap(customLat, customLng, customRadius) {
   const mapContainer = document.getElementById('geoMapContainer');
   if (!mapContainer) return;
 
-  // Determinar capa inicial según tema del usuario si no fue cambiada explícitamente
-  const theme = document.body.getAttribute('data-theme') || 'system';
-  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const isDark = theme === 'dark' || (theme === 'system' && prefersDark);
-  const targetLayer = currentMapLayerType || (isDark ? 'dark' : 'google');
+  const targetLayer = currentMapLayerType || 'google';
 
   if (!geoMap) {
     try {
@@ -1689,6 +1675,85 @@ function deleteTimePreset(presetId) {
   }
 }
 
+function parseCoordsString(coordStr) {
+  if (!coordStr) return null;
+  const latMatch = coordStr.match(/Lat:\s*([-\d.]+)/i);
+  const lngMatch = coordStr.match(/Lng:\s*([-\d.]+)/i);
+  const radMatch = coordStr.match(/Radio:\s*(\d+)m/i);
+  if (latMatch && lngMatch) {
+    return {
+      lat: parseFloat(latMatch[1]),
+      lng: parseFloat(lngMatch[1]),
+      radius: radMatch ? parseInt(radMatch[1]) : 50
+    };
+  }
+  return null;
+}
+
+const miniMapInstances = {};
+
+function initMiniLocationMap(elemId, lat, lng, radius) {
+  const elem = document.getElementById(elemId);
+  if (!elem || typeof L === 'undefined') return;
+
+  if (miniMapInstances[elemId]) {
+    try {
+      miniMapInstances[elemId].remove();
+    } catch (e) {}
+    delete miniMapInstances[elemId];
+  }
+
+  try {
+    const mini = L.map(elemId, {
+      center: [lat, lng],
+      zoom: 16,
+      dragging: false,
+      touchZoom: false,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      boxZoom: false,
+      keyboard: false,
+      zoomControl: false,
+      attributionControl: false
+    });
+
+    L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+      subdomains: '0123',
+      maxZoom: 20
+    }).addTo(mini);
+
+    const pinIcon = L.divIcon({
+      className: 'custom-map-pin',
+      html: `<div style="background: #EF4444; color: white; width: 22px; height: 22px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.4); border: 2px solid white;"><div style="width: 7px; height: 7px; background: white; border-radius: 50%; transform: rotate(45deg);"></div></div>`,
+      iconSize: [22, 22],
+      iconAnchor: [11, 22]
+    });
+
+    L.marker([lat, lng], { icon: pinIcon }).addTo(mini);
+
+    const circle = L.circle([lat, lng], {
+      radius: radius,
+      color: '#0284C7',
+      fillColor: '#38BDF8',
+      fillOpacity: 0.25,
+      weight: 2
+    }).addTo(mini);
+
+    // Ajusta la vista para que el mapa cubra exactamente toda la geocerca
+    mini.fitBounds(circle.getBounds().pad(0.35));
+
+    [60, 200, 450].forEach(delay => {
+      setTimeout(() => {
+        if (mini) mini.invalidateSize();
+      }, delay);
+    });
+
+    miniMapInstances[elemId] = mini;
+  } catch (err) {
+    console.warn('Error al inicializar mini mapa:', err);
+  }
+}
+
 function renderSettingsLocations() {
   const container = document.getElementById('settingsLocationsList');
   if (!container) return;
@@ -1724,35 +1789,50 @@ function renderSettingsLocations() {
   container.innerHTML = uniquePlaces.map(item => {
     const p = item.place;
     const safeId = p.replace(/[^a-zA-Z0-9_-]/g, '_');
-    const savedCoord = localStorage.getItem(`posty_geo_coords_${p}`) || 'Sin georreferencia fijada (elija en el mapa o pulse Actualizar Aquí)';
-    const isFixed = savedCoord.includes('Lat:');
+    const savedCoord = localStorage.getItem(`posty_geo_coords_${p}`) || '';
+    const coords = parseCoordsString(savedCoord);
     const escapedPlace = escapeHtml(p);
     const escapedLabel = escapeHtml(item.label);
     return `
-      <div class="location-item">
-        <div style="flex: 1 1 auto; min-width: 0; padding-right: 6px;">
-          <div style="display: flex; align-items: center; gap: 6px;">
+      <div class="location-item-card">
+        <!-- Línea 1: Nombre del lugar y a la derecha solo íconos planos (mapa, pin actual, basurero) -->
+        <div class="location-card-header">
+          <div class="location-name-title">
             ${ICONS.pin}
-            <strong>${escapedLabel}</strong>
+            <span>${escapedLabel}</span>
           </div>
-          <div class="coords-text ${isFixed ? 'coords-fixed' : ''}" id="coordsText_${safeId}">
-            ${escapeHtml(savedCoord)}
+          <div class="location-flat-actions">
+            <button type="button" class="btn-flat-action" onclick="openGeoPickerForPlace('${escapedPlace}')" title="Elegir y ajustar en el mapa">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+            </button>
+            <button type="button" class="btn-flat-action" id="btnUpdate_${safeId}" onclick="updateGeoCoord('${escapedPlace}')" title="Fijar GPS del celular aquí">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3m0 14v3M2 12h3m14 0h3"></path></svg>
+            </button>
+            <button type="button" class="btn-flat-action delete" onclick="deleteGeoPreset('${escapedPlace}')" title="Eliminar lugar">
+              ${ICONS.trash}
+            </button>
           </div>
         </div>
-        <div class="location-actions">
-          <button type="button" class="btn-loc-map" onclick="openGeoPickerForPlace('${escapedPlace}')" title="Elegir y ajustar en el mapa">
-            🗺️ Elegir de mapa
-          </button>
-          <button class="chip-action" id="btnUpdate_${safeId}" onclick="updateGeoCoord('${escapedPlace}')" title="Fijar GPS del celular aquí">
-            Actualizar Aquí
-          </button>
-          <button type="button" class="btn-delete-small" onclick="deleteGeoPreset('${escapedPlace}')" title="Eliminar lugar">
-            ${ICONS.trash}
-          </button>
+
+        <!-- Línea 2: El mapa imagen que cubre toda la geocerca -->
+        <div class="location-map-wrapper" onclick="openGeoPickerForPlace('${escapedPlace}')" title="Toque para editar geocerca en el mapa">
+          <div id="miniMap_${safeId}" class="location-mini-map"></div>
+          <div class="mini-map-badge">${coords ? `Cobertura: ${coords.radius}m GPS` : 'Sin georreferencia fijada'}</div>
         </div>
       </div>
     `;
   }).join('');
+
+  // Inicializar cada mapa imagen para que cubra la geocerca correspondiente
+  setTimeout(() => {
+    uniquePlaces.forEach(item => {
+      const p = item.place;
+      const safeId = p.replace(/[^a-zA-Z0-9_-]/g, '_');
+      const savedCoord = localStorage.getItem(`posty_geo_coords_${p}`);
+      const coords = parseCoordsString(savedCoord) || { lat: -17.783300, lng: -63.182100, radius: 50 };
+      initMiniLocationMap(`miniMap_${safeId}`, coords.lat, coords.lng, coords.radius);
+    });
+  }, 100);
 }
 
 function deleteGeoPreset(placeName) {
@@ -1895,29 +1975,47 @@ function startClockUpdater() {
   setInterval(update, 10000);
 }
 
-// Modo Protector de Pantalla (AOD - Actividades Relevantes del Smartphone)
+// Modo Protector de Pantalla (Pantalla Feliz con Post-it alegre y tareas relevantes)
 function openScreensaver() {
   const overlay = document.getElementById('screensaverOverlay');
   if (overlay) overlay.classList.remove('hidden');
 
-  // Inyectar dinámicamente las tareas prioritarias en tiempo real
+  if (!notes || notes.length === 0) {
+    loadNotes();
+  }
+
+  const now = new Date();
+  const aod = document.getElementById('aodClock');
+  const aodDate = document.getElementById('aodDate');
+  const hrs = String(now.getHours()).padStart(2, '0');
+  const mins = String(now.getMinutes()).padStart(2, '0');
+  if (aod) aod.textContent = `${hrs}:${mins}`;
+  if (aodDate) {
+    const options = { weekday: 'long', day: 'numeric', month: 'long' };
+    const dateFormatted = now.toLocaleDateString('es-ES', options);
+    aodDate.textContent = dateFormatted.charAt(0).toUpperCase() + dateFormatted.slice(1);
+  }
+
+  // Inyectar dinámicamente las tareas prioritarias en el Post-it Feliz
   const tasksCont = document.getElementById('screensaverTasksDynamic');
   if (tasksCont) {
-    const active = notes.filter(n => !n.completed);
+    const active = (notes || []).filter(n => !n.completed);
     if (active.length === 0) {
       tasksCont.innerHTML = `
-        <div style="text-align: center; color: #94A3B8; font-size: 13px; padding: 18px 0;">
-          ✨ No hay tareas pendientes.<br>¡Todas las actividades cumplidas!
+        <div style="text-align: center; color: #78350F; font-size: 12px; padding: 10px 0; font-weight: 600;">
+          ✨ ¡Todas las notas cumplidas!
         </div>
       `;
     } else {
-      tasksCont.innerHTML = active.slice(0, 5).map(n => `
-        <div class="aod-task ${n.urgency === 'urgent' ? 'red' : 'yellow'}">
-          <span class="aod-icon">${n.urgency === 'urgent' ? ICONS.urgentDot : ICONS.clock}</span>
-          <div class="aod-info">
-            <span class="aod-task-title">${escapeHtml(n.lines ? n.lines[0].text : n.text)}</span>
-            <span class="aod-task-meta">${escapeHtml(n.alertDateTimeStr || n.triggerLabel || 'Alarma')}</span>
-          </div>
+      tasksCont.innerHTML = active.slice(0, 4).map(n => `
+        <div class="postit-task-row">
+          <span style="color: ${n.urgency === 'urgent' ? '#EF4444' : '#F59E0B'}; font-size: 14px; line-height: 1;">●</span>
+          <span style="flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            ${escapeHtml(n.lines ? n.lines[0].text : n.text)}
+          </span>
+          <span style="font-size: 10px; color: #92400E; font-weight: 700; flex-shrink: 0;">
+            ${escapeHtml(n.alertDateTimeStr || n.triggerLabel || '')}
+          </span>
         </div>
       `).join('');
     }
