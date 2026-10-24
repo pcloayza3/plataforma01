@@ -650,6 +650,18 @@ body[data-theme="dark"] .alarm-pill {
   box-sizing: border-box;
 }
 
+#newNoteModal {
+  z-index: 100 !important;
+}
+
+#settingsModal {
+  z-index: 150 !important;
+}
+
+#voicePromptModal {
+  z-index: 300 !important;
+}
+
 .modal-backdrop.hidden {
   display: none;
 }
@@ -1410,23 +1422,39 @@ body[data-theme="dark"] .btn-card-action:hover {
   gap: 8px;
 }
 
+.modal-line-container,
 .modal-line-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.5);
-  padding: 6px 10px;
-  border-radius: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-body[data-theme="dark"] .modal-line-row {
+.modal-line-box {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.55);
+  padding: 5px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+body[data-theme="dark"] .modal-line-box {
   background: rgba(0, 0, 0, 0.35);
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .line-text-input {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
   background: transparent;
   border: none;
   outline: none;
@@ -1519,10 +1547,12 @@ body[data-theme="dark"] .line-text-input::placeholder {
   color: #94A3B8;
 }
 
+/* El botón Aumentar nueva línea de lista se mantiene con estilo claro aún en tema oscuro */
+.btn-add-line,
 body[data-theme="dark"] .btn-add-line {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.25);
-  color: #F8FAFC;
+  background: rgba(255, 255, 255, 0.75) !important;
+  border: 1px dashed rgba(0, 0, 0, 0.35) !important;
+  color: #0F172A !important;
 }
 
 body[data-theme="dark"] .btn-voice-mini {
@@ -1607,27 +1637,28 @@ body[data-theme="dark"] .btn-voice-mini {
 }
 
 .btn-line-action {
-  background: none;
+  background: transparent;
   border: none;
   color: inherit;
   font-size: 15px;
   cursor: pointer;
-  opacity: 0.7;
+  opacity: 0.75;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 28px;
   height: 28px;
   border-radius: 6px;
-  flex-shrink: 0;
+  flex: 0 0 28px;
   transition: transform 0.1s, opacity 0.1s;
+  box-sizing: border-box;
 }
 
 .btn-line-action:hover {
   opacity: 1;
   transform: scale(1.15);
   background: rgba(0, 0, 0, 0.08);
-}
+  color: #EF4444;
 }
 
 .line-audio-badge {
@@ -1645,19 +1676,25 @@ body[data-theme="dark"] .btn-voice-mini {
 
 .btn-add-line {
   width: 100%;
-  background: rgba(255, 255, 255, 0.65);
-  border: 1px dashed rgba(0, 0, 0, 0.25);
+  background: rgba(255, 255, 255, 0.75) !important;
+  border: 1px dashed rgba(0, 0, 0, 0.35) !important;
   border-radius: 10px;
   padding: 8px;
   font-size: 12px;
   font-weight: 700;
-  color: inherit;
+  color: #0F172A !important;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
 }
 
-.btn-add-line:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.95);
+.btn-add-line:hover:not(:disabled),
+.btn-add-line:active:not(:disabled),
+.btn-add-line:focus:not(:disabled) {
+  background: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: rgba(0, 0, 0, 0.5) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .btn-add-line:disabled {

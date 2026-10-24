@@ -490,7 +490,7 @@ function openNewNoteModal() {
   renderPhotoPreview();
   renderTriggerPresets();
 
-  modalTitle.textContent = '✏️ Nueva Nota (Lista)';
+  modalTitle.textContent = 'Nueva Nota';
 }
 
 function openEditNoteModal(noteId) {
@@ -507,12 +507,13 @@ function openEditNoteModal(noteId) {
   const modalTitle = document.getElementById('modalTitle');
 
   modal.classList.remove('hidden');
-  modalTitle.textContent = '✏️ Editar Nota y Lista';
+  modalTitle.textContent = 'Editar Nota';
 
   selectColor(note.color || 'yellow');
   selectedTriggerType = note.triggerType || 'none';
   selectedTriggerLabel = note.triggerLabel || 'Ninguna asignada';
-  document.getElementById('selectedTriggerText').textContent = `Alerta: ${selectedTriggerLabel}`;
+  const selTrig = document.getElementById('selectedTriggerText');
+  if (selTrig) selTrig.textContent = `Alerta: ${selectedTriggerLabel}`;
 
   renderModalLines();
   renderPhotoPreview();
@@ -531,12 +532,14 @@ function renderModalLines() {
 
   modalLines.forEach((line, idx) => {
     const row = document.createElement('div');
-    row.className = 'modal-line-row';
+    row.className = 'modal-line-container';
 
     row.innerHTML = `
-      <button type="button" class="btn-voice-mini icon-only" id="btnVoiceLine_${idx}" title="Dictar por voz">${ICONS.microphone}</button>
-      <span style="font-size: 13px; font-weight: 700; opacity: 0.6; min-width: 14px; text-align: center;">${idx + 1}.</span>
-      <input type="text" id="modalLineInput_${idx}" class="line-text-input" placeholder="Escriba o dicte el ítem ${idx + 1}..." value="${escapeHtml(line.text)}" oninput="updateModalLineText(${idx}, this.value)">
+      <div class="modal-line-box">
+        <button type="button" class="btn-voice-mini icon-only" id="btnVoiceLine_${idx}" title="Dictar por voz">${ICONS.microphone}</button>
+        <span class="line-number" style="font-size: 13px; font-weight: 700; opacity: 0.6; min-width: 14px; text-align: center; flex-shrink: 0;">${idx + 1}.</span>
+        <input type="text" id="modalLineInput_${idx}" class="line-text-input" placeholder="Escriba o dicte el ítem ${idx + 1}..." value="${escapeHtml(line.text)}" oninput="updateModalLineText(${idx}, this.value)">
+      </div>
       ${modalLines.length > 1 ? `<button type="button" class="btn-line-action" title="Eliminar línea" onclick="removeLineFromModal(${idx})">${ICONS.close}</button>` : ''}
     `;
     container.appendChild(row);
@@ -759,7 +762,10 @@ function openVoicePromptModal(type) {
     title.textContent = 'Agregar Nuevo Lugar';
     if (timeSection) timeSection.classList.add('hidden');
     if (geoSection) geoSection.classList.remove('hidden');
-    if (geoInput) geoInput.value = '';
+    if (geoInput) {
+      geoInput.value = '';
+      setTimeout(() => geoInput.focus(), 150);
+    }
   }
 }
 
@@ -997,7 +1003,8 @@ function selectTimePreset(preset) {
   selectedTargetTimestamp = calc.timestamp;
   selectedAlertDateTimeStr = calc.label;
   selectedTriggerLabel = calc.label;
-  document.getElementById('selectedTriggerText').textContent = `Alerta: ${selectedAlertDateTimeStr}`;
+  const selTrig = document.getElementById('selectedTriggerText');
+  if (selTrig) selTrig.textContent = `Alerta: ${selectedAlertDateTimeStr}`;
 
   preset.uses = (preset.uses || 0) + 1;
   localStorage.setItem('posty_time_presets_v2', JSON.stringify(timePresets));
@@ -1015,7 +1022,8 @@ function selectGeoPreset(preset) {
   selectedTargetTimestamp = null;
   selectedAlertDateTimeStr = preset.label;
   selectedTriggerLabel = preset.label;
-  document.getElementById('selectedTriggerText').textContent = `Alerta: ${preset.label}`;
+  const selTrig = document.getElementById('selectedTriggerText');
+  if (selTrig) selTrig.textContent = `Alerta: ${preset.label}`;
 
   preset.uses = (preset.uses || 0) + 1;
   localStorage.setItem('posty_geo_presets_v2', JSON.stringify(geoPresets));
@@ -1413,6 +1421,20 @@ function updateGeoCoord(place) {
 
 // Callback global invocado por AndroidBridge cuando el GPS nativo responde
 window.onNativeGPSReceived = function(place, lat, lng, accuracy) {
+  if (place === '__pending_new_place__') {
+    const latStr = lat.toFixed(6);
+    const lngStr = lng.toFixed(6);
+    const acc = Math.round(accuracy);
+    pendingNewPlaceCoords = `Lat: ${latStr}, Lng: ${lngStr} (±${acc}m GPS Real)`;
+    const statusEl = document.getElementById('newPlaceCoordsStatus');
+    if (statusEl) {
+      statusEl.textContent = `✓ Ubicación fijada: ${pendingNewPlaceCoords}`;
+      statusEl.style.color = '#10B981';
+    }
+    const btn = document.getElementById('btnCaptureGeoNewPlace');
+    if (btn) btn.disabled = false;
+    return;
+  }
   saveRealLocationCoordinates(place, lat.toFixed(6), lng.toFixed(6), Math.round(accuracy));
   const safeId = place.replace(/[^a-zA-Z0-9_-]/g, '_');
   const btn = document.getElementById(`btnUpdate_${safeId}`);

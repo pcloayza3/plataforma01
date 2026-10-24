@@ -110,7 +110,7 @@
   <div id="newNoteModal" class="modal-backdrop hidden">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 id="modalTitle">Nueva Nota Rápida</h3>
+        <h3 id="modalTitle">Nueva Nota</h3>
         <button class="close-x-btn" onclick="closeModal()">✕</button>
       </div>
 
@@ -213,49 +213,6 @@
     </div>
   </div>
 
-  <!-- MODAL DE ENTRADA PARA FECHA/HORA O NUEVO LUGAR -->
-  <div id="voicePromptModal" class="modal-backdrop hidden">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3 id="voicePromptTitle">Programar Alerta</h3>
-        <button class="close-x-btn" onclick="closeVoicePromptModal()">✕</button>
-      </div>
-
-      <!-- Sección específica para Tiempo (Fecha y Hora Exacta) -->
-      <div id="voicePromptTimeSection">
-        <label class="trigger-label">Seleccione fecha y hora exacta de la alarma:</label>
-        <input type="datetime-local" id="voicePromptDateTimeInput" class="custom-input" style="font-size: 15px; padding: 10px; margin-top: 6px;">
-        <p class="voice-hint" style="margin-top: 6px;">La alarma se guardará con fecha y hora exacta y se mostrará en la nota.</p>
-      </div>
-
-      <!-- Sección específica para Lugar (Nombre y GPS opcional) -->
-      <div id="voicePromptGeoSection" class="hidden">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
-          <label class="trigger-label">Nombre del nuevo lugar:</label>
-          <button type="button" class="btn-voice-mini icon-only" id="btnVoicePromptDictar" title="Dictar por voz">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
-          </button>
-        </div>
-        <input type="text" id="voicePromptTextInput" class="custom-input" placeholder="Ej: Gimnasio, Farmacia...">
-
-        <div class="geo-optional-box" style="margin-top: 10px; padding: 12px; background: var(--bg-primary); border: 1px solid var(--border-subtle); border-radius: 12px;">
-          <div style="font-size: 12px; font-weight: 700; margin-bottom: 4px;">📍 Coordenadas Georreferenciales (Opcional):</div>
-          <div id="newPlaceCoordsStatus" style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">
-            Sin fijar (puede fijarse luego al estar en la zona).
-          </div>
-          <button type="button" class="chip-action" id="btnCaptureGeoNewPlace" onclick="captureGPSForNewPlace()">
-            Fijar posición GPS actual ahora
-          </button>
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button class="btn-cancel" onclick="closeVoicePromptModal()">Cancelar</button>
-        <button class="btn-save" onclick="confirmVoicePrompt()">✓ Aceptar</button>
-      </div>
-    </div>
-  </div>
-
   <!-- PANTALLA: MODO PROTECTOR DE PANTALLA (AOD / Screensaver) -->
   <div id="screensaverOverlay" class="screensaver-view hidden" onclick="closeScreensaver()">
     <div class="screensaver-content">
@@ -353,6 +310,49 @@
 
       <div class="modal-footer">
         <button class="btn-save" onclick="closeSettings()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE ENTRADA PARA FECHA/HORA O NUEVO LUGAR (Superpuesto a Configuración y Nueva Nota) -->
+  <div id="voicePromptModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="voicePromptTitle">Programar Alerta</h3>
+        <button class="close-x-btn" onclick="closeVoicePromptModal()">✕</button>
+      </div>
+
+      <!-- Sección específica para Tiempo (Fecha y Hora Exacta) -->
+      <div id="voicePromptTimeSection">
+        <label class="trigger-label">Seleccione fecha y hora exacta de la alarma:</label>
+        <input type="datetime-local" id="voicePromptDateTimeInput" class="custom-input" style="font-size: 15px; padding: 10px; margin-top: 6px;">
+        <p class="voice-hint" style="margin-top: 6px;">La alarma se guardará con fecha y hora exacta y se mostrará en la nota.</p>
+      </div>
+
+      <!-- Sección específica para Lugar (Nombre y GPS opcional) -->
+      <div id="voicePromptGeoSection" class="hidden">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+          <label class="trigger-label">Nombre del nuevo lugar:</label>
+          <button type="button" class="btn-voice-mini icon-only" id="btnVoicePromptDictar" title="Dictar por voz">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+          </button>
+        </div>
+        <input type="text" id="voicePromptTextInput" class="custom-input" placeholder="Ej: Gimnasio, Farmacia...">
+
+        <div class="geo-optional-box" style="margin-top: 10px; padding: 12px; background: var(--bg-primary); border: 1px solid var(--border-subtle); border-radius: 12px;">
+          <div style="font-size: 12px; font-weight: 700; margin-bottom: 4px;">📍 Coordenadas Georreferenciales (Opcional):</div>
+          <div id="newPlaceCoordsStatus" style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">
+            Sin fijar (puede fijarse luego al estar en la zona).
+          </div>
+          <button type="button" class="chip-action" id="btnCaptureGeoNewPlace" onclick="captureGPSForNewPlace()">
+            Fijar posición GPS actual ahora
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeVoicePromptModal()">Cancelar</button>
+        <button class="btn-save" onclick="confirmVoicePrompt()">✓ Aceptar</button>
       </div>
     </div>
   </div>
