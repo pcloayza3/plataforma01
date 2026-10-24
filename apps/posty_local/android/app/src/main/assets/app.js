@@ -465,6 +465,7 @@ function openNewNoteModal() {
   renderModalLines();
   renderPhotoPreview();
   renderTriggerPresets();
+  selectNoAlert();
 
   modalTitle.textContent = 'Nueva Nota';
 }
@@ -494,6 +495,13 @@ function openEditNoteModal(noteId) {
   renderModalLines();
   renderPhotoPreview();
   renderTriggerPresets();
+
+  if (!note.triggerType || note.triggerType === 'none') {
+    selectNoAlert();
+  } else {
+    const btnNoAlert = document.getElementById('btnSelectNoAlert');
+    if (btnNoAlert) btnNoAlert.classList.remove('active');
+  }
 }
 
 function renderModalLines() {
@@ -703,8 +711,8 @@ function removeAttachedPhoto() {
   renderPhotoPreview();
 }
 
-// Modal para "➕ Otro tiempo" / "➕ Nuevo lugar"
-function openVoicePromptModal(type) {
+// Modal para "➕ Otro tiempo" / "➕ Nuevo lugar" / "🗺️ Elegir de mapa"
+function openVoicePromptModal(type, placeToEdit = null) {
   currentVoicePromptType = type;
   const modal = document.getElementById('voicePromptModal');
   const title = document.getElementById('voicePromptTitle');
@@ -735,18 +743,45 @@ function openVoicePromptModal(type) {
     const mi = String(defDate.getMinutes()).padStart(2, '0');
     if (dtInput) dtInput.value = `${yr}-${mo}-${da}T${ho}:${mi}`;
   } else {
-    title.textContent = 'Agregar Nuevo Lugar';
+    title.textContent = placeToEdit ? `Ubicación: ${placeToEdit}` : 'Agregar Nuevo Lugar';
     if (timeSection) timeSection.classList.add('hidden');
     if (geoSection) geoSection.classList.remove('hidden');
-    if (geoInput) {
-      geoInput.value = '';
-      setTimeout(() => geoInput.focus(), 150);
+
+    let initLat = currentMapLat;
+    let initLng = currentMapLng;
+    let initRadius = currentMapRadius;
+
+    if (placeToEdit) {
+      if (geoInput) geoInput.value = placeToEdit;
+      const saved = localStorage.getItem(`posty_geo_coords_${placeToEdit}`);
+      if (saved) {
+        const matchLat = saved.match(/Lat:\s*([-\d.]+)/);
+        const matchLng = saved.match(/Lng:\s*([-\d.]+)/);
+        const matchRad = saved.match(/Radio:\s*(\d+)m/);
+        if (matchLat && matchLng) {
+          initLat = parseFloat(matchLat[1]);
+          initLng = parseFloat(matchLng[1]);
+        }
+        if (matchRad) {
+          initRadius = parseInt(matchRad[1]);
+        }
+      }
+    } else {
+      if (geoInput) {
+        geoInput.value = '';
+        setTimeout(() => geoInput.focus(), 150);
+      }
     }
+
     // Inicializar o refrescar el mapa interactivo de geocerca
     setTimeout(() => {
-      initOrRefreshGeoMap();
-    }, 250);
+      initOrRefreshGeoMap(initLat, initLng, initRadius);
+    }, 150);
   }
+}
+
+function openGeoPickerForPlace(placeName) {
+  openVoicePromptModal('geo', placeName);
 }
 
 // Variables del Mapa Interactivo Táctil
@@ -758,7 +793,10 @@ let currentMapLng = -68.150000;
 let currentMapRadius = 150;
 
 function initOrRefreshGeoMap(customLat, customLng, customRadius) {
-  if (typeof L === 'undefined') return;
+  if (typeof L === 'undefined') {
+    console.warn('Leaflet aún no cargado');
+    return;
+  }
 
   if (customLat && customLng) {
     currentMapLat = parseFloat(customLat);
@@ -777,63 +815,73 @@ function initOrRefreshGeoMap(customLat, customLng, customRadius) {
   if (!mapContainer) return;
 
   if (!geoMap) {
-    geoMap = L.map('geoMapContainer', {
-      center: [currentMapLat, currentMapLng],
-      zoom: 16,
-      zoomControl: true,
-      attributionControl: false
-    });
+    try {
+      geoMap = L.map('geoMapContainer', {
+        center: [currentMapLat, currentMapLng],
+        zoom: 16,
+        zoomControl: true,
+        attributionControl: false
+      });
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19
-    }).addTo(geoMap);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19
+      }).addTo(geoMap);
 
-    const pinIcon = L.divIcon({
-      className: 'custom-map-pin',
-      html: `<div style="background: #EF4444; color: white; width: 28px; height: 28px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.35); border: 2px solid white;"><div style="width: 10px; height: 10px; background: white; border-radius: 50%; transform: rotate(45deg);"></div></div>`,
-      iconSize: [28, 28],
-      iconAnchor: [14, 28]
-    });
+      const pinIcon = L.divIcon({
+        className: 'custom-map-pin',
+        html: `<div style="background: #EF4444; color: white; width: 30px; height: 30px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 8px rgba(0,0,0,0.4); border: 2.5px solid white;"><div style="width: 10px; height: 10px; background: white; border-radius: 50%; transform: rotate(45deg);"></div></div>`,
+        iconSize: [30, 30],
+        iconAnchor: [15, 30]
+      });
 
-    geoMarker = L.marker([currentMapLat, currentMapLng], {
-      draggable: true,
-      icon: pinIcon
-    }).addTo(geoMap);
+      geoMarker = L.marker([currentMapLat, currentMapLng], {
+        draggable: true,
+        icon: pinIcon
+      }).addTo(geoMap);
 
-    geoCircle = L.circle([currentMapLat, currentMapLng], {
-      radius: currentMapRadius,
-      color: '#0284C7',
-      fillColor: '#38BDF8',
-      fillOpacity: 0.28,
-      weight: 2
-    }).addTo(geoMap);
+      geoCircle = L.circle([currentMapLat, currentMapLng], {
+        radius: currentMapRadius,
+        color: '#0284C7',
+        fillColor: '#38BDF8',
+        fillOpacity: 0.3,
+        weight: 2
+      }).addTo(geoMap);
 
-    // Permitir arrastrar el marcador con el dedo para mover el centro
-    geoMarker.on('drag', (e) => {
-      const pos = e.target.getLatLng();
-      currentMapLat = pos.lat;
-      currentMapLng = pos.lng;
-      geoCircle.setLatLng(pos);
-      updatePendingCoordsString();
-    });
+      // Permitir arrastrar el marcador con el dedo para mover el centro
+      geoMarker.on('drag', (e) => {
+        const pos = e.target.getLatLng();
+        currentMapLat = pos.lat;
+        currentMapLng = pos.lng;
+        geoCircle.setLatLng(pos);
+        updatePendingCoordsString();
+      });
 
-    // Permitir tocar cualquier punto del mapa para reubicar centro
-    geoMap.on('click', (e) => {
-      currentMapLat = e.latlng.lat;
-      currentMapLng = e.latlng.lng;
-      geoMarker.setLatLng(e.latlng);
-      geoCircle.setLatLng(e.latlng);
-      updatePendingCoordsString();
-    });
+      // Permitir tocar cualquier punto del mapa para reubicar centro
+      geoMap.on('click', (e) => {
+        currentMapLat = e.latlng.lat;
+        currentMapLng = e.latlng.lng;
+        geoMarker.setLatLng(e.latlng);
+        geoCircle.setLatLng(e.latlng);
+        updatePendingCoordsString();
+      });
+    } catch (e) {
+      console.warn('Error al inicializar Leaflet:', e);
+    }
   } else {
-    geoMap.setView([currentMapLat, currentMapLng], 16);
-    geoMarker.setLatLng([currentMapLat, currentMapLng]);
-    geoCircle.setLatLng([currentMapLat, currentMapLng]);
-    geoCircle.setRadius(currentMapRadius);
+    try {
+      geoMap.setView([currentMapLat, currentMapLng], 16);
+      geoMarker.setLatLng([currentMapLat, currentMapLng]);
+      geoCircle.setLatLng([currentMapLat, currentMapLng]);
+      geoCircle.setRadius(currentMapRadius);
+    } catch (e) {}
+  }
+
+  // Múltiples invalidaciones para asegurar renderizado tras animaciones de apertura
+  [60, 200, 500].forEach(delay => {
     setTimeout(() => {
       if (geoMap) geoMap.invalidateSize();
-    }, 200);
-  }
+    }, delay);
+  });
 
   updatePendingCoordsString();
 }
@@ -927,31 +975,42 @@ function confirmVoicePrompt() {
     timePresets.unshift(newPreset);
     localStorage.setItem('posty_time_presets_v2', JSON.stringify(timePresets));
     renderTriggerPresets();
+    renderSettingsTimePresets();
     selectTimePreset(newPreset);
   } else {
     const geoInput = document.getElementById('voicePromptTextInput');
     const val = geoInput ? geoInput.value.trim() : '';
     if (!val) {
-      alert('Por favor ingrese o dicte el nombre del nuevo lugar.');
+      alert('Por favor ingrese o dicte el nombre del lugar.');
       return;
     }
-    const newGeo = {
-      id: 'g_custom_' + Date.now(),
-      label: val,
-      place: val,
-      transition: 'ENTER',
-      uses: 10
-    };
-    geoPresets.unshift(newGeo);
+    let targetGeo = geoPresets.find(g => (g.place || g.label) === val || g.label === val);
+    if (!targetGeo) {
+      targetGeo = {
+        id: 'g_custom_' + Date.now(),
+        label: val,
+        place: val,
+        transition: 'ENTER',
+        uses: 10
+      };
+      geoPresets.unshift(targetGeo);
+    }
     localStorage.setItem('posty_geo_presets_v2', JSON.stringify(geoPresets));
 
     if (pendingNewPlaceCoords) {
       localStorage.setItem(`posty_geo_coords_${val}`, pendingNewPlaceCoords);
     }
 
+    // Si estaba en la lista de eliminados, restaurarlo
+    const deleted = JSON.parse(localStorage.getItem('posty_deleted_geo_presets') || '[]');
+    if (deleted.includes(val)) {
+      const filtered = deleted.filter(p => p !== val);
+      localStorage.setItem('posty_deleted_geo_presets', JSON.stringify(filtered));
+    }
+
     renderTriggerPresets();
     renderSettingsLocations();
-    selectGeoPreset(newGeo);
+    selectGeoPreset(targetGeo);
   }
 
   closeVoicePromptModal();
@@ -1080,6 +1139,21 @@ function selectGeoPresetById(id) {
   if (g) selectGeoPreset(g);
 }
 
+function selectNoAlert() {
+  selectedTriggerType = 'none';
+  selectedTargetTimestamp = null;
+  selectedAlertDateTimeStr = 'Sin alarma';
+  selectedTriggerLabel = 'Sin alarma';
+  const selTrig = document.getElementById('selectedTriggerText');
+  if (selTrig) selTrig.textContent = 'Alerta: Sin alarma';
+
+  document.querySelectorAll('#primaryTimePresets .preset-btn, #secondaryTimePresets .preset-btn, #primaryGeoPresets .preset-btn, #secondaryGeoPresets .preset-btn').forEach(b => {
+    b.classList.remove('active');
+  });
+  const btn = document.getElementById('btnSelectNoAlert');
+  if (btn) btn.classList.add('active');
+}
+
 function selectTimePreset(preset) {
   selectedTriggerType = 'time';
   const calc = calculateAlertDateTime(preset);
@@ -1088,6 +1162,9 @@ function selectTimePreset(preset) {
   selectedTriggerLabel = calc.label;
   const selTrig = document.getElementById('selectedTriggerText');
   if (selTrig) selTrig.textContent = `Alerta: ${selectedAlertDateTimeStr}`;
+
+  const btnNoAlert = document.getElementById('btnSelectNoAlert');
+  if (btnNoAlert) btnNoAlert.classList.remove('active');
 
   preset.uses = (preset.uses || 0) + 1;
   localStorage.setItem('posty_time_presets_v2', JSON.stringify(timePresets));
@@ -1107,6 +1184,9 @@ function selectGeoPreset(preset) {
   selectedTriggerLabel = preset.label;
   const selTrig = document.getElementById('selectedTriggerText');
   if (selTrig) selTrig.textContent = `Alerta: ${preset.label}`;
+
+  const btnNoAlert = document.getElementById('btnSelectNoAlert');
+  if (btnNoAlert) btnNoAlert.classList.remove('active');
 
   preset.uses = (preset.uses || 0) + 1;
   localStorage.setItem('posty_geo_presets_v2', JSON.stringify(geoPresets));
@@ -1482,7 +1562,45 @@ function snoozeFromPush() {
   alert('⏱️ Recordatorio pospuesto automáticamente por 15 minutos.');
 }
 
-// 5. ACTUALIZACIÓN DE GPS REAL ("ACTUALIZAR AQUÍ") PARA CUALQUIER LUGAR
+// 5. GESTIÓN DE ALERTAS DE TIEMPO Y UBICACIÓN EN CONFIGURACIÓN
+function renderSettingsTimePresets() {
+  const container = document.getElementById('settingsTimePresetsList');
+  if (!container) return;
+
+  if (!timePresets || timePresets.length === 0) {
+    container.innerHTML = `<div style="text-align: center; color: var(--text-muted); font-size: 12px; padding: 10px;">No hay alertas de tiempo guardadas. Pulse "Agregar alerta de tiempo" abajo.</div>`;
+    return;
+  }
+
+  container.innerHTML = timePresets.map(p => {
+    const escapedLabel = escapeHtml(p.label);
+    const uses = p.uses || 0;
+    return `
+      <div class="time-preset-item">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          ${ICONS.clock}
+          <strong>${escapedLabel}</strong>
+          <span style="font-size: 11px; opacity: 0.6;">(${uses} usos)</span>
+        </div>
+        <button type="button" class="btn-delete-small" onclick="deleteTimePreset('${p.id}')" title="Eliminar alerta de tiempo">
+          ${ICONS.trash}
+        </button>
+      </div>
+    `;
+  }).join('');
+}
+
+function deleteTimePreset(presetId) {
+  const p = timePresets.find(t => t.id === presetId);
+  const name = p ? p.label : 'alerta';
+  if (confirm(`¿Eliminar la alerta de tiempo "${name}"?`)) {
+    timePresets = timePresets.filter(t => t.id !== presetId);
+    localStorage.setItem('posty_time_presets_v2', JSON.stringify(timePresets));
+    renderSettingsTimePresets();
+    renderTriggerPresets();
+  }
+}
+
 function renderSettingsLocations() {
   const container = document.getElementById('settingsLocationsList');
   if (!container) return;
@@ -1500,25 +1618,31 @@ function renderSettingsLocations() {
     }
   });
 
-  // Asegurar los 3 lugares por defecto requeridos
+  // Asegurar los 3 lugares por defecto si no han sido eliminados por el usuario
+  const deletedPlaces = JSON.parse(localStorage.getItem('posty_deleted_geo_presets') || '[]');
   ['Casa', 'Supermercado', 'Trabajo'].forEach(p => {
-    if (!seen.has(p)) {
+    if (!seen.has(p) && !deletedPlaces.includes(p)) {
       seen.add(p);
       const label = p === 'Casa' ? 'Al salir de casa' : (p === 'Supermercado' ? 'Cerca del súper' : 'En el trabajo');
       uniquePlaces.push({ place: p, label: label });
     }
   });
 
+  if (uniquePlaces.length === 0) {
+    container.innerHTML = `<div style="text-align: center; color: var(--text-muted); font-size: 12px; padding: 10px;">No hay lugares configurados. Pulse "Agregar nuevo lugar" abajo.</div>`;
+    return;
+  }
+
   container.innerHTML = uniquePlaces.map(item => {
     const p = item.place;
     const safeId = p.replace(/[^a-zA-Z0-9_-]/g, '_');
-    const savedCoord = localStorage.getItem(`posty_geo_coords_${p}`) || 'Sin georreferencia fijada (toque Actualizar Aquí al estar en la zona)';
+    const savedCoord = localStorage.getItem(`posty_geo_coords_${p}`) || 'Sin georreferencia fijada (elija en el mapa o pulse Actualizar Aquí)';
     const isFixed = savedCoord.includes('Lat:');
     const escapedPlace = escapeHtml(p);
     const escapedLabel = escapeHtml(item.label);
     return `
       <div class="location-item">
-        <div style="flex: 1 1 auto; min-width: 0; padding-right: 8px;">
+        <div style="flex: 1 1 auto; min-width: 0; padding-right: 6px;">
           <div style="display: flex; align-items: center; gap: 6px;">
             ${ICONS.pin}
             <strong>${escapedLabel}</strong>
@@ -1527,12 +1651,37 @@ function renderSettingsLocations() {
             ${escapeHtml(savedCoord)}
           </div>
         </div>
-        <button class="chip-action" id="btnUpdate_${safeId}" onclick="updateGeoCoord('${escapedPlace}')">
-          Actualizar Aquí
-        </button>
+        <div class="location-actions">
+          <button type="button" class="btn-loc-map" onclick="openGeoPickerForPlace('${escapedPlace}')" title="Elegir y ajustar en el mapa">
+            🗺️ Elegir de mapa
+          </button>
+          <button class="chip-action" id="btnUpdate_${safeId}" onclick="updateGeoCoord('${escapedPlace}')" title="Fijar GPS del celular aquí">
+            Actualizar Aquí
+          </button>
+          <button type="button" class="btn-delete-small" onclick="deleteGeoPreset('${escapedPlace}')" title="Eliminar lugar">
+            ${ICONS.trash}
+          </button>
+        </div>
       </div>
     `;
   }).join('');
+}
+
+function deleteGeoPreset(placeName) {
+  if (confirm(`¿Eliminar el lugar "${placeName}" de sus alertas?`)) {
+    geoPresets = geoPresets.filter(g => (g.place || g.label) !== placeName && g.label !== placeName);
+    localStorage.setItem('posty_geo_presets_v2', JSON.stringify(geoPresets));
+    localStorage.removeItem(`posty_geo_coords_${placeName}`);
+
+    const deleted = JSON.parse(localStorage.getItem('posty_deleted_geo_presets') || '[]');
+    if (!deleted.includes(placeName)) {
+      deleted.push(placeName);
+      localStorage.setItem('posty_deleted_geo_presets', JSON.stringify(deleted));
+    }
+
+    renderSettingsLocations();
+    renderTriggerPresets();
+  }
 }
 
 function updateGeoCoord(place) {
@@ -1658,24 +1807,32 @@ function startClockUpdater() {
   setInterval(update, 10000);
 }
 
-// Modo Protector de Pantalla (AOD)
+// Modo Protector de Pantalla (AOD - Actividades Relevantes del Smartphone)
 function openScreensaver() {
   const overlay = document.getElementById('screensaverOverlay');
   if (overlay) overlay.classList.remove('hidden');
 
-  // Inyectar dinámicamente las 3 tareas más prioritarias con íconos vectoriales planos
+  // Inyectar dinámicamente las tareas prioritarias en tiempo real
   const tasksCont = document.getElementById('screensaverTasksDynamic');
   if (tasksCont) {
-    const active = notes.filter(n => !n.completed).slice(0, 3);
-    tasksCont.innerHTML = active.map(n => `
-      <div class="aod-task ${n.urgency === 'urgent' ? 'red' : 'yellow'}">
-        <span class="aod-icon">${n.urgency === 'urgent' ? ICONS.urgentDot : ICONS.clock}</span>
-        <div class="aod-info">
-          <span class="aod-task-title">${escapeHtml(n.lines ? n.lines[0].text : n.text)}</span>
-          <span class="aod-task-meta">${escapeHtml(n.alertDateTimeStr || n.triggerLabel || 'Alarma')}</span>
+    const active = notes.filter(n => !n.completed);
+    if (active.length === 0) {
+      tasksCont.innerHTML = `
+        <div style="text-align: center; color: #94A3B8; font-size: 13px; padding: 18px 0;">
+          ✨ No hay tareas pendientes.<br>¡Todas las actividades cumplidas!
         </div>
-      </div>
-    `).join('');
+      `;
+    } else {
+      tasksCont.innerHTML = active.slice(0, 5).map(n => `
+        <div class="aod-task ${n.urgency === 'urgent' ? 'red' : 'yellow'}">
+          <span class="aod-icon">${n.urgency === 'urgent' ? ICONS.urgentDot : ICONS.clock}</span>
+          <div class="aod-info">
+            <span class="aod-task-title">${escapeHtml(n.lines ? n.lines[0].text : n.text)}</span>
+            <span class="aod-task-meta">${escapeHtml(n.alertDateTimeStr || n.triggerLabel || 'Alarma')}</span>
+          </div>
+        </div>
+      `).join('');
+    }
   }
 }
 
@@ -1686,6 +1843,7 @@ function closeScreensaver() {
 
 // Configuración & Respaldo
 function openSettings() {
+  renderSettingsTimePresets();
   renderSettingsLocations();
   document.getElementById('settingsModal').classList.remove('hidden');
 }

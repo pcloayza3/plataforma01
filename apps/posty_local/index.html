@@ -156,6 +156,14 @@
         </button>
       </div>
 
+      <!-- Opción de Alerta (Con botón prominente "Sin alerta") -->
+      <div class="no-alert-bar" style="display: flex; align-items: center; justify-content: space-between; margin: 8px 0 4px;">
+        <label class="trigger-label" style="margin-bottom: 0;">¿Cuándo alertar?</label>
+        <button type="button" class="btn-no-alert" id="btnSelectNoAlert" onclick="selectNoAlert()">
+          🚫 Sin alerta (Libre)
+        </button>
+      </div>
+
       <!-- Sección de Alertas Temporales Rápidas (Dinámicas con Frecuencia de Uso) -->
       <div class="trigger-group">
         <div class="trigger-header-row">
@@ -268,18 +276,47 @@
 
         <hr class="settings-divider">
 
-        <!-- Requerimiento: Actualización de GPS Real con Geolocation / Puente Nativo -->
+        <!-- Gestión de Botones: Alertas de Tiempo -->
+        <h4>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          Gestión de Botones: Alertas de Tiempo
+        </h4>
+        <p class="settings-desc">Horarios predefinidos para asignar alarmas en un solo toque.</p>
+        <div id="settingsTimePresetsList" class="settings-time-presets-list">
+          <!-- Se inyectan dinámicamente los botones de tiempo (+1 hora, Hoy 18:00...) con opción de eliminar -->
+        </div>
+        <button type="button" class="btn-text-action" onclick="openVoicePromptModal('time')" style="margin-top: 8px;">➕ Agregar alerta de tiempo</button>
+
+        <hr class="settings-divider">
+
+        <!-- Gestión de Botones: Alertas de Ubicación y Geocercas -->
         <h4>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-          Mis Lugares de Georreferenciación (Radio 150m)
+          Gestión de Botones: Alertas de Ubicación
         </h4>
-        <p class="settings-desc">Las alertas se activan mediante GPS local en su celular al estar en la zona.</p>
-
+        <p class="settings-desc">Lugares georreferenciados para alertar por proximidad (elegir en mapa o GPS).</p>
         <div id="settingsLocationsList" class="settings-locations-list">
-          <!-- Se inyectan dinámicamente los lugares configurados con botón para fijar GPS en la zona -->
+          <!-- Se inyectan dinámicamente con Elegir de mapa, Actualizar Aquí y Eliminar -->
         </div>
-
         <button type="button" class="btn-text-action" onclick="openVoicePromptModal('geo')" style="margin-top: 8px;">➕ Agregar nuevo lugar</button>
+
+        <hr class="settings-divider">
+
+        <!-- Protector de Pantalla del Celular (Always On Display / Daydream) -->
+        <h4>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          Protector de Pantalla (Actividades en Vivo)
+        </h4>
+        <p class="settings-desc">Muestra el reloj OLED y las actividades urgentes mientras su smartphone carga.</p>
+        <div style="background: var(--bg-primary); padding: 12px; border-radius: 12px; border: 1px solid var(--border-subtle); margin-top: 6px; font-size: 12px; line-height: 1.5;">
+          <strong>Cómo activarlo en su smartphone:</strong><br>
+          1. Abra <em>Ajustes de Android &gt; Pantalla &gt; Protector de pantalla</em>.<br>
+          2. Seleccione <strong>Nota Feliz</strong> como protector predeterminado.<br>
+          3. Elija <em>Al cargar</em> o <em>En soporte</em>.
+        </div>
+        <button type="button" class="chip-action" onclick="openScreensaver()" style="margin-top: 8px; width: 100%; justify-content: center;">
+          👁️ Probar Protector de Pantalla Ahora
+        </button>
 
         <hr class="settings-divider">
 
