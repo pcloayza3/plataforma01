@@ -973,25 +973,38 @@ body[data-theme="dark"] .color-opt.active {
 }
 
 .preset-btn {
-  background: #F1F5F9;
-  border: 1px solid var(--border-subtle);
+  background: #F1F5F9 !important;
+  border: 1px solid #CBD5E1 !important;
   border-radius: 12px;
-  padding: 6px 10px;
+  padding: 6px 12px;
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-main);
+  color: #0F172A !important;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   transition: all 0.15s;
 }
 
+.preset-btn svg {
+  color: #0F172A !important;
+  stroke: #0F172A !important;
+}
+
 .preset-btn:hover {
-  background: #E2E8F0;
+  background: #E2E8F0 !important;
 }
 
 .preset-btn.active {
-  background: #0284C7;
-  color: #FFFFFF;
-  border-color: #0284C7;
+  background: #0284C7 !important;
+  color: #FFFFFF !important;
+  border-color: #0284C7 !important;
+}
+
+.preset-btn.active svg {
+  color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
 }
 
 .preset-btn.geo-btn.active {
@@ -1248,15 +1261,30 @@ body[data-theme="dark"] .color-opt.active {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #F8FAFC;
-  padding: 10px;
+  background: #F8FAFC !important;
+  color: #0F172A !important;
+  padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid #CBD5E1;
 }
 
-.coords-text {
+.location-item strong {
+  color: #0F172A !important;
+}
+
+.location-item svg {
+  color: #0F172A !important;
+  stroke: #0F172A !important;
+}
+
+.location-item .coords-text {
   font-size: 11px;
-  color: var(--text-muted);
+  color: #475569 !important;
+}
+
+.location-item .coords-text.coords-fixed {
+  color: #059669 !important;
+  font-weight: 600 !important;
 }
 
 .chip-action {
@@ -1581,15 +1609,25 @@ body[data-theme="dark"] .btn-voice-mini {
 .btn-line-action {
   background: none;
   border: none;
-  font-size: 16px;
+  color: inherit;
+  font-size: 15px;
   cursor: pointer;
-  opacity: 0.75;
+  opacity: 0.7;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  flex-shrink: 0;
   transition: transform 0.1s, opacity 0.1s;
 }
 
 .btn-line-action:hover {
   opacity: 1;
   transform: scale(1.15);
+  background: rgba(0, 0, 0, 0.08);
+}
 }
 
 .line-audio-badge {

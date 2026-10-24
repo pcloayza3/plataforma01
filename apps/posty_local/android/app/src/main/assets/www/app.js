@@ -193,8 +193,13 @@ function loadNotes() {
   if (saved) {
     try {
       notes = JSON.parse(saved);
+      // Reclasificar según regla estricta: hoy -> urgente, otras fechas/geo -> próximas, sin alertas -> libres
+      notes.forEach(note => {
+        note.urgency = classifyUrgency(note.triggerType, null, note.alertTimestamp, note.alertDateTimeStr || note.triggerLabel);
+      });
     } catch (e) {
       notes = JSON.parse(JSON.stringify(DEFAULT_NOTES));
+      saveToStorage();
     }
   } else {
     notes = JSON.parse(JSON.stringify(DEFAULT_NOTES));
@@ -290,19 +295,19 @@ function renderBoard() {
   const normalCount = activeNotes.filter(n => n.urgency === 'normal').length;
 
   if (chipMap.urgent) {
-    chipMap.urgent.innerHTML = (currentFilter === 'urgent') ? `${ICONS.urgentDot} <span>Urgente (${urgentCount})</span>` : ICONS.urgentDot;
+    chipMap.urgent.innerHTML = (currentFilter === 'urgent') ? `🔴 <span>Urgente (${urgentCount})</span>` : '🔴';
     chipMap.urgent.classList.toggle('active', currentFilter === 'urgent');
   }
   if (chipMap.context) {
-    chipMap.context.innerHTML = (currentFilter === 'context') ? `${ICONS.clock} <span>Próximas (${contextCount})</span>` : ICONS.clock;
+    chipMap.context.innerHTML = (currentFilter === 'context') ? `🟡 <span>Próximas (${contextCount})</span>` : '🟡';
     chipMap.context.classList.toggle('active', currentFilter === 'context');
   }
   if (chipMap.normal) {
-    chipMap.normal.innerHTML = (currentFilter === 'normal') ? `${ICONS.listIcon} <span>Libres (${normalCount})</span>` : ICONS.listIcon;
+    chipMap.normal.innerHTML = (currentFilter === 'normal') ? `🟢 <span>Libres (${normalCount})</span>` : '🟢';
     chipMap.normal.classList.toggle('active', currentFilter === 'normal');
   }
   if (chipMap.completed) {
-    chipMap.completed.innerHTML = (currentFilter === 'completed') ? `${ICONS.check} <span>Realizadas (${completedNotes.length})</span>` : ICONS.check;
+    chipMap.completed.innerHTML = (currentFilter === 'completed') ? `✓ <span>Realizadas (${completedNotes.length})</span>` : '✓';
     chipMap.completed.classList.toggle('active', currentFilter === 'completed');
   }
 
@@ -529,9 +534,9 @@ function renderModalLines() {
     row.className = 'modal-line-row';
 
     row.innerHTML = `
-      <span style="font-size: 12px; font-weight: 700; opacity: 0.6;">${idx + 1}.</span>
-      <input type="text" id="modalLineInput_${idx}" class="line-text-input" placeholder="Escriba o dicte el ítem ${idx + 1}..." value="${escapeHtml(line.text)}" oninput="updateModalLineText(${idx}, this.value)">
       <button type="button" class="btn-voice-mini icon-only" id="btnVoiceLine_${idx}" title="Dictar por voz">${ICONS.microphone}</button>
+      <span style="font-size: 13px; font-weight: 700; opacity: 0.6; min-width: 14px; text-align: center;">${idx + 1}.</span>
+      <input type="text" id="modalLineInput_${idx}" class="line-text-input" placeholder="Escriba o dicte el ítem ${idx + 1}..." value="${escapeHtml(line.text)}" oninput="updateModalLineText(${idx}, this.value)">
       ${modalLines.length > 1 ? `<button type="button" class="btn-line-action" title="Eliminar línea" onclick="removeLineFromModal(${idx})">${ICONS.close}</button>` : ''}
     `;
     container.appendChild(row);
@@ -1077,7 +1082,7 @@ function saveNoteFromModal() {
   }
 
   const activePreset = timePresets.find(t => t.label === selectedTriggerLabel || (t.alertDateTimeStr && t.alertDateTimeStr === selectedTriggerLabel));
-  const urgency = classifyUrgency(selectedTriggerType, activePreset || { targetTimestamp: selectedTargetTimestamp });
+  const urgency = classifyUrgency(selectedTriggerType, activePreset, selectedTargetTimestamp, selectedAlertDateTimeStr);
 
   if (editingNoteId) {
     const note = notes.find(n => n.id === editingNoteId);
@@ -1115,11 +1120,47 @@ function saveNoteFromModal() {
 }
 
 // Clasificación de Urgencia Estricta
-function classifyUrgency(triggerType, preset) {
-  if (triggerType === 'geo') return 'context'; // Geocercas -> Amarillo (UPCOMING)
-  if (!preset || triggerType === 'none') return 'normal'; // Sin alarma -> Verde (NORMAL)
-  if (preset.isTomorrow || preset.isNextWeek) return 'context'; // Mañana / Sig semana -> Amarillo (UPCOMING)
-  if (preset.isToday || preset.minutes) return 'urgent'; // Vence hoy -> Rojo (URGENT_TODAY)
+// Hoy -> Urgente, Otras fechas -> Próximas, Georreferenciadas -> Próximas, Sin alertas -> Libres
+function classifyUrgency(triggerType, preset, targetTimestamp, alertDateTimeStr) {
+  if (triggerType === 'none' || !triggerType) {
+    return 'normal'; // Sin alertas -> Libres
+  }
+
+  if (triggerType === 'geo') {
+    return 'context'; // Georreferenciadas -> Próximas
+  }
+
+  if (triggerType === 'time') {
+    // Si viene de preset con flags explícitos
+    if (preset && (preset.isToday || preset.minutes)) {
+      return 'urgent'; // Hoy -> Urgente
+    }
+    if (preset && (preset.isTomorrow || preset.isNextWeek)) {
+      return 'context'; // Otras fechas -> Próximas
+    }
+
+    const ts = targetTimestamp || (preset ? preset.targetTimestamp : null);
+    if (ts) {
+      const now = new Date();
+      const target = new Date(ts);
+      const isToday = (now.getFullYear() === target.getFullYear() &&
+                       now.getMonth() === target.getMonth() &&
+                       now.getDate() === target.getDate());
+      return isToday ? 'urgent' : 'context';
+    }
+
+    const str = alertDateTimeStr || (preset ? (preset.alertDateTimeStr || preset.label) : '');
+    if (str) {
+      const lower = str.toLowerCase();
+      if (lower.includes('hoy') || lower.includes('hora') || lower.includes('min')) {
+        return 'urgent';
+      }
+      return 'context';
+    }
+
+    return 'urgent';
+  }
+
   return 'normal';
 }
 

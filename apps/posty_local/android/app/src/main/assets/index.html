@@ -50,12 +50,12 @@
       </div>
     </header>
 
-    <!-- Pestañas de Filtro Rápido (Sin 'Todas'; Soporta click y mantener presionado para selección múltiple) -->
+    <!-- Pestañas de Filtro Rápido (Texto dinámico al presionar, íconos de color para Urgente, Próximas y Libres) -->
     <nav class="filter-bar" id="filterBar">
-      <button class="filter-chip chip-red active" id="chipUrgent" data-filter="urgent">🔴 Urgente (1)</button>
-      <button class="filter-chip chip-yellow active" id="chipContext" data-filter="context">🟡 Próximas (2)</button>
-      <button class="filter-chip chip-green active" id="chipNormal" data-filter="normal">🟢 Libres (2)</button>
-      <button class="filter-chip chip-gray" id="chipDone" data-filter="completed">✓ Realizadas (0)</button>
+      <button class="filter-chip active" id="chipUrgent" data-filter="urgent">🔴 <span>Urgente (1)</span></button>
+      <button class="filter-chip" id="chipContext" data-filter="context">🟡</button>
+      <button class="filter-chip" id="chipNormal" data-filter="normal">🟢</button>
+      <button class="filter-chip" id="chipDone" data-filter="completed">✓</button>
     </nav>
 
     <!-- Tablero de Post-its Diarios (Semáforo de Urgencia) -->
