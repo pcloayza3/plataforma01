@@ -57,11 +57,11 @@ const DEFAULT_TIME_PRESETS = [
   { id: 't_manana12', label: 'Mañana medio día', timeStr: '12:00', isTomorrow: true, uses: 6 }
 ];
 
-// Georreferencias por defecto: Exactamente las 3 requeridas
+// Georreferencias por defecto: Exactamente las 3 requeridas con opciones Al llegar a / Al salir de
 const DEFAULT_GEO_PRESETS = [
-  { id: 'g_casa', label: 'Al salir de casa', place: 'Casa', transition: 'EXIT', uses: 10 },
-  { id: 'g_super', label: 'Cerca del súper', place: 'Supermercado', transition: 'ENTER', uses: 8 },
-  { id: 'g_trabajo', label: 'En el trabajo', place: 'Trabajo', transition: 'ENTER', uses: 6 }
+  { id: 'g_casa', label: 'Al salir de Casa', place: 'Casa', transition: 'EXIT', uses: 10 },
+  { id: 'g_super', label: 'Al llegar a Supermercado', place: 'Supermercado', transition: 'ENTER', uses: 8 },
+  { id: 'g_trabajo', label: 'Al llegar a Trabajo', place: 'Trabajo', transition: 'ENTER', uses: 6 }
 ];
 
 let notes = [];
@@ -77,19 +77,28 @@ let selectedTriggerType = 'none';
 let selectedTriggerLabel = 'Ninguna asignada';
 let selectedTargetTimestamp = null;
 let selectedAlertDateTimeStr = null;
+let selectedGeoPlace = null;
+let selectedGeoTransition = 'ENTER';
 let editingNoteId = null;
 let modalLines = [];
 
 let activeAudioElement = null;
 let activeAudioId = null;
 let currentVoicePromptType = 'time';
+let currentGeoTransition = 'ENTER'; // 'ENTER' (Al llegar a) o 'EXIT' (Al salir de)
 let pendingNewPlaceCoords = null;
+
+// Ubicación satelital del usuario en tiempo real
+let currentUserLat = null;
+let currentUserLng = null;
+let currentUserAccuracy = null;
+let userLocationMarker = null;
 
 // Reconocimiento de Voz Web (Web Speech API)
 let postyRecognitionInstance = null;
 
 // Versionado de instalación: Al instalarse, se ejecuta de manera 100% automática la restauración de datos iniciales
-const APP_DATA_VERSION = 'v2_clean_install_fresh';
+const APP_DATA_VERSION = 'v4_geofence_fresh_alerts';
 
 function checkInitialInstallation() {
   const currentVer = localStorage.getItem('posty_app_installed_version');
@@ -140,15 +149,19 @@ document.addEventListener('DOMContentLoaded', () => {
   // Conectar dictado estilo clinik_local en el modal de otro tiempo / nuevo lugar
   setupVoiceDictation('btnVoicePromptDictar', 'voicePromptTextInput');
 
-  // Ajuste para que el teclado androide no tape el campo de texto del nuevo lugar
+  // Ajuste para que el teclado androide no tape el campo de texto del nuevo lugar y vista previa dinámica
   const geoTextInput = document.getElementById('voicePromptTextInput');
   if (geoTextInput) {
+    geoTextInput.addEventListener('input', updateGeoFinalTextPreview);
     geoTextInput.addEventListener('focus', () => {
       setTimeout(() => {
         geoTextInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 300);
     });
   }
+
+  // Iniciar monitoreo continuo de geolocalización para alertas de entrada y salida
+  startContinuousLocationEngine();
 
   // Si se abre como protector de pantalla (Daydream en Android: ?screensaver=1)
   const urlParams = new URLSearchParams(window.location.search);
@@ -486,9 +499,12 @@ function openNewNoteModal() {
   editingNoteId = null;
   modalLines = [{ id: 'ml-1', text: '', completed: false, hasAudio: false, audioDuration: null, audioData: null }];
   modalPhotoData = null;
+  selectedGeoPlace = null;
+  selectedGeoTransition = 'ENTER';
   const modal = document.getElementById('newNoteModal');
   const modalTitle = document.getElementById('modalTitle');
 
+  notifyModalState(true);
   modal.classList.remove('hidden');
   resetModalForm();
   renderModalLines();
@@ -512,12 +528,15 @@ function openEditNoteModal(noteId) {
   const modal = document.getElementById('newNoteModal');
   const modalTitle = document.getElementById('modalTitle');
 
+  notifyModalState(true);
   modal.classList.remove('hidden');
   modalTitle.textContent = 'Editar Nota';
 
   selectColor(note.color || 'yellow');
   selectedTriggerType = note.triggerType || 'none';
   selectedTriggerLabel = note.triggerLabel || 'Ninguna asignada';
+  selectedGeoPlace = note.geoPlace || null;
+  selectedGeoTransition = note.geoTransition || 'ENTER';
   const selTrig = document.getElementById('selectedTriggerText');
   if (selTrig) selTrig.textContent = `Alerta: ${selectedTriggerLabel}`;
 
@@ -743,6 +762,7 @@ function removeAttachedPhoto() {
 // Modal para "➕ Otro tiempo" / "➕ Nuevo lugar" / "🗺️ Elegir de mapa"
 function openVoicePromptModal(type, placeToEdit = null) {
   currentVoicePromptType = type;
+  notifyModalState(true);
   const modal = document.getElementById('voicePromptModal');
   const title = document.getElementById('voicePromptTitle');
   const timeSection = document.getElementById('voicePromptTimeSection');
@@ -753,8 +773,8 @@ function openVoicePromptModal(type, placeToEdit = null) {
   pendingNewPlaceCoords = null;
   const statusEl = document.getElementById('newPlaceCoordsStatus');
   if (statusEl) {
-    statusEl.textContent = 'Sin fijar (puede fijarse luego al estar en la zona).';
-    statusEl.style.color = 'var(--text-muted)';
+    statusEl.textContent = '✓ Geocerca lista en el mapa. Toque el mapa para moverla.';
+    statusEl.style.color = '#10B981';
   }
 
   modal.classList.remove('hidden');
@@ -782,6 +802,10 @@ function openVoicePromptModal(type, placeToEdit = null) {
 
     if (placeToEdit) {
       if (geoInput) geoInput.value = placeToEdit;
+      const matched = geoPresets.find(g => (g.place || g.label) === placeToEdit || g.label === placeToEdit);
+      const isExit = (matched && matched.transition === 'EXIT') || placeToEdit.toLowerCase().includes('salir');
+      selectGeoTransition(isExit ? 'EXIT' : 'ENTER');
+
       const saved = localStorage.getItem(`posty_geo_coords_${placeToEdit}`);
       if (saved) {
         const matchLat = saved.match(/Lat:\s*([-\d.]+)/);
@@ -796,16 +820,42 @@ function openVoicePromptModal(type, placeToEdit = null) {
         }
       }
     } else {
+      selectGeoTransition('ENTER');
       if (geoInput) {
         geoInput.value = '';
         setTimeout(() => geoInput.focus(), 150);
       }
+      if (currentUserLat !== null && currentUserLng !== null) {
+        initLat = currentUserLat;
+        initLng = currentUserLng;
+      }
     }
+
+    updateGeoFinalTextPreview();
 
     // Inicializar o refrescar el mapa interactivo de geocerca
     setTimeout(() => {
       initOrRefreshGeoMap(initLat, initLng, initRadius);
     }, 150);
+  }
+}
+
+function selectGeoTransition(trans) {
+  currentGeoTransition = trans;
+  const btnEnter = document.getElementById('btnTransitionEnter');
+  const btnExit = document.getElementById('btnTransitionExit');
+  if (btnEnter) btnEnter.classList.toggle('active', trans === 'ENTER');
+  if (btnExit) btnExit.classList.toggle('active', trans === 'EXIT');
+  updateGeoFinalTextPreview();
+}
+
+function updateGeoFinalTextPreview() {
+  const geoInput = document.getElementById('voicePromptTextInput');
+  const rawName = (geoInput ? geoInput.value : '').trim();
+  const prefix = currentGeoTransition === 'EXIT' ? 'Al salir de' : 'Al llegar a';
+  const previewEl = document.getElementById('geoFinalTextPreview');
+  if (previewEl) {
+    previewEl.textContent = rawName ? `Alarma: ${prefix} ${rawName}` : `Alarma: ${prefix} [Nombre del lugar]`;
   }
 }
 
@@ -863,6 +913,27 @@ function switchMapLayer(type) {
   }
 }
 
+// Punto azul oscuro con sombra celeste tenue de nuestra ubicación satelital en tiempo real
+function updateUserLocationMapMarker(lat, lng) {
+  if (!geoMap || typeof L === 'undefined' || lat === null || lng === null) return;
+  const userLocIcon = L.divIcon({
+    className: 'user-realtime-loc-marker',
+    html: `<div style="width: 14px; height: 14px; background: #1D4ED8; border: 2.5px solid #FFFFFF; border-radius: 50%; box-shadow: 0 0 0 6px rgba(56, 189, 248, 0.55), 0 2px 6px rgba(0,0,0,0.35);"></div>`,
+    iconSize: [26, 26],
+    iconAnchor: [13, 13]
+  });
+
+  if (userLocationMarker) {
+    userLocationMarker.setLatLng([lat, lng]);
+  } else {
+    userLocationMarker = L.marker([lat, lng], {
+      icon: userLocIcon,
+      interactive: false,
+      zIndexOffset: 1000
+    }).addTo(geoMap);
+  }
+}
+
 function initOrRefreshGeoMap(customLat, customLng, customRadius) {
   if (typeof L === 'undefined') {
     console.warn('Leaflet aún no cargado');
@@ -872,7 +943,11 @@ function initOrRefreshGeoMap(customLat, customLng, customRadius) {
   if (customLat && customLng) {
     currentMapLat = parseFloat(customLat);
     currentMapLng = parseFloat(customLng);
+  } else if (currentUserLat !== null && currentUserLng !== null) {
+    currentMapLat = currentUserLat;
+    currentMapLng = currentUserLng;
   }
+
   if (customRadius) {
     currentMapRadius = parseInt(customRadius);
   }
@@ -950,6 +1025,11 @@ function initOrRefreshGeoMap(customLat, customLng, customRadius) {
     } catch (e) {}
   }
 
+  // Refrescar punto de ubicación del usuario en tiempo real en el mapa
+  if (currentUserLat !== null && currentUserLng !== null) {
+    updateUserLocationMapMarker(currentUserLat, currentUserLng);
+  }
+
   // Múltiples invalidaciones para asegurar renderizado perfecto tras transiciones
   [60, 200, 500, 800].forEach(delay => {
     setTimeout(() => {
@@ -974,48 +1054,9 @@ function updatePendingCoordsString() {
   pendingNewPlaceCoords = `Lat: ${latFixed}, Lng: ${lngFixed} (Radio: ${currentMapRadius}m GPS)`;
   const statusEl = document.getElementById('newPlaceCoordsStatus');
   if (statusEl) {
-    statusEl.textContent = `✓ Ubicación: ${pendingNewPlaceCoords}`;
+    statusEl.textContent = `✓ Geocerca configurada • Cobertura: ${currentMapRadius}m`;
     statusEl.style.color = '#10B981';
   }
-}
-
-// Fijar ubicación GPS satelital opcional al crear un nuevo lugar
-function captureGPSForNewPlace() {
-  const statusEl = document.getElementById('newPlaceCoordsStatus');
-  const btn = document.getElementById('btnCaptureGeoNewPlace');
-  if (statusEl) statusEl.textContent = '🛰️ Obteniendo posición GPS satelital...';
-  if (btn) btn.disabled = true;
-
-  if (window.AndroidBridge && window.AndroidBridge.getRealGPSLocation) {
-    window.AndroidBridge.getRealGPSLocation('__pending_new_place__');
-    setTimeout(() => {
-      if (btn) btn.disabled = false;
-    }, 4000);
-    return;
-  }
-
-  if (!navigator.geolocation) {
-    if (statusEl) statusEl.textContent = 'Geolocalización no disponible en este dispositivo.';
-    if (btn) btn.disabled = false;
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      const lat = pos.coords.latitude;
-      const lng = pos.coords.longitude;
-      initOrRefreshGeoMap(lat, lng, currentMapRadius);
-      if (btn) btn.disabled = false;
-    },
-    (err) => {
-      if (statusEl) {
-        statusEl.textContent = 'No se pudo obtener GPS directo. Puede fijarse en el mapa.';
-        statusEl.style.color = 'var(--text-muted)';
-      }
-      if (btn) btn.disabled = false;
-    },
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-  );
 }
 
 function confirmVoicePrompt() {
@@ -1058,22 +1099,27 @@ function confirmVoicePrompt() {
       alert('Por favor ingrese o dicte el nombre del lugar.');
       return;
     }
-    let targetGeo = geoPresets.find(g => (g.place || g.label) === val || g.label === val);
+
+    const prefix = currentGeoTransition === 'EXIT' ? 'Al salir de' : 'Al llegar a';
+    const finalLabel = `${prefix} ${val}`;
+
+    let targetGeo = geoPresets.find(g => (g.place === val || g.label === finalLabel) && g.transition === currentGeoTransition);
     if (!targetGeo) {
       targetGeo = {
-        id: 'g_custom_' + Date.now(),
-        label: val,
+        id: 'g_' + (currentGeoTransition === 'EXIT' ? 'exit_' : 'enter_') + val.replace(/\s+/g, '_').toLowerCase(),
+        label: finalLabel,
         place: val,
-        transition: 'ENTER',
+        transition: currentGeoTransition,
         uses: 10
       };
       geoPresets.unshift(targetGeo);
+    } else {
+      targetGeo.label = finalLabel;
     }
     localStorage.setItem('posty_geo_presets_v2', JSON.stringify(geoPresets));
 
-    if (pendingNewPlaceCoords) {
-      localStorage.setItem(`posty_geo_coords_${val}`, pendingNewPlaceCoords);
-    }
+    const finalCoords = pendingNewPlaceCoords || `Lat: ${currentMapLat.toFixed(6)}, Lng: ${currentMapLng.toFixed(6)} (Radio: ${currentMapRadius}m GPS)`;
+    localStorage.setItem(`posty_geo_coords_${val}`, finalCoords);
 
     // Si estaba en la lista de eliminados, restaurarlo
     const deleted = JSON.parse(localStorage.getItem('posty_deleted_geo_presets') || '[]');
@@ -1091,6 +1137,7 @@ function confirmVoicePrompt() {
 }
 
 function closeVoicePromptModal() {
+  notifyModalState(false);
   document.getElementById('voicePromptModal').classList.add('hidden');
 }
 
@@ -1256,6 +1303,8 @@ function selectGeoPreset(preset) {
   selectedTargetTimestamp = null;
   selectedAlertDateTimeStr = preset.label;
   selectedTriggerLabel = preset.label;
+  selectedGeoPlace = preset.place || preset.label.replace(/^Al\s+(llegar\s+a|salir\s+de)\s+/i, '').trim();
+  selectedGeoTransition = preset.transition || (preset.label.toLowerCase().includes('salir') ? 'EXIT' : 'ENTER');
   const selTrig = document.getElementById('selectedTriggerText');
   if (selTrig) selTrig.textContent = `Alerta: ${preset.label}`;
 
@@ -1302,6 +1351,7 @@ function closeModal() {
     try { postyRecognitionInstance.stop(); } catch (err) {}
     postyRecognitionInstance = null;
   }
+  notifyModalState(false);
   document.getElementById('newNoteModal').classList.add('hidden');
   stopAudio();
 }
@@ -1340,6 +1390,12 @@ function saveNoteFromModal() {
       note.alertTimestamp = selectedTargetTimestamp;
       note.alertDateTimeStr = selectedAlertDateTimeStr;
       note.photo = modalPhotoData;
+      if (selectedTriggerType === 'geo') {
+        note.geoPlace = selectedGeoPlace;
+        note.geoTransition = selectedGeoTransition;
+        note.alreadyAlertedToday = false;
+        note.lastInsideState = null;
+      }
     }
   } else {
     const newNote = {
@@ -1350,6 +1406,10 @@ function saveNoteFromModal() {
       triggerLabel: selectedAlertDateTimeStr || (selectedTriggerLabel === 'Ninguna asignada' ? 'Sin alarma' : selectedTriggerLabel),
       alertTimestamp: selectedTargetTimestamp,
       alertDateTimeStr: selectedAlertDateTimeStr,
+      geoPlace: (selectedTriggerType === 'geo') ? selectedGeoPlace : null,
+      geoTransition: (selectedTriggerType === 'geo') ? selectedGeoTransition : null,
+      alreadyAlertedToday: false,
+      lastInsideState: null,
       completed: false,
       completedAt: null,
       createdAt: Date.now(),
@@ -1569,6 +1629,123 @@ window.openNoteFromNotification = function(targetNoteId) {
   playBellChime(noteText);
 };
 
+// Motor Geofence: Distancia Haversine y Verificación de Entradas y Salidas
+function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
+function checkGeofenceAlerts(userLat, userLng) {
+  if (userLat === null || userLng === null || isNaN(userLat) || isNaN(userLng)) return;
+
+  notes.forEach(note => {
+    if (note.completed || note.triggerType !== 'geo') return;
+
+    let place = note.geoPlace;
+    if (!place && note.triggerLabel) {
+      place = note.triggerLabel.replace(/^Al\s+(llegar\s+a|salir\s+de)\s+/i, '').trim();
+    }
+    if (!place) return;
+
+    // Obtener coordenadas del lugar
+    const savedCoord = localStorage.getItem(`posty_geo_coords_${place}`);
+    let placeCoords = parseCoordsString(savedCoord);
+    if (!placeCoords) {
+      if (place.toLowerCase().includes('casa')) placeCoords = { lat: -17.783300, lng: -63.182100, radius: 50 };
+      else if (place.toLowerCase().includes('super')) placeCoords = { lat: -17.781200, lng: -63.180400, radius: 50 };
+      else if (place.toLowerCase().includes('trabajo')) placeCoords = { lat: -17.778609, lng: -63.175607, radius: 50 };
+      else return;
+    }
+
+    const dist = getDistanceFromLatLonInMeters(userLat, userLng, placeCoords.lat, placeCoords.lng);
+    const isInside = dist <= placeCoords.radius;
+    const transition = note.geoTransition || (note.triggerLabel && note.triggerLabel.toLowerCase().includes('salir') ? 'EXIT' : 'ENTER');
+
+    if (note.lastInsideState === undefined || note.lastInsideState === null) {
+      note.lastInsideState = isInside;
+      return;
+    }
+
+    if (transition === 'ENTER' && !note.lastInsideState && isInside && !note.alreadyAlertedToday) {
+      note.alreadyAlertedToday = true;
+      note.lastInsideState = isInside;
+      const noteText = (note.lines && note.lines.length > 0) ? note.lines.map(l => l.text).join('. ') : (note.text || 'Llegó a ' + place);
+      triggerPushBanner(`📍 ${note.triggerLabel || 'Al llegar a ' + place}`, noteText, note.id);
+      saveToStorage();
+    } else if (transition === 'EXIT' && note.lastInsideState && !isInside && !note.alreadyAlertedToday) {
+      note.alreadyAlertedToday = true;
+      note.lastInsideState = isInside;
+      const noteText = (note.lines && note.lines.length > 0) ? note.lines.map(l => l.text).join('. ') : (note.text || 'Salió de ' + place);
+      triggerPushBanner(`🚪 ${note.triggerLabel || 'Al salir de ' + place}`, noteText, note.id);
+      saveToStorage();
+    } else {
+      note.lastInsideState = isInside;
+    }
+  });
+}
+
+function startContinuousLocationEngine() {
+  if (navigator.geolocation) {
+    navigator.geolocation.watchPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const acc = Math.round(pos.coords.accuracy || 10);
+        window.onDeviceLocationUpdate(lat, lng, acc);
+      },
+      (err) => {},
+      { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
+    );
+  }
+}
+
+window.onDeviceLocationUpdate = function(lat, lng, acc) {
+  currentUserLat = lat;
+  currentUserLng = lng;
+  currentUserAccuracy = acc;
+  updateUserLocationMapMarker(lat, lng);
+  checkGeofenceAlerts(lat, lng);
+};
+
+function notifyModalState(isOpen) {
+  if (window.AndroidBridge && window.AndroidBridge.setModalOpen) {
+    try {
+      window.AndroidBridge.setModalOpen(isOpen);
+    } catch (e) {}
+  }
+}
+
+window.handleAndroidBackButton = function() {
+  const screensaver = document.getElementById('screensaverOverlay');
+  if (screensaver && !screensaver.classList.contains('hidden')) {
+    closeScreensaver();
+    return true;
+  }
+  const voiceModal = document.getElementById('voicePromptModal');
+  if (voiceModal && !voiceModal.classList.contains('hidden')) {
+    closeVoicePromptModal();
+    return true;
+  }
+  const noteModal = document.getElementById('newNoteModal');
+  if (noteModal && !noteModal.classList.contains('hidden')) {
+    closeModal();
+    return true;
+  }
+  const settingsModal = document.getElementById('settingsModal');
+  if (settingsModal && !settingsModal.classList.contains('hidden')) {
+    closeSettings();
+    return true;
+  }
+  return false;
+};
+
 // 6. ALERTAS AUTOMÁTICAS (Push en pantalla y de sistema nativo)
 function startAutomaticAlertMonitor() {
   setInterval(() => {
@@ -1588,7 +1765,11 @@ function startAutomaticAlertMonitor() {
         triggerPushBanner(note.triggerLabel, noteText, note.id);
       }
     });
-  }, 8000);
+
+    if (currentUserLat !== null && currentUserLng !== null) {
+      checkGeofenceAlerts(currentUserLat, currentUserLng);
+    }
+  }, 6000);
 }
 
 function triggerPushBanner(title, body, noteId = null) {
@@ -1977,6 +2158,7 @@ function startClockUpdater() {
 
 // Modo Protector de Pantalla (Pantalla Feliz con Post-it alegre y tareas relevantes)
 function openScreensaver() {
+  notifyModalState(true);
   const overlay = document.getElementById('screensaverOverlay');
   if (overlay) overlay.classList.remove('hidden');
 
@@ -2023,18 +2205,21 @@ function openScreensaver() {
 }
 
 function closeScreensaver() {
+  notifyModalState(false);
   const overlay = document.getElementById('screensaverOverlay');
   if (overlay) overlay.classList.add('hidden');
 }
 
 // Configuración & Respaldo
 function openSettings() {
+  notifyModalState(true);
   renderSettingsTimePresets();
   renderSettingsLocations();
   document.getElementById('settingsModal').classList.remove('hidden');
 }
 
 function closeSettings() {
+  notifyModalState(false);
   document.getElementById('settingsModal').classList.add('hidden');
 }
 

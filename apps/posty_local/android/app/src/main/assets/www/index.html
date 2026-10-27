@@ -383,27 +383,39 @@
         <p class="voice-hint" style="margin-top: 6px;">La alarma se guardará con fecha y hora exacta y se mostrará en la nota.</p>
       </div>
 
-      <!-- Sección específica para Lugar (Nombre y GPS opcional) -->
+      <!-- Sección específica para Lugar (Opciones Al llegar a / Al salir de y Mapa) -->
       <div id="voicePromptGeoSection" class="hidden">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
-          <label class="trigger-label">Nombre del nuevo lugar:</label>
+        <div class="geo-transition-selector">
+          <label class="trigger-label" style="display: block; margin-bottom: 6px;">¿Cuándo disparar la alarma?</label>
+          <div style="display: flex; gap: 8px;">
+            <button type="button" class="btn-transition-opt active" id="btnTransitionEnter" onclick="selectGeoTransition('ENTER')">
+              🚗 Al llegar a
+            </button>
+            <button type="button" class="btn-transition-opt" id="btnTransitionExit" onclick="selectGeoTransition('EXIT')">
+              🚪 Al salir de
+            </button>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 8px; margin-bottom: 4px;">
+          <label class="trigger-label">Nombre del lugar:</label>
           <button type="button" class="btn-voice-mini icon-only" id="btnVoicePromptDictar" title="Dictar por voz">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
           </button>
         </div>
-        <input type="text" id="voicePromptTextInput" class="custom-input" placeholder="Ej: Gimnasio, Farmacia...">
+        <input type="text" id="voicePromptTextInput" class="custom-input" placeholder="Ej: Gimnasio, Farmacia, Casa...">
+        <div id="geoFinalTextPreview" style="font-size: 13px; font-weight: 700; color: #0284C7; margin: 6px 0 2px 2px;">
+          Alarma: Al llegar a...
+        </div>
 
         <div class="geo-optional-box" style="margin-top: 10px; padding: 12px; background: var(--bg-primary); border: 1px solid var(--border-subtle); border-radius: 12px;">
-          <div style="font-size: 12px; font-weight: 700; margin-bottom: 4px;">📍 Coordenadas Georreferenciales (Opcional):</div>
-          <div id="newPlaceCoordsStatus" style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">
-            Sin fijar (puede fijarse luego al estar en la zona).
+          <div style="font-size: 12px; font-weight: 700; margin-bottom: 4px;">📍 Área de Cobertura en el Mapa:</div>
+          <div id="newPlaceCoordsStatus" style="font-size: 11px; color: #10B981; margin-bottom: 8px;">
+            ✓ Geocerca lista en el mapa. Toque el mapa para moverla.
           </div>
-          <button type="button" class="chip-action" id="btnCaptureGeoNewPlace" onclick="captureGPSForNewPlace()">
-            Fijar posición GPS actual ahora
-          </button>
 
           <!-- Mapa Interactivo Táctil para fijar centro y radio visualmente -->
-          <div class="geo-map-box" id="geoMapBox" style="margin-top: 10px;">
+          <div class="geo-map-box" id="geoMapBox" style="margin-top: 6px;">
             <div class="map-type-bar">
               <button type="button" class="btn-map-type active" id="btnMapGoogle" onclick="switchMapLayer('google')">🗺️ Google Maps</button>
               <button type="button" class="btn-map-type" id="btnMapSat" onclick="switchMapLayer('satellite')">🛰️ Satélite</button>

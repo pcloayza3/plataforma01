@@ -249,21 +249,77 @@ html, body {
 .filter-chip.active {
   flex: 1 1 auto;
   min-width: 0;
-  background-color: #0284C7 !important;
-  color: #FFFFFF !important;
-  border-color: #0284C7 !important;
   font-size: 12px;
   font-weight: 700;
-  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.35);
   padding: 0 10px;
 }
 
-body[data-theme="dark"] .filter-chip.active {
-  background-color: #38BDF8 !important;
-  color: #0F172A !important;
-  border-color: #38BDF8 !important;
-  font-weight: 700;
-  box-shadow: 0 2px 8px rgba(56, 189, 248, 0.35);
+/* 1. Urgente: Botón y fondo rojo */
+.filter-chip[data-filter="urgent"].active,
+#chipUrgent.active {
+  background-color: #EF4444 !important;
+  color: #FFFFFF !important;
+  border-color: #DC2626 !important;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.45) !important;
+}
+
+/* 2. Próximas: Fondo amarillo */
+.filter-chip[data-filter="context"].active,
+#chipContext.active {
+  background-color: #F59E0B !important;
+  color: #FFFFFF !important;
+  border-color: #D97706 !important;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.45) !important;
+}
+
+/* 3. Libres: Verde */
+.filter-chip[data-filter="normal"].active,
+#chipNormal.active {
+  background-color: #10B981 !important;
+  color: #FFFFFF !important;
+  border-color: #059669 !important;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.45) !important;
+}
+
+/* 4. Realizadas: Gris oscuro */
+.filter-chip[data-filter="completed"].active,
+#chipDone.active {
+  background-color: #334155 !important;
+  color: #FFFFFF !important;
+  border-color: #1E293B !important;
+  box-shadow: 0 2px 8px rgba(51, 65, 85, 0.45) !important;
+}
+
+body[data-theme="dark"] .filter-chip[data-filter="urgent"].active,
+body[data-theme="dark"] #chipUrgent.active {
+  background-color: #EF4444 !important;
+  color: #FFFFFF !important;
+  border-color: #F87171 !important;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.5) !important;
+}
+
+body[data-theme="dark"] .filter-chip[data-filter="context"].active,
+body[data-theme="dark"] #chipContext.active {
+  background-color: #F59E0B !important;
+  color: #FFFFFF !important;
+  border-color: #FBBF24 !important;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.5) !important;
+}
+
+body[data-theme="dark"] .filter-chip[data-filter="normal"].active,
+body[data-theme="dark"] #chipNormal.active {
+  background-color: #10B981 !important;
+  color: #FFFFFF !important;
+  border-color: #34D399 !important;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.5) !important;
+}
+
+body[data-theme="dark"] .filter-chip[data-filter="completed"].active,
+body[data-theme="dark"] #chipDone.active {
+  background-color: #475569 !important;
+  color: #FFFFFF !important;
+  border-color: #64748B !important;
+  box-shadow: 0 2px 8px rgba(71, 85, 105, 0.5) !important;
 }
 
 /* Tablero de Notas */
@@ -1816,6 +1872,41 @@ body[data-theme="dark"] .btn-voice-mini {
   font-weight: 600;
   color: var(--text-muted);
   font-style: italic;
+}
+
+.geo-transition-selector {
+  margin-top: 6px;
+  margin-bottom: 8px;
+}
+
+.btn-transition-opt {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border-subtle);
+  background: var(--bg-surface);
+  color: var(--text-main);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.btn-transition-opt.active {
+  background: #0284C7 !important;
+  color: #FFFFFF !important;
+  border-color: #0284C7 !important;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+}
+
+.user-realtime-loc-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Mapa Interactivo y Control Táctil de Geocerca */

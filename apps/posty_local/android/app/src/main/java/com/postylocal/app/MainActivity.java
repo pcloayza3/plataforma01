@@ -56,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
     private String pendingVoiceTargetIndex = "0";
     private TextToSpeech textToSpeech;
     private ValueCallback<Uri[]> fileUploadCallback;
+    private LocationListener continuousLocationListener = null;
+    private volatile boolean isModalOpen = false;
 
     // Grabación nativa de audio de Android (Hardware de Micrófono)
     private MediaRecorder nativeRecorder = null;
@@ -237,10 +239,89 @@ public class MainActivity extends AppCompatActivity {
 
         if (!needed.isEmpty()) {
             ActivityCompat.requestPermissions(this, needed.toArray(new String[0]), PERMISSION_REQUEST_CODE);
+        } else {
+            startContinuousLocationUpdates();
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            startContinuousLocationUpdates();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        startContinuousLocationUpdates();
+    }
+
+    private void startContinuousLocationUpdates() {
+        runOnUiThread(() -> {
+            try {
+                LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                if (lm == null) return;
+
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    return;
+                }
+
+                if (continuousLocationListener != null) {
+                    lm.removeUpdates(continuousLocationListener);
+                }
+
+                continuousLocationListener = new LocationListener() {
+                    @Override
+                    public void onLocationChanged(Location loc) {
+                        sendDeviceLocationToWebView(loc.getLatitude(), loc.getLongitude(), loc.getAccuracy());
+                    }
+                    @Override public void onStatusChanged(String provider, int status, Bundle extras) {}
+                    @Override public void onProviderEnabled(String provider) {}
+                    @Override public void onProviderDisabled(String provider) {}
+                };
+
+                // Emitir inmediatamente la última ubicación conocida
+                Location best = null;
+                if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                    best = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                }
+                if (best == null && lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                    best = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                }
+                if (best != null) {
+                    sendDeviceLocationToWebView(best.getLatitude(), best.getLongitude(), best.getAccuracy());
+                }
+
+                if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                    lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 2, continuousLocationListener);
+                }
+                if (lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                    lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 4000, 3, continuousLocationListener);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    private void sendDeviceLocationToWebView(double lat, double lng, float acc) {
+        if (webView == null) return;
+        webView.post(() -> {
+            String js = String.format(java.util.Locale.US,
+                "if (window.onDeviceLocationUpdate) { window.onDeviceLocationUpdate(%.6f, %.6f, %.1f); }",
+                lat, lng, acc);
+            webView.evaluateJavascript(js, null);
+        });
+    }
+
     public class AndroidNativeBridge {
+
+        @JavascriptInterface
+        public void setModalOpen(boolean isOpen) {
+            isModalOpen = isOpen;
+        }
 
         @JavascriptInterface
         public void startVoiceDictation(String targetIndex) {
@@ -496,6 +577,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        if (continuousLocationListener != null) {
+            LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            if (lm != null) {
+                lm.removeUpdates(continuousLocationListener);
+            }
+        }
         if (textToSpeech != null) {
             textToSpeech.stop();
             textToSpeech.shutdown();
@@ -505,8 +592,23 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (webView != null && webView.canGoBack()) {
-            webView.goBack();
+        if (webView != null) {
+            webView.evaluateJavascript(
+                "(function() { return (window.handleAndroidBackButton && window.handleAndroidBackButton()) ? 'closed' : 'exit'; })();",
+                result -> {
+                    if (result != null && result.contains("closed")) {
+                        // Se cerró un formulario/modal abierto con éxito, no salir de la app
+                        return;
+                    }
+                    runOnUiThread(() -> {
+                        if (webView.canGoBack()) {
+                            webView.goBack();
+                        } else {
+                            MainActivity.super.onBackPressed();
+                        }
+                    });
+                }
+            );
         } else {
             super.onBackPressed();
         }
