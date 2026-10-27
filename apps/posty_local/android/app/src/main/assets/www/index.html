@@ -312,27 +312,51 @@
         </h4>
         <p class="settings-desc">Lugares georreferenciados para alertar por proximidad (elegir en mapa o GPS).</p>
         <div id="settingsLocationsList" class="settings-locations-list">
-          <!-- Se inyectan dinámicamente con Elegir de mapa, Actualizar Aquí y Eliminar -->
+          <!-- Se inyectan dinámicamente con Elegir de mapa y Eliminar (sin botón actualizar) -->
         </div>
         <button type="button" class="btn-text-action" onclick="openVoicePromptModal('geo')" style="margin-top: 8px;">➕ Agregar nuevo lugar</button>
 
         <hr class="settings-divider">
 
-        <!-- Protector de Pantalla del Celular (Always On Display / Daydream) -->
+        <!-- Protector de Pantalla y Bloqueo del Celular (Always On Display / Daydream / Lock Screen) -->
         <h4>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-          Protector de Pantalla (Actividades en Vivo)
+          Protector y Bloqueo de Pantalla (Actividades en Vivo)
         </h4>
-        <p class="settings-desc">Muestra el reloj OLED y las actividades urgentes mientras su smartphone carga.</p>
+        <p class="settings-desc">Integre sus notas urgentes en su protector actual, pantalla de bloqueo y Always-On Display.</p>
+
+        <!-- Opción 1: En su protector actual y pantalla de bloqueo (Live Widget / Notificación Pública AOD) -->
         <div style="background: var(--bg-primary); padding: 12px; border-radius: 12px; border: 1px solid var(--border-subtle); margin-top: 6px; font-size: 12px; line-height: 1.5;">
-          <strong>Cómo activarlo en su smartphone:</strong><br>
-          1. Abra <em>Ajustes de Android &gt; Pantalla &gt; Protector de pantalla</em>.<br>
-          2. Seleccione <strong>Nota Feliz</strong> como protector predeterminado.<br>
-          3. Elija <em>Al cargar</em> o <em>En soporte</em>.
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+            <strong style="color: var(--text-primary); font-size: 13px;">🔒 Mostrar en Bloqueo y Protector actual (AOD)</strong>
+            <label class="switch" style="margin: 0;">
+              <input type="checkbox" id="lockScreenWidgetToggle" onchange="toggleLockScreenWidget(this.checked)" checked>
+              <span class="slider-round"></span>
+            </label>
+          </div>
+          <div style="color: var(--text-muted); font-size: 11px;">
+            Mantiene sus tareas activas visibles directamente en la pantalla de bloqueo de su teléfono y Always-On Display de fábrica, sin necesidad de estar enchufado al cargador.
+          </div>
+          <button type="button" class="chip-action" onclick="syncLockScreenWidget(true)" style="margin-top: 8px; width: 100%; justify-content: center; font-size: 12px;">
+            📌 Sincronizar tareas en Pantalla de Bloqueo ahora
+          </button>
         </div>
-        <button type="button" class="chip-action" onclick="openScreensaver()" style="margin-top: 8px; width: 100%; justify-content: center;">
-          👁️ Probar Protector de Pantalla Ahora
-        </button>
+
+        <!-- Opción 2: Protector de Pantalla de Android (Daydream al cargar) -->
+        <div style="background: var(--bg-primary); padding: 12px; border-radius: 12px; border: 1px solid var(--border-subtle); margin-top: 10px; font-size: 12px; line-height: 1.5;">
+          <strong style="color: var(--text-primary); font-size: 13px;">⚡ Protector del Sistema Android (Al Cargar)</strong>
+          <div style="color: var(--text-muted); font-size: 11px; margin-top: 4px;">
+            En Android, los protectores de pantalla del sistema se activan automáticamente <em>únicamente cuando el celular está conectado al cargador</em> y la pantalla se apaga sola por inactividad.
+          </div>
+          <div style="display: flex; gap: 8px; margin-top: 8px;">
+            <button type="button" class="chip-action" onclick="openAndroidDreamSettings()" style="flex: 1; justify-content: center; font-size: 11px;">
+              ⚙️ Ajustes del Celular
+            </button>
+            <button type="button" class="chip-action" onclick="openScreensaver()" style="flex: 1; justify-content: center; font-size: 11px;">
+              👁️ Modo Reposo OLED
+            </button>
+          </div>
+        </div>
 
         <hr class="settings-divider">
 

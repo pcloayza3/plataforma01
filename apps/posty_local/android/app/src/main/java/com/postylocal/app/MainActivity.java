@@ -2,6 +2,9 @@ package com.postylocal.app;
 
 import android.Manifest;
 import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -16,9 +19,11 @@ import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.Settings;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.util.Base64;
+import android.view.WindowManager;
 import android.widget.Toast;
 import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
@@ -36,6 +41,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -537,6 +543,104 @@ public class MainActivity extends AppCompatActivity {
                     } catch (Exception ex) {
                         Toast.makeText(MainActivity.this, "Error al exportar: " + ex.getMessage(), Toast.LENGTH_LONG).show();
                     }
+                }
+            });
+        }
+
+        // Actualizar Actividades Relevantes directamente en Pantalla de Bloqueo y AOD (Protector actual)
+        @JavascriptInterface
+        public void updateLockScreenLiveWidget(String title, String summary, String detailsText) {
+            runOnUiThread(() -> {
+                try {
+                    NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                    if (manager == null) return;
+
+                    String channelId = "nota_feliz_lockscreen_feed";
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        NotificationChannel channel = manager.getNotificationChannel(channelId);
+                        if (channel == null) {
+                            channel = new NotificationChannel(
+                                channelId,
+                                "Nota Feliz - Pantalla de Bloqueo y AOD",
+                                NotificationManager.IMPORTANCE_LOW
+                            );
+                            channel.setDescription("Muestra las notas relevantes en la pantalla de bloqueo y Always On Display");
+                            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+                            channel.setShowBadge(true);
+                            manager.createNotificationChannel(channel);
+                        }
+                    }
+
+                    Intent mainIntent = new Intent(MainActivity.this, MainActivity.class);
+                    mainIntent.setAction("com.postylocal.app.ACTION_OPEN_FROM_LOCKSCREEN");
+                    mainIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+                    PendingIntent pendingIntent = PendingIntent.getActivity(
+                        MainActivity.this,
+                        1001,
+                        mainIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                    );
+
+                    NotificationCompat.Builder builder = new NotificationCompat.Builder(MainActivity.this, channelId)
+                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setContentTitle(title)
+                        .setContentText(summary)
+                        .setStyle(new NotificationCompat.BigTextStyle().bigText(detailsText))
+                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                        .setOngoing(true)
+                        .setContentIntent(pendingIntent)
+                        .setShowWhen(true);
+
+                    manager.notify(1001, builder.build());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+
+        // Remover Widget de Pantalla de Bloqueo si el usuario lo desactiva
+        @JavascriptInterface
+        public void removeLockScreenLiveWidget() {
+            runOnUiThread(() -> {
+                try {
+                    NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                    if (manager != null) {
+                        manager.cancel(1001);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+
+        // Abrir Ajustes de Protector de Pantalla del Sistema Android directamente
+        @JavascriptInterface
+        public void openDreamSettings() {
+            runOnUiThread(() -> {
+                try {
+                    Intent intent = new Intent(Settings.ACTION_DREAM_SETTINGS);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                } catch (Exception e) {
+                    try {
+                        Intent intent = new Intent(Settings.ACTION_DISPLAY_SETTINGS);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                    } catch (Exception ignored) {}
+                }
+            });
+        }
+
+        // Mantener Pantalla Encendida durante el Modo Reposo OLED
+        @JavascriptInterface
+        public void setKeepScreenOn(boolean keepOn) {
+            runOnUiThread(() -> {
+                if (keepOn) {
+                    getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                } else {
+                    getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 }
             });
         }

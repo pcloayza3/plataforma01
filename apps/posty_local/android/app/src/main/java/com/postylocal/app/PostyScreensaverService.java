@@ -39,6 +39,13 @@ public class PostyScreensaverService extends DreamService {
                 // Forzar despliegue inmediato de la Pantalla Feliz con su Post-it y Carita Feliz
                 view.evaluateJavascript("if (window.openScreensaver) { window.openScreensaver(); }", null);
             }
+
+            @Override
+            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                if (failingUrl != null && failingUrl.startsWith("file:///android_asset/www/index.html")) {
+                    view.loadUrl("file:///android_asset/index.html?screensaver=1");
+                }
+            }
         });
 
         setContentView(webView);

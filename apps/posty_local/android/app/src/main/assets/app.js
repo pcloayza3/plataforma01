@@ -330,6 +330,9 @@ function renderBoard() {
   if (urgentSummary) {
     urgentSummary.textContent = `${activeNotes.length} actividades • ${urgentCount} urgente`;
   }
+
+  // Sincronizar automáticamente la lista de actividades en la pantalla de bloqueo y AOD del smartphone
+  syncLockScreenWidget();
 }
 
 // Crear Elemento HTML de Nota
@@ -1986,9 +1989,6 @@ function renderSettingsLocations() {
             <button type="button" class="btn-flat-action" onclick="openGeoPickerForPlace('${escapedPlace}')" title="Elegir y ajustar en el mapa">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
             </button>
-            <button type="button" class="btn-flat-action" id="btnUpdate_${safeId}" onclick="updateGeoCoord('${escapedPlace}')" title="Fijar GPS del celular aquí">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3m0 14v3M2 12h3m14 0h3"></path></svg>
-            </button>
             <button type="button" class="btn-flat-action delete" onclick="deleteGeoPreset('${escapedPlace}')" title="Eliminar lugar">
               ${ICONS.trash}
             </button>
@@ -2159,6 +2159,9 @@ function startClockUpdater() {
 // Modo Protector de Pantalla (Pantalla Feliz con Post-it alegre y tareas relevantes)
 function openScreensaver() {
   notifyModalState(true);
+  if (window.AndroidBridge && window.AndroidBridge.setKeepScreenOn) {
+    window.AndroidBridge.setKeepScreenOn(true);
+  }
   const overlay = document.getElementById('screensaverOverlay');
   if (overlay) overlay.classList.remove('hidden');
 
@@ -2206,8 +2209,80 @@ function openScreensaver() {
 
 function closeScreensaver() {
   notifyModalState(false);
+  if (window.AndroidBridge && window.AndroidBridge.setKeepScreenOn) {
+    window.AndroidBridge.setKeepScreenOn(false);
+  }
   const overlay = document.getElementById('screensaverOverlay');
   if (overlay) overlay.classList.add('hidden');
+}
+
+// Sincronización de tareas relevantes en la Pantalla de Bloqueo y Protector AOD del celular
+function syncLockScreenWidget(showAlertIfManual = false) {
+  const isEnabled = localStorage.getItem('posty_lockscreen_widget_enabled') !== 'false';
+  if (!isEnabled) {
+    if (window.AndroidBridge && window.AndroidBridge.removeLockScreenLiveWidget) {
+      window.AndroidBridge.removeLockScreenLiveWidget();
+    }
+    return;
+  }
+
+  const activeNotes = (notes || []).filter(n => !n.completed);
+  let title = "Nota Feliz • Actividades Relevantes";
+  let summary = "";
+  let details = "";
+
+  if (activeNotes.length === 0) {
+    summary = "✨ ¡Todas las notas cumplidas!";
+    details = "✨ Todas las notas cumplidas. ¡Disfrute su día!";
+  } else {
+    const urgentCount = activeNotes.filter(n => n.urgency === 'urgent').length;
+    if (urgentCount > 0) {
+      summary = `📌 ${urgentCount} urgente${urgentCount > 1 ? 's' : ''} pendiente${urgentCount > 1 ? 's' : ''}`;
+    } else {
+      summary = `📝 ${activeNotes.length} actividad${activeNotes.length > 1 ? 'es' : ''} pendiente${activeNotes.length > 1 ? 's' : ''}`;
+    }
+
+    const lines = [];
+    activeNotes.slice(0, 5).forEach(n => {
+      const text = n.lines && n.lines.length > 0 ? n.lines[0].text : (n.text || '');
+      const icon = n.urgency === 'urgent' ? '📌' : (n.triggerType === 'geo' ? '📍' : '●');
+      const timeInfo = n.alertDateTimeStr || n.triggerLabel || '';
+      lines.push(`${icon} ${text}${timeInfo ? ` (${timeInfo})` : ''}`);
+    });
+    if (activeNotes.length > 5) {
+      lines.push(`... y ${activeNotes.length - 5} notas más`);
+    }
+    details = lines.join('\n');
+  }
+
+  if (window.AndroidBridge && window.AndroidBridge.updateLockScreenLiveWidget) {
+    window.AndroidBridge.updateLockScreenLiveWidget(title, summary, details);
+    if (showAlertIfManual) {
+      alert("✓ Tareas sincronizadas en la Pantalla de Bloqueo y Protector de su smartphone.");
+    }
+  } else if (showAlertIfManual) {
+    alert("✓ Tareas sincronizadas localmente.");
+  }
+}
+
+function toggleLockScreenWidget(enabled) {
+  localStorage.setItem('posty_lockscreen_widget_enabled', enabled ? 'true' : 'false');
+  if (enabled) {
+    syncLockScreenWidget(true);
+  } else {
+    if (window.AndroidBridge && window.AndroidBridge.removeLockScreenLiveWidget) {
+      window.AndroidBridge.removeLockScreenLiveWidget();
+    }
+    alert("Notificación en Pantalla de Bloqueo desactivada.");
+  }
+}
+
+function openAndroidDreamSettings() {
+  if (window.AndroidBridge && window.AndroidBridge.openDreamSettings) {
+    window.AndroidBridge.openDreamSettings();
+  } else {
+    alert("Abra Ajustes de su smartphone > Pantalla > Protector de pantalla.");
+  }
 }
 
 // Configuración & Respaldo
@@ -2215,6 +2290,10 @@ function openSettings() {
   notifyModalState(true);
   renderSettingsTimePresets();
   renderSettingsLocations();
+  const toggle = document.getElementById('lockScreenWidgetToggle');
+  if (toggle) {
+    toggle.checked = localStorage.getItem('posty_lockscreen_widget_enabled') !== 'false';
+  }
   document.getElementById('settingsModal').classList.remove('hidden');
 }
 
