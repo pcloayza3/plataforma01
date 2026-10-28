@@ -2359,11 +2359,32 @@ function syncLockScreenWidget(showAlertIfManual = false) {
 
   if (window.AndroidBridge && window.AndroidBridge.updateLockScreenLiveWidget) {
     window.AndroidBridge.updateLockScreenLiveWidget(title, summary, details);
-    if (showAlertIfManual) {
-      alert("✓ Tareas sincronizadas en la Pantalla de Bloqueo y Protector de su smartphone.");
+  }
+
+  // Sincronizar datos con el Lock Screen Widget nativo (AppWidget / Keyguard)
+  let nextAlarmTitle = "Nota Feliz";
+  let nextAlarmTime = "Sin alarmas pendientes";
+  let nextNoteId = "";
+
+  if (activeNotes.length > 0) {
+    const priorityNote = activeNotes.find(n => n.urgency === 'urgent') ||
+                         activeNotes.find(n => n.alertDateTimeStr || n.triggerLabel) ||
+                         activeNotes[0];
+    if (priorityNote) {
+      nextAlarmTitle = (priorityNote.lines && priorityNote.lines.length > 0)
+        ? priorityNote.lines[0].text
+        : (priorityNote.text || 'Nota');
+      nextAlarmTime = priorityNote.alertDateTimeStr || priorityNote.triggerLabel || 'Pendiente';
+      nextNoteId = priorityNote.id || '';
     }
-  } else if (showAlertIfManual) {
-    alert("✓ Tareas sincronizadas localmente.");
+  }
+
+  if (window.AndroidBridge && window.AndroidBridge.updateLockScreenWidgetData) {
+    window.AndroidBridge.updateLockScreenWidgetData(nextAlarmTitle, nextAlarmTime, activeNotes.length, nextNoteId);
+  }
+
+  if (showAlertIfManual) {
+    alert("✓ Widget y Pantalla de Bloqueo sincronizados con éxito.");
   }
 }
 

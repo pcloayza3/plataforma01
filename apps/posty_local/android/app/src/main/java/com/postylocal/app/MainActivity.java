@@ -645,6 +645,14 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
+        // Actualizar datos del Lock Screen Widget nativo (AppWidget / Keyguard / Pantalla de Bloqueo)
+        @JavascriptInterface
+        public void updateLockScreenWidgetData(String title, String timeStr, int count, String noteId) {
+            runOnUiThread(() -> {
+                LockScreenWidgetProvider.updateAllWidgets(MainActivity.this, title, timeStr, count, noteId);
+            });
+        }
+
         private void sendGpsToWebView(String place, double lat, double lng, float acc) {
             webView.post(() -> {
                 String js = String.format(java.util.Locale.US,
