@@ -1530,7 +1530,111 @@ body.dark .alert-tab-btn:hover:not(.active) {
 .settings-divider {
   border: none;
   border-top: 1px solid var(--border-subtle);
-  margin: 6px 0;
+  margin: 12px 0 8px;
+}
+
+/* Botones de Navegación a Nuevas Pantallas de Configuración */
+.settings-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+  margin-top: 10px;
+}
+
+.settings-nav-btn:hover {
+  background: var(--bg-primary);
+  border-color: #0284C7;
+  transform: translateY(-1px);
+}
+
+.settings-nav-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings-nav-icon {
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(2, 132, 199, 0.08);
+  flex-shrink: 0;
+}
+
+.settings-nav-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-nav-text strong {
+  font-size: 13px;
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+.settings-nav-text span {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.settings-nav-arrow {
+  font-size: 18px;
+  color: var(--text-muted);
+  font-weight: 700;
+  margin-left: 8px;
+}
+
+/* Sub-pantallas (Vistas Secundarias) de Configuración */
+.settings-subscreen {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: fadeIn 0.15s ease-in;
+}
+
+.settings-subscreen.hidden {
+  display: none !important;
+}
+
+.settings-subscreen-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.settings-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: #0284C7;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+
+.settings-back-btn:hover {
+  background: rgba(2, 132, 199, 0.1);
 }
 
 .backup-actions {

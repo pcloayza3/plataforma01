@@ -102,7 +102,7 @@
 
     <!-- Barra Inferior de Captura Rápida (Botón CREAR NOTA prominente sin iconos) -->
     <footer class="bottom-action-bar">
-      <button class="btn-create-note-main" id="btnCreateNote" onclick="openNewNoteModal()">
+      <button class="btn-create-note-main" id="btnCreateNote" onclick="openNewNoteModal()" data-i18n="btn_create_note">
         CREAR NOTA
       </button>
     </footer>
@@ -111,7 +111,7 @@
   <div id="newNoteModal" class="modal-backdrop hidden">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 id="modalTitle">Nueva Nota</h3>
+        <h3 id="modalTitle" data-i18n="modal_title_new">Nueva Nota</h3>
         <button class="close-x-btn" onclick="closeModal()">✕</button>
       </div>
 
@@ -122,7 +122,7 @@
         </div>
 
         <div class="add-line-control">
-          <button type="button" class="btn-add-line" id="btnAddLine" onclick="addNewLineToModal()">
+          <button type="button" class="btn-add-line" id="btnAddLine" onclick="addNewLineToModal()" data-i18n="btn_add_line">
             ➕ Aumentar nueva línea de lista (<span id="lineCountDisplay">1/5</span>)
           </button>
         </div>
@@ -130,7 +130,7 @@
 
       <!-- Selector de Color del Post-it (Cambio Inmediato) -->
       <div class="color-picker-row" id="modalColorPicker">
-        <span class="picker-label">Color:</span>
+        <span class="picker-label" data-i18n="label_color">Color:</span>
         <div class="color-options">
           <button type="button" class="color-opt opt-yellow active" onclick="selectColor('yellow')"></button>
           <button type="button" class="color-opt opt-green" onclick="selectColor('green')"></button>
@@ -147,12 +147,12 @@
           <img id="photoPreviewImg" src="" alt="Foto adjunta" class="photo-preview-thumb">
           <button type="button" class="btn-remove-photo" onclick="removeAttachedPhoto()" title="Eliminar foto">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-            Quitar foto
+            <span data-i18n="btn_remove_photo">Quitar foto</span>
           </button>
         </div>
         <button type="button" class="btn-attach-photo" id="btnAttachPhoto" onclick="document.getElementById('notePhotoInput').click()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-          Adjuntar Foto (Opcional)
+          <span data-i18n="btn_attach_photo">Adjuntar Foto (Opcional)</span>
         </button>
       </div>
 
@@ -161,14 +161,14 @@
         <div class="alert-tabs-nav" role="tablist">
           <button type="button" class="alert-tab-btn active" id="tabBtnTime" onclick="switchAlertTab('time')" role="tab" aria-selected="true">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-            <span>Por tiempo</span>
+            <span data-i18n="tab_by_time">Por tiempo</span>
           </button>
           <button type="button" class="alert-tab-btn" id="tabBtnGeo" onclick="switchAlertTab('geo')" role="tab" aria-selected="false">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-            <span>Por ubicación</span>
+            <span data-i18n="tab_by_geo">Por ubicación</span>
           </button>
         </div>
-        <button type="button" class="btn-no-alert" id="btnSelectNoAlert" onclick="selectNoAlert()" title="Guardar nota sin alarma programada">
+        <button type="button" class="btn-no-alert" id="btnSelectNoAlert" onclick="selectNoAlert()" title="Guardar nota sin alarma programada" data-i18n="btn_no_alert">
           🚫 Sin alerta
         </button>
       </div>
@@ -178,8 +178,8 @@
         <!-- Pestaña 1: Alertas por Tiempo (Reloj) -->
         <div id="alertTabContentTime" class="alert-tab-pane">
           <div class="trigger-header-row">
-            <label class="trigger-label">Horarios predefinidos:</label>
-            <button type="button" class="btn-text-action" onclick="openVoicePromptModal('time')">➕ Otro tiempo</button>
+            <label class="trigger-label" data-i18n="label_preset_times">Horarios predefinidos:</label>
+            <button type="button" class="btn-text-action" onclick="openVoicePromptModal('time')" data-i18n="btn_other_time">➕ Otro tiempo</button>
           </div>
           <div class="trigger-presets" id="primaryTimePresets"></div>
           <div class="more-toggle-row">
@@ -193,8 +193,8 @@
         <!-- Pestaña 2: Alertas por Ubicación (Marcador / Geocercas) -->
         <div id="alertTabContentGeo" class="alert-tab-pane hidden">
           <div class="trigger-header-row">
-            <label class="trigger-label">Lugares georreferenciados:</label>
-            <button type="button" class="btn-text-action" onclick="openVoicePromptModal('geo')">➕ Nuevo lugar</button>
+            <label class="trigger-label" data-i18n="label_preset_geo">Lugares georreferenciados:</label>
+            <button type="button" class="btn-text-action" onclick="openVoicePromptModal('geo')" data-i18n="btn_new_place">➕ Nuevo lugar</button>
           </div>
           <div class="trigger-presets" id="primaryGeoPresets"></div>
           <div class="more-toggle-row">
@@ -211,8 +211,8 @@
 
       <!-- Botones de Acción del Modal -->
       <div class="modal-footer">
-        <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
-        <button class="btn-save" onclick="saveNoteFromModal()">✓ Guardar Nota</button>
+        <button class="btn-cancel" onclick="closeModal()" data-i18n="btn_cancel">Cancelar</button>
+        <button class="btn-save" onclick="saveNoteFromModal()" data-i18n="btn_save_note">✓ Guardar Nota</button>
       </div>
     </div>
   </div>
@@ -236,7 +236,7 @@
 
       <div class="postit-tasks-box">
         <div class="postit-tasks-header">
-          <span>📌 Actividades Relevantes:</span>
+          <span data-i18n="screensaver_tasks_header">📌 Actividades Relevantes:</span>
         </div>
         <div id="screensaverTasksDynamic" class="postit-tasks-list">
           <!-- Actividades inyectadas en tiempo real -->
@@ -244,7 +244,7 @@
       </div>
 
       <div class="postit-tap-hint">
-        <span>Toque en cualquier parte para volver</span>
+        <span data-i18n="screensaver_tap_hint">Toque en cualquier parte para volver</span>
       </div>
     </div>
   </div>
@@ -253,145 +253,205 @@
   <div id="settingsModal" class="modal-backdrop hidden">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>Configuración de UnLethe</h3>
+        <h3 id="settingsModalTitle" data-i18n="settings_title">Configuración de UnLethe</h3>
         <button class="close-x-btn" onclick="closeSettings()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
       </div>
 
       <div class="settings-content">
-        <!-- Requerimiento: Opciones de tema Oscuro, Claro y Sistema con íconos vectoriales planos -->
-        <h4>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 0 0 20z"></path></svg>
-          Tema Visual de Fondo
-        </h4>
-        <div class="theme-selector-row">
-          <button type="button" class="theme-btn" id="themeBtnDark" onclick="setAppTheme('dark')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-            Oscuro
-          </button>
-          <button type="button" class="theme-btn" id="themeBtnLight" onclick="setAppTheme('light')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-            Claro
-          </button>
-          <button type="button" class="theme-btn" id="themeBtnSystem" onclick="setAppTheme('system')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
-            Sistema
-          </button>
-        </div>
-
-        <hr class="settings-divider">
-
-        <!-- Gestión de Botones: Alertas de Tiempo y Ubicación en 2 Pestañas -->
-        <h4>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-          Gestión de Botones de Alertas
-        </h4>
-        <p class="settings-desc">Personalice los accesos rápidos de alertas para asignar recordatorios en un toque.</p>
-
-        <div class="alert-tabs-container" style="margin-bottom: 12px;">
-          <div class="alert-tabs-nav" role="tablist">
-            <button type="button" class="alert-tab-btn active" id="settingsTabBtnTime" onclick="switchSettingsButtonsTab('time')" role="tab" aria-selected="true">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-              <span>Alertas de tiempo</span>
+        <!-- VISTA PRINCIPAL DE CONFIGURACIÓN -->
+        <div id="settingsMainView">
+          <!-- Tema Visual de Fondo -->
+          <h4>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 0 0 20z"></path></svg>
+            <span data-i18n="settings_theme_title">Tema Visual de Fondo</span>
+          </h4>
+          <div class="theme-selector-row">
+            <button type="button" class="theme-btn" id="themeBtnDark" onclick="setAppTheme('dark')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+              <span data-i18n="theme_dark">Oscuro</span>
             </button>
-            <button type="button" class="alert-tab-btn" id="settingsTabBtnGeo" onclick="switchSettingsButtonsTab('geo')" role="tab" aria-selected="false">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-              <span>Alertas de ubicación</span>
+            <button type="button" class="theme-btn" id="themeBtnLight" onclick="setAppTheme('light')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+              <span data-i18n="theme_light">Claro</span>
+            </button>
+            <button type="button" class="theme-btn" id="themeBtnSystem" onclick="setAppTheme('system')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+              <span data-i18n="theme_system">Sistema</span>
             </button>
           </div>
-        </div>
 
-        <!-- Pestaña 1: Alertas de Tiempo -->
-        <div id="settingsTabPaneTime" class="settings-tab-pane">
-          <p class="settings-desc" style="margin-top: 0;">Horarios predefinidos (+1 hora, Hoy 18:00, Mañana 09:00...):</p>
-          <div id="settingsTimePresetsList" class="settings-time-presets-list">
-            <!-- Se inyectan dinámicamente los botones de tiempo (+1 hora, Hoy 18:00...) con opción de eliminar -->
-          </div>
-          <button type="button" class="btn-text-action" onclick="openVoicePromptModal('time')" style="margin-top: 8px;">➕ Agregar alerta de tiempo</button>
-        </div>
+          <hr class="settings-divider">
 
-        <!-- Pestaña 2: Alertas de Ubicación y Geocercas -->
-        <div id="settingsTabPaneGeo" class="settings-tab-pane hidden">
-          <p class="settings-desc" style="margin-top: 0;">Lugares georreferenciados para alertar por proximidad (elegir en mapa o GPS):</p>
-          <div id="settingsLocationsList" class="settings-locations-list">
-            <!-- Se inyectan dinámicamente con Elegir de mapa y Eliminar (sin botón actualizar) -->
-          </div>
-          <button type="button" class="btn-text-action" onclick="openVoicePromptModal('geo')" style="margin-top: 8px;">➕ Agregar nuevo lugar</button>
-        </div>
-
-        <hr class="settings-divider">
-
-        <!-- Protector de Pantalla y Bloqueo del Celular (Always On Display / Daydream / Lock Screen) -->
-        <h4>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-          Protector y Bloqueo de Pantalla (Actividades en Vivo)
-        </h4>
-        <p class="settings-desc">Integre sus notas urgentes en su protector actual, pantalla de bloqueo y Always-On Display.</p>
-
-        <!-- Opción 1: En su protector actual y pantalla de bloqueo (Live Widget / Notificación Pública AOD) -->
-        <div style="background: var(--bg-primary); padding: 12px; border-radius: 12px; border: 1px solid var(--border-subtle); margin-top: 6px; font-size: 12px; line-height: 1.5;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-            <strong style="color: var(--text-primary); font-size: 13px;">🔒 Mostrar en Bloqueo y Protector actual (AOD)</strong>
-            <label class="switch" style="margin: 0;">
-              <input type="checkbox" id="lockScreenWidgetToggle" onchange="toggleLockScreenWidget(this.checked)" checked>
-              <span class="slider-round"></span>
-            </label>
-          </div>
-          <div style="color: var(--text-muted); font-size: 11px;">
-            Mantiene sus tareas activas visibles directamente en la pantalla de bloqueo de su teléfono y Always-On Display de fábrica, sin necesidad de estar enchufado al cargador.
-          </div>
-          <button type="button" class="chip-action" onclick="syncLockScreenWidget(true)" style="margin-top: 8px; width: 100%; justify-content: center; font-size: 12px;">
-            📌 Sincronizar tareas en Pantalla de Bloqueo ahora
-          </button>
-        </div>
-
-        <!-- Opción 2: Protector de Pantalla de Android (Daydream al cargar) -->
-        <div style="background: var(--bg-primary); padding: 12px; border-radius: 12px; border: 1px solid var(--border-subtle); margin-top: 10px; font-size: 12px; line-height: 1.5;">
-          <strong style="color: var(--text-primary); font-size: 13px;">⚡ Protector del Sistema Android (Al Cargar)</strong>
-          <div style="color: var(--text-muted); font-size: 11px; margin-top: 4px;">
-            En Android, los protectores de pantalla del sistema se activan automáticamente <em>únicamente cuando el celular está conectado al cargador</em> y la pantalla se apaga sola por inactividad.
-          </div>
-          <div style="display: flex; gap: 8px; margin-top: 8px;">
-            <button type="button" class="chip-action" onclick="openAndroidDreamSettings()" style="flex: 1; justify-content: center; font-size: 11px;">
-              ⚙️ Ajustes del Celular
+          <!-- Selector de Lenguaje / Language -->
+          <h4>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+            <span data-i18n="settings_language_title">Idioma / Language</span>
+          </h4>
+          <div class="theme-selector-row">
+            <button type="button" class="theme-btn" id="langBtnEs" onclick="setAppLanguage('es')">
+              🇪🇸 Español
             </button>
-            <button type="button" class="chip-action" onclick="openScreensaver()" style="flex: 1; justify-content: center; font-size: 11px;">
-              👁️ Modo Reposo OLED
+            <button type="button" class="theme-btn" id="langBtnEn" onclick="setAppLanguage('en')">
+              🇺🇸 English
             </button>
           </div>
+
+          <hr class="settings-divider">
+
+          <!-- Gestión de Botones: Alertas de Tiempo y Ubicación en 2 Pestañas -->
+          <h4>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <span data-i18n="settings_buttons_title">Gestión de Botones de Alertas</span>
+          </h4>
+          <p class="settings-desc" data-i18n="settings_buttons_desc">Personalice los accesos rápidos de alertas para asignar recordatorios en un toque.</p>
+
+          <div class="alert-tabs-container" style="margin-bottom: 12px;">
+            <div class="alert-tabs-nav" role="tablist">
+              <button type="button" class="alert-tab-btn active" id="settingsTabBtnTime" onclick="switchSettingsButtonsTab('time')" role="tab" aria-selected="true">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                <span data-i18n="settings_tab_time">Alertas de tiempo</span>
+              </button>
+              <button type="button" class="alert-tab-btn" id="settingsTabBtnGeo" onclick="switchSettingsButtonsTab('geo')" role="tab" aria-selected="false">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                <span data-i18n="settings_tab_geo">Alertas de ubicación</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Pestaña 1: Alertas de Tiempo -->
+          <div id="settingsTabPaneTime" class="settings-tab-pane">
+            <p class="settings-desc" style="margin-top: 0;" data-i18n="settings_time_desc">Horarios predefinidos (+1 hora, Hoy 18:00, Mañana 09:00...):</p>
+            <div id="settingsTimePresetsList" class="settings-time-presets-list">
+              <!-- Se inyectan dinámicamente los botones de tiempo (+1 hora, Hoy 18:00...) con opción de eliminar -->
+            </div>
+            <button type="button" class="btn-text-action" onclick="openVoicePromptModal('time')" style="margin-top: 8px;" data-i18n="btn_add_time_alert">➕ Agregar alerta de tiempo</button>
+          </div>
+
+          <!-- Pestaña 2: Alertas de Ubicación y Geocercas -->
+          <div id="settingsTabPaneGeo" class="settings-tab-pane hidden">
+            <p class="settings-desc" style="margin-top: 0;" data-i18n="settings_geo_desc">Lugares georreferenciados para alertar por proximidad (elegir en mapa o GPS):</p>
+            <div id="settingsLocationsList" class="settings-locations-list">
+              <!-- Se inyectan dinámicamente con Elegir de mapa y Eliminar (sin botón actualizar) -->
+            </div>
+            <button type="button" class="btn-text-action" onclick="openVoicePromptModal('geo')" style="margin-top: 8px;" data-i18n="btn_add_geo_place">➕ Agregar nuevo lugar</button>
+          </div>
+
+          <hr class="settings-divider">
+
+          <!-- Botones de Navegación a Pantallas Secundarias -->
+          <button type="button" class="settings-nav-btn" onclick="openSettingsSubscreen('lockscreen')">
+            <div class="settings-nav-left">
+              <span class="settings-nav-icon">🔒</span>
+              <div class="settings-nav-text">
+                <strong data-i18n="settings_lockscreen_title">Protector y Bloqueo de Pantalla</strong>
+                <span data-i18n="settings_lockscreen_desc">Actividades en vivo, AOD y widget de bloqueo</span>
+              </div>
+            </div>
+            <span class="settings-nav-arrow">›</span>
+          </button>
+
+          <button type="button" class="settings-nav-btn" onclick="openSettingsSubscreen('backup')">
+            <div class="settings-nav-left">
+              <span class="settings-nav-icon">🛡️</span>
+              <div class="settings-nav-text">
+                <strong data-i18n="settings_backup_title">Respaldo y Soberanía Local</strong>
+                <span data-i18n="settings_backup_desc">Exportar, importar JSON y restaurar notas</span>
+              </div>
+            </div>
+            <span class="settings-nav-arrow">›</span>
+          </button>
         </div>
 
-        <hr class="settings-divider">
+        <!-- NUEVA PANTALLA: PROTECTOR Y BLOQUEO DE PANTALLA -->
+        <div id="settingsSubscreenLockscreen" class="settings-subscreen hidden">
+          <div class="settings-subscreen-header">
+            <button type="button" class="settings-back-btn" onclick="openSettingsSubscreen('main')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              <span data-i18n="btn_back_to_settings">Volver a Configuración</span>
+            </button>
+          </div>
 
-        <!-- Requerimiento 3: Respaldo y Soberanía Local (Exportar e Importar JSON) -->
-        <h4>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
-          Respaldo y Soberanía Local
-        </h4>
-        <input type="file" id="jsonFileInput" accept=".json,application/json" style="display: none;" onchange="importDataJSON(event)">
-        <div class="backup-actions">
-          <button type="button" class="backup-btn" onclick="exportDataJSON()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            Exportar Notas, Audios, Fotos y Videos (JSON)
-          </button>
-          <button type="button" class="backup-btn" onclick="document.getElementById('jsonFileInput').click()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-            Restaurar desde archivo JSON
-          </button>
-          <button type="button" class="backup-btn" onclick="resetDemoData()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
-            Restaurar Datos Iniciales
-          </button>
+          <h4 style="margin-top: 4px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            <span data-i18n="lockscreen_sub_title">Protector y Bloqueo de Pantalla</span>
+          </h4>
+          <p class="settings-desc" data-i18n="lockscreen_sub_desc">Integre sus notas urgentes en su protector actual, pantalla de bloqueo y Always-On Display.</p>
+
+          <!-- Opción 1: En su protector actual y pantalla de bloqueo (Live Widget / Notificación Pública AOD) -->
+          <div style="background: var(--bg-primary); padding: 12px; border-radius: 12px; border: 1px solid var(--border-subtle); margin-top: 6px; font-size: 12px; line-height: 1.5;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+              <strong style="color: var(--text-primary); font-size: 13px;" data-i18n="lockscreen_opt1_title">🔒 Mostrar en Bloqueo y Protector actual (AOD)</strong>
+              <label class="switch" style="margin: 0;">
+                <input type="checkbox" id="lockScreenWidgetToggle" onchange="toggleLockScreenWidget(this.checked)" checked>
+                <span class="slider-round"></span>
+              </label>
+            </div>
+            <div style="color: var(--text-muted); font-size: 11px;" data-i18n="lockscreen_opt1_desc">
+              Mantiene sus tareas activas visibles directamente en la pantalla de bloqueo de su teléfono y Always-On Display de fábrica, sin necesidad de estar enchufado al cargador.
+            </div>
+            <button type="button" class="chip-action" onclick="syncLockScreenWidget(true)" style="margin-top: 8px; width: 100%; justify-content: center; font-size: 12px;" data-i18n="btn_sync_lockscreen">
+              📌 Sincronizar tareas en Pantalla de Bloqueo ahora
+            </button>
+          </div>
+
+          <!-- Opción 2: Protector de Pantalla de Android (Daydream al cargar) -->
+          <div style="background: var(--bg-primary); padding: 12px; border-radius: 12px; border: 1px solid var(--border-subtle); margin-top: 10px; font-size: 12px; line-height: 1.5;">
+            <strong style="color: var(--text-primary); font-size: 13px;" data-i18n="lockscreen_opt2_title">⚡ Protector del Sistema Android (Al Cargar)</strong>
+            <div style="color: var(--text-muted); font-size: 11px; margin-top: 4px;" data-i18n="lockscreen_opt2_desc">
+              En Android, los protectores de pantalla del sistema se activan automáticamente únicamente cuando el celular está conectado al cargador y la pantalla se apaga sola por inactividad.
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 8px;">
+              <button type="button" class="chip-action" onclick="openAndroidDreamSettings()" style="flex: 1; justify-content: center; font-size: 11px;" data-i18n="btn_phone_settings">
+                ⚙️ Ajustes del Celular
+              </button>
+              <button type="button" class="chip-action" onclick="openScreensaver()" style="flex: 1; justify-content: center; font-size: 11px;" data-i18n="btn_oled_mode">
+                👁️ Modo Reposo OLED
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div class="privacy-callout">
-          🛡️ <strong>100% Local-First:</strong> Todos los audios, textos, fotos y ubicaciones residen únicamente en este dispositivo.
+        <!-- NUEVA PANTALLA: RESPALDO Y SOBERANÍA LOCAL -->
+        <div id="settingsSubscreenBackup" class="settings-subscreen hidden">
+          <div class="settings-subscreen-header">
+            <button type="button" class="settings-back-btn" onclick="openSettingsSubscreen('main')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              <span data-i18n="btn_back_to_settings">Volver a Configuración</span>
+            </button>
+          </div>
+
+          <h4 style="margin-top: 4px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+            <span data-i18n="backup_sub_title">Respaldo y Soberanía Local</span>
+          </h4>
+          <p class="settings-desc" data-i18n="backup_sub_desc">Cree copias de seguridad de sus notas locales o restaure desde un archivo JSON.</p>
+
+          <input type="file" id="jsonFileInput" accept=".json,application/json" style="display: none;" onchange="importDataJSON(event)">
+          <div class="backup-actions">
+            <button type="button" class="backup-btn" onclick="exportDataJSON()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              <span data-i18n="btn_export_json">Exportar Notas, Audios, Fotos y Videos (JSON)</span>
+            </button>
+            <button type="button" class="backup-btn" onclick="document.getElementById('jsonFileInput').click()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              <span data-i18n="btn_import_json">Restaurar desde archivo JSON</span>
+            </button>
+            <button type="button" class="backup-btn" onclick="resetDemoData()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+              <span data-i18n="btn_reset_initial">Restaurar Datos Iniciales</span>
+            </button>
+          </div>
+
+          <div class="privacy-callout" data-i18n="privacy_callout" style="margin-top: 10px;">
+            🛡️ <strong>100% Local-First:</strong> Todos los audios, textos, fotos y ubicaciones residen únicamente en este dispositivo.
+          </div>
         </div>
       </div>
 
       <div class="modal-footer">
-        <button class="btn-save" onclick="closeSettings()">Cerrar</button>
+        <button class="btn-save" onclick="closeSettings()" data-i18n="btn_close">Cerrar</button>
       </div>
     </div>
   </div>
@@ -400,45 +460,45 @@
   <div id="voicePromptModal" class="modal-backdrop hidden">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 id="voicePromptTitle">Programar Alerta</h3>
+        <h3 id="voicePromptTitle" data-i18n="voice_modal_title">Programar Alerta</h3>
         <button class="close-x-btn" onclick="closeVoicePromptModal()">✕</button>
       </div>
 
       <!-- Sección específica para Tiempo (Fecha y Hora Exacta) -->
       <div id="voicePromptTimeSection">
-        <label class="trigger-label">Seleccione fecha y hora exacta de la alarma:</label>
+        <label class="trigger-label" data-i18n="voice_label_time">Seleccione fecha y hora exacta de la alarma:</label>
         <input type="datetime-local" id="voicePromptDateTimeInput" class="custom-input" style="font-size: 15px; padding: 10px; margin-top: 6px;">
-        <p class="voice-hint" style="margin-top: 6px;">La alarma se guardará con fecha y hora exacta y se mostrará en la nota.</p>
+        <p class="voice-hint" style="margin-top: 6px;" data-i18n="voice_time_hint">La alarma se guardará con fecha y hora exacta y se mostrará en la nota.</p>
       </div>
 
       <!-- Sección específica para Lugar (Opciones Al llegar a / Al salir de y Mapa) -->
       <div id="voicePromptGeoSection" class="hidden">
         <div class="geo-transition-selector">
-          <label class="trigger-label" style="display: block; margin-bottom: 6px;">¿Cuándo disparar la alarma?</label>
+          <label class="trigger-label" style="display: block; margin-bottom: 6px;" data-i18n="voice_when_trigger">¿Cuándo disparar la alarma?</label>
           <div style="display: flex; gap: 8px;">
             <button type="button" class="btn-transition-opt active" id="btnTransitionEnter" onclick="selectGeoTransition('ENTER')">
-              🚗 Al llegar a
+              <span data-i18n="voice_transition_enter">🚗 Al llegar a</span>
             </button>
             <button type="button" class="btn-transition-opt" id="btnTransitionExit" onclick="selectGeoTransition('EXIT')">
-              🚪 Al salir de
+              <span data-i18n="voice_transition_exit">🚪 Al salir de</span>
             </button>
           </div>
         </div>
 
         <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 8px; margin-bottom: 4px;">
-          <label class="trigger-label">Nombre del lugar:</label>
+          <label class="trigger-label" data-i18n="voice_label_placename">Nombre del lugar:</label>
           <button type="button" class="btn-voice-mini icon-only" id="btnVoicePromptDictar" title="Dictar por voz">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
           </button>
         </div>
-        <input type="text" id="voicePromptTextInput" class="custom-input" placeholder="Ej: Gimnasio, Farmacia, Casa...">
+        <input type="text" id="voicePromptTextInput" class="custom-input" placeholder="Ej: Gimnasio, Farmacia, Casa..." data-i18n-placeholder="voice_placeholder_geo">
         <div id="geoFinalTextPreview" style="font-size: 13px; font-weight: 700; color: #0284C7; margin: 6px 0 2px 2px;">
           Alarma: Al llegar a...
         </div>
 
         <div class="geo-optional-box" style="margin-top: 10px; padding: 12px; background: var(--bg-primary); border: 1px solid var(--border-subtle); border-radius: 12px;">
-          <div style="font-size: 12px; font-weight: 700; margin-bottom: 4px;">📍 Área de Cobertura en el Mapa:</div>
-          <div id="newPlaceCoordsStatus" style="font-size: 11px; color: #10B981; margin-bottom: 8px;">
+          <div style="font-size: 12px; font-weight: 700; margin-bottom: 4px;" data-i18n="geo_coverage_title">📍 Área de Cobertura en el Mapa:</div>
+          <div id="newPlaceCoordsStatus" style="font-size: 11px; color: #10B981; margin-bottom: 8px;" data-i18n="geo_coverage_hint">
             ✓ Geocerca lista en el mapa. Toque el mapa para moverla.
           </div>
 
@@ -451,13 +511,13 @@
             <div id="geoMapContainer"></div>
             <div class="geo-slider-box">
               <div class="geo-slider-header">
-                <span>🎯 Cobertura Geocerca:</span>
+                <span data-i18n="geo_slider_label">🎯 Cobertura Geocerca:</span>
                 <span id="geoRadiusLabel" style="color: #0284C7; font-weight: 700;">50 m</span>
               </div>
               <input type="range" id="geoRadiusSlider" class="geo-radius-slider" min="50" max="1000" step="25" value="50" oninput="updateGeoMapRadius(this.value)">
               <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); margin-top: 2px;">
                 <span>50m</span>
-                <span>Arrastre marcador o toque mapa para ubicar centro</span>
+                <span data-i18n="geo_drag_hint">Arrastre marcador o toque mapa para ubicar centro</span>
                 <span>1000m (1km)</span>
               </div>
             </div>
@@ -466,8 +526,8 @@
       </div>
 
       <div class="modal-footer">
-        <button class="btn-cancel" onclick="closeVoicePromptModal()">Cancelar</button>
-        <button class="btn-save" onclick="confirmVoicePrompt()">✓ Aceptar</button>
+        <button class="btn-cancel" onclick="closeVoicePromptModal()" data-i18n="btn_cancel">Cancelar</button>
+        <button class="btn-save" onclick="confirmVoicePrompt()" data-i18n="btn_save_alert">✓ Aceptar</button>
       </div>
     </div>
   </div>

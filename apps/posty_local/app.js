@@ -23,6 +23,363 @@ const ICONS = {
   gpsTarget: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>`
 };
 
+// ==========================================
+// SISTEMA DE INTERNACIONALIZACIÓN (i18n)
+// Soporte Integral para Español (es) e English (en)
+// ==========================================
+const TRANSLATIONS = {
+  es: {
+    app_badge: "UnLethe",
+    urgent_summary_format: "{total} actividades • {urgent} urgente",
+    urgent_summary_format_plural: "{total} actividades • {urgent} urgentes",
+    no_urgent_summary: "{total} actividades • ninguna urgente",
+    all_caught_up: "¡Todo al día! Sin tareas pendientes",
+    btn_screensaver_title: "Protector de pantalla",
+    btn_settings_title: "Configuración de UnLethe",
+
+    filter_urgent: "Urgente",
+    filter_context: "Próximas",
+    filter_normal: "Libres",
+    filter_completed: "Realizadas",
+
+    section_urgent: "URGENTE / VENCE HOY",
+    section_context: "CONTEXTO & PRÓXIMAS (MAÑANA / GEOFENCE)",
+    section_normal: "PENDIENTES LIBRES (SIN PLAZO FIJO)",
+    section_completed: "TAREAS REALIZADAS (SOLO LECTURA Y ESCUCHA)",
+    empty_board_section: "No hay notas en esta sección.",
+    empty_board_hint: "Crea una nueva nota pulsando el botón + o dicta por voz.",
+
+    card_complete: "✓ Completar",
+    card_undo: "↺ Deshacer",
+    card_edit: "Editar nota y lista",
+    card_delete: "Eliminar",
+    btn_create_note: "CREAR NOTA",
+
+    modal_title_new: "Nueva Nota",
+    modal_title_edit: "Editar Nota",
+    placeholder_task: "Escribe o dicta una tarea...",
+    placeholder_subtask: "Escribe o dicta una subtarea...",
+    btn_add_line: "➕ Aumentar nueva línea de lista",
+    label_color: "Color:",
+    btn_attach_photo: "Adjuntar Foto (Opcional)",
+    btn_remove_photo: "Quitar foto",
+    tab_by_time: "Por tiempo",
+    tab_by_geo: "Por ubicación",
+    btn_no_alert: "🚫 Sin alerta",
+    label_preset_times: "Horarios predefinidos:",
+    btn_other_time: "➕ Otro tiempo",
+    btn_more_times: "Ver más horarios",
+    btn_hide_more: "Ocultar",
+    label_preset_geo: "Lugares georreferenciados:",
+    btn_new_place: "➕ Nuevo lugar",
+    btn_more_places: "Ver más lugares",
+    alert_none_assigned: "Alerta: Ninguna asignada",
+    alert_no_alarm: "Alerta: Sin alarma",
+    alert_prefix: "Alerta: ",
+    btn_save_note: "Guardar Nota",
+
+    settings_title: "Configuración de UnLethe",
+    settings_theme_title: "Tema Visual de Fondo",
+    theme_dark: "Oscuro",
+    theme_light: "Claro",
+    theme_system: "Sistema",
+    settings_language_title: "Idioma / Language",
+    settings_buttons_title: "Gestión de Botones de Alertas",
+    settings_buttons_desc: "Personalice los accesos rápidos de alertas para asignar recordatorios en un toque.",
+    settings_tab_time: "Alertas de tiempo",
+    settings_tab_geo: "Alertas de ubicación",
+    settings_time_desc: "Horarios predefinidos (+1 hora, Hoy 18:00, Mañana 09:00...):",
+    btn_add_time_alert: "➕ Agregar alerta de tiempo",
+    settings_geo_desc: "Lugares georreferenciados para alertar por proximidad (elegir en mapa o GPS):",
+    btn_add_geo_place: "➕ Agregar nuevo lugar",
+
+    settings_lockscreen_title: "Protector y Bloqueo de Pantalla",
+    settings_lockscreen_desc: "Actividades en vivo, AOD y widget de bloqueo",
+    settings_backup_title: "Respaldo y Soberanía Local",
+    settings_backup_desc: "Exportar, importar JSON y restaurar notas",
+    btn_back_to_settings: "Volver a Configuración",
+
+    lockscreen_sub_title: "Protector y Bloqueo de Pantalla",
+    lockscreen_sub_desc: "Integre sus notas urgentes en su protector actual, pantalla de bloqueo y Always-On Display.",
+    lockscreen_opt1_title: "🔒 Mostrar en Bloqueo y Protector actual (AOD)",
+    lockscreen_opt1_desc: "Mantiene sus tareas activas visibles directamente en la pantalla de bloqueo de su teléfono y Always-On Display de fábrica, sin necesidad de estar enchufado al cargador.",
+    btn_sync_lockscreen: "📌 Sincronizar tareas en Pantalla de Bloqueo ahora",
+    lockscreen_opt2_title: "⚡ Protector del Sistema Android (Al Cargar)",
+    lockscreen_opt2_desc: "En Android, los protectores de pantalla del sistema se activan automáticamente únicamente cuando el celular está conectado al cargador y la pantalla se apaga sola por inactividad.",
+    btn_phone_settings: "⚙️ Ajustes del Celular",
+    btn_oled_mode: "👁️ Modo Reposo OLED",
+
+    backup_sub_title: "Respaldo y Soberanía Local",
+    backup_sub_desc: "Cree copias de seguridad de sus notas locales o restaure desde un archivo JSON.",
+    btn_export_json: "Exportar Notas, Audios, Fotos y Videos (JSON)",
+    btn_import_json: "Restaurar desde archivo JSON",
+    btn_reset_initial: "Restaurar Datos Iniciales",
+    privacy_callout: "🛡️ 100% Local-First: Todos los audios, textos, fotos y ubicaciones residen únicamente en este dispositivo.",
+    btn_close: "Cerrar",
+
+    screensaver_tasks_header: "📌 Actividades Relevantes:",
+    screensaver_tap_hint: "Toque en cualquier parte para volver",
+    screensaver_empty: "🎉 ¡Todo al día! Sin tareas urgentes pendientes.",
+
+    push_app_name: "UnLethe • Recordatorio",
+    push_title_default: "⏰ Recordatorio Automático",
+    btn_push_complete: "✓ Completar",
+    btn_push_snooze: "⏱️ Posponer 15m",
+
+    confirm_delete_note: "¿Eliminar esta nota?",
+    confirm_delete_preset: "¿Eliminar este botón predefinido?",
+    confirm_reset_data: "¿Desea restaurar la nota limpia inicial de UnLethe?",
+    backup_restored_success: "✓ Respaldo restaurado exitosamente: {count} notas con sus audios y fotos recuperadas.",
+    backup_restore_error: "Error al restaurar respaldo JSON: ",
+    invalid_file_format: "El archivo no contiene un formato de notas válido.",
+    lockscreen_synced_success: "✓ Widget y Pantalla de Bloqueo sincronizados con éxito.",
+    lockscreen_disabled_msg: "Notificación en Pantalla de Bloqueo desactivada.",
+    dictation_not_available: "Dictado por voz no disponible en este dispositivo.",
+    uses_count: "usos",
+
+    btn_cancel: "Cancelar",
+    voice_modal_title: "Programar Alerta",
+    voice_label_time: "Seleccione fecha y hora exacta de la alarma:",
+    voice_time_hint: "La alarma se guardará con fecha y hora exacta y se mostrará en la nota.",
+    voice_when_trigger: "¿Cuándo disparar la alarma?",
+    voice_transition_enter: "🚗 Al llegar a",
+    voice_transition_exit: "🚪 Al salir de",
+    voice_label_placename: "Nombre del lugar:",
+    voice_placeholder_geo: "Ej: Gimnasio, Farmacia, Casa...",
+    geo_coverage_title: "📍 Área de Cobertura en el Mapa:",
+    geo_coverage_hint: "✓ Geocerca lista en el mapa. Toque el mapa para moverla.",
+    geo_slider_label: "🎯 Cobertura Geocerca:",
+    geo_drag_hint: "Arrastre marcador o toque mapa para ubicar centro",
+    btn_save_alert: "✓ Aceptar"
+  },
+  en: {
+    app_badge: "UnLethe",
+    urgent_summary_format: "{total} activities • {urgent} urgent",
+    urgent_summary_format_plural: "{total} activities • {urgent} urgent",
+    no_urgent_summary: "{total} activities • none urgent",
+    all_caught_up: "All caught up! No pending tasks",
+    btn_screensaver_title: "Screensaver",
+    btn_settings_title: "UnLethe Settings",
+
+    filter_urgent: "Urgent",
+    filter_context: "Upcoming",
+    filter_normal: "General",
+    filter_completed: "Done",
+
+    section_urgent: "URGENT / DUE TODAY",
+    section_context: "CONTEXT & UPCOMING (TOMORROW / GEOFENCE)",
+    section_normal: "GENERAL PENDING (NO DEADLINE)",
+    section_completed: "COMPLETED TASKS (READ & LISTEN ONLY)",
+    empty_board_section: "No notes in this section.",
+    empty_board_hint: "Create a new note by tapping + or use voice dictation.",
+
+    card_complete: "✓ Complete",
+    card_undo: "↺ Undo",
+    card_edit: "Edit note and list",
+    card_delete: "Delete",
+    btn_create_note: "CREATE NOTE",
+
+    modal_title_new: "New Note",
+    modal_title_edit: "Edit Note",
+    placeholder_task: "Write or speak a task...",
+    placeholder_subtask: "Write or speak a subtask...",
+    btn_add_line: "➕ Add new line to list",
+    label_color: "Color:",
+    btn_attach_photo: "Attach Photo (Optional)",
+    btn_remove_photo: "Remove photo",
+    tab_by_time: "By time",
+    tab_by_geo: "By location",
+    btn_no_alert: "🚫 No alert",
+    label_preset_times: "Preset times:",
+    btn_other_time: "➕ Other time",
+    btn_more_times: "See more times",
+    btn_hide_more: "Hide",
+    label_preset_geo: "Georeferenced places:",
+    btn_new_place: "➕ New place",
+    btn_more_places: "See more places",
+    alert_none_assigned: "Alert: None assigned",
+    alert_no_alarm: "Alert: No alarm",
+    alert_prefix: "Alert: ",
+    btn_save_note: "Save Note",
+
+    settings_title: "UnLethe Settings",
+    settings_theme_title: "Visual Background Theme",
+    theme_dark: "Dark",
+    theme_light: "Light",
+    theme_system: "System",
+    settings_language_title: "Language / Idioma",
+    settings_buttons_title: "Alert Buttons Management",
+    settings_buttons_desc: "Customize quick alert shortcuts to set reminders in a single tap.",
+    settings_tab_time: "Time alerts",
+    settings_tab_geo: "Location alerts",
+    settings_time_desc: "Preset times (+1 hour, Today 18:00, Tomorrow 09:00...):",
+    btn_add_time_alert: "➕ Add time alert",
+    settings_geo_desc: "Georeferenced places to alert by proximity (choose on map or GPS):",
+    btn_add_geo_place: "➕ Add new place",
+
+    settings_lockscreen_title: "Screensaver & Lock Screen",
+    settings_lockscreen_desc: "Live activities, AOD and lock screen widget",
+    settings_backup_title: "Local Backup & Sovereignty",
+    settings_backup_desc: "Export, import JSON and restore notes",
+    btn_back_to_settings: "Back to Settings",
+
+    lockscreen_sub_title: "Screensaver & Lock Screen",
+    lockscreen_sub_desc: "Integrate your urgent notes with your lock screen and factory Always-On Display.",
+    lockscreen_opt1_title: "🔒 Show on Lock Screen and current Screensaver (AOD)",
+    lockscreen_opt1_desc: "Keeps your active tasks visible directly on your phone's lock screen and factory Always-On Display without needing to be plugged in.",
+    btn_sync_lockscreen: "📌 Sync tasks to Lock Screen now",
+    lockscreen_opt2_title: "⚡ Android System Screensaver (When Charging)",
+    lockscreen_opt2_desc: "On Android, system screensavers activate automatically only when the phone is connected to the charger and the screen turns off due to inactivity.",
+    btn_phone_settings: "⚙️ Phone Settings",
+    btn_oled_mode: "👁️ OLED Sleep Mode",
+
+    backup_sub_title: "Local Backup & Sovereignty",
+    backup_sub_desc: "Create local backups of your notes or restore from a JSON file.",
+    btn_export_json: "Export Notes, Audios, Photos and Videos (JSON)",
+    btn_import_json: "Restore from JSON file",
+    btn_reset_initial: "Restore Initial Data",
+    privacy_callout: "🛡️ 100% Local-First: All audios, texts, photos and locations stay strictly on this device.",
+    btn_close: "Close",
+
+    screensaver_tasks_header: "📌 Relevant Activities:",
+    screensaver_tap_hint: "Tap anywhere to return",
+    screensaver_empty: "🎉 All caught up! No urgent tasks pending.",
+
+    push_app_name: "UnLethe • Reminder",
+    push_title_default: "⏰ Automatic Reminder",
+    btn_push_complete: "✓ Complete",
+    btn_push_snooze: "⏱️ Snooze 15m",
+
+    confirm_delete_note: "Delete this note?",
+    confirm_delete_preset: "Delete this preset button?",
+    confirm_reset_data: "Do you want to restore UnLethe's clean initial note?",
+    backup_restored_success: "✓ Backup successfully restored: {count} notes with audios and photos recovered.",
+    backup_restore_error: "Error restoring JSON backup: ",
+    invalid_file_format: "File does not contain a valid notes format.",
+    lockscreen_synced_success: "✓ Widget and Lock Screen successfully synchronized.",
+    lockscreen_disabled_msg: "Lock Screen notification disabled.",
+    dictation_not_available: "Voice dictation not available on this device.",
+    uses_count: "uses",
+
+    btn_cancel: "Cancel",
+    voice_modal_title: "Schedule Alert",
+    voice_label_time: "Select exact date and time for alarm:",
+    voice_time_hint: "The alarm will be saved with exact date & time and displayed on the note.",
+    voice_when_trigger: "When to trigger the alarm?",
+    voice_transition_enter: "🚗 Arriving at",
+    voice_transition_exit: "🚪 Leaving",
+    voice_label_placename: "Place name:",
+    voice_placeholder_geo: "E.g. Gym, Pharmacy, Home...",
+    geo_coverage_title: "📍 Coverage Area on Map:",
+    geo_coverage_hint: "✓ Geofence ready on map. Tap map to move.",
+    geo_slider_label: "🎯 Geofence Coverage:",
+    geo_drag_hint: "Drag marker or tap map to position center",
+    btn_save_alert: "✓ Accept"
+  }
+};
+
+let currentLanguage = localStorage.getItem('posty_language') || 'es';
+
+function t(key, fallback = '') {
+  const dict = TRANSLATIONS[currentLanguage] || TRANSLATIONS.es;
+  return dict[key] || TRANSLATIONS.es[key] || fallback || key;
+}
+
+function setAppLanguage(lang, save = true) {
+  currentLanguage = (lang === 'en') ? 'en' : 'es';
+  if (save) {
+    localStorage.setItem('posty_language', currentLanguage);
+  }
+
+  const btnEs = document.getElementById('langBtnEs');
+  const btnEn = document.getElementById('langBtnEn');
+  if (btnEs) btnEs.classList.toggle('active', currentLanguage === 'es');
+  if (btnEn) btnEn.classList.toggle('active', currentLanguage === 'en');
+
+  applyTranslations();
+  renderBoard();
+  renderTriggerPresets();
+  renderSettingsTimePresets();
+  renderSettingsLocations();
+  updateClockAndDates();
+}
+
+function initAppLanguage() {
+  const savedLang = localStorage.getItem('posty_language') || 'es';
+  setAppLanguage(savedLang, false);
+}
+
+function applyTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const val = t(key);
+    if (val) {
+      if (val.includes('<') && val.includes('>')) {
+        el.innerHTML = val;
+      } else {
+        el.textContent = val;
+      }
+    }
+  });
+
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    const val = t(key);
+    if (val) el.placeholder = val;
+  });
+
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const key = el.getAttribute('data-i18n-title');
+    const val = t(key);
+    if (val) el.title = val;
+  });
+}
+
+function formatPresetLabel(label) {
+  if (!label) return '';
+  if (currentLanguage === 'en') {
+    const map = {
+      '+1 hora': '+1 hour',
+      'Hoy 18:00': 'Today 18:00',
+      'Mañana 09:00': 'Tomorrow 09:00',
+      'Al salir de casa': 'Leaving home',
+      'Cerca del súper': 'Near grocery',
+      'En el trabajo': 'At work',
+      'Casa': 'Home',
+      'Supermercado': 'Supermarket',
+      'Trabajo': 'Work',
+      'Sin alarma': 'No alarm',
+      'Ninguna asignada': 'None assigned'
+    };
+    if (map[label]) return map[label];
+    if (label.startsWith('Al llegar a ')) {
+      return 'Arriving at ' + label.replace('Al llegar a ', '');
+    }
+    if (label.startsWith('Al salir de ')) {
+      return 'Leaving ' + label.replace('Al salir de ', '');
+    }
+  }
+  return label;
+}
+
+function updateClockAndDates() {
+  const el = document.getElementById('currentDateDisplay');
+  const aod = document.getElementById('aodClock');
+  const aodDate = document.getElementById('aodDate');
+  const now = new Date();
+
+  const options = { weekday: 'long', day: 'numeric', month: 'long' };
+  const dateFormatted = now.toLocaleDateString(currentLanguage === 'en' ? 'en-US' : 'es-ES', options);
+  const capitalized = dateFormatted.charAt(0).toUpperCase() + dateFormatted.slice(1);
+
+  if (el) el.textContent = capitalized;
+
+  const hrs = String(now.getHours()).padStart(2, '0');
+  const mins = String(now.getMinutes()).padStart(2, '0');
+  if (aod) aod.textContent = `${hrs}:${mins}`;
+  if (aodDate) aodDate.textContent = `${capitalized} • UnLethe`;
+}
+
 // Requerimiento: Al instalar la app, se crea limpia con una sola nota urgente (+5 minutos)
 function createDefaultInitialNotes() {
   const targetTime = Date.now() + 5 * 60 * 1000;
@@ -42,7 +399,7 @@ function createDefaultInitialNotes() {
       completedAt: null,
       createdAt: Date.now(),
       lines: [
-        { id: 'ml-welcome-1', text: 'Bienvenido a UnLethe', completed: false, hasAudio: false, audioDuration: null, audioData: null }
+        { id: 'ml-welcome-1', text: (currentLanguage === 'en' ? 'Welcome to UnLethe' : 'Bienvenido a UnLethe'), completed: false, hasAudio: false, audioDuration: null, audioData: null }
       ]
     }
   ];
@@ -128,6 +485,7 @@ function initializeDefaultFreshData() {
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
   initAppTheme();
+  initAppLanguage();
   checkInitialInstallation();
   loadNotes();
   loadPresets();
@@ -309,27 +667,42 @@ function renderBoard() {
   const contextCount = activeNotes.filter(n => n.urgency === 'context').length;
   const normalCount = activeNotes.filter(n => n.urgency === 'normal').length;
 
+  const urgentText = t('filter_urgent');
+  const contextText = t('filter_context');
+  const normalText = t('filter_normal');
+  const doneText = t('filter_completed');
+
   if (chipMap.urgent) {
-    chipMap.urgent.innerHTML = (currentFilter === 'urgent') ? `🔴 <span>Urgente (${urgentCount})</span>` : '🔴';
+    chipMap.urgent.innerHTML = (currentFilter === 'urgent') ? `🔴 <span>${urgentText} (${urgentCount})</span>` : '🔴';
     chipMap.urgent.classList.toggle('active', currentFilter === 'urgent');
   }
   if (chipMap.context) {
-    chipMap.context.innerHTML = (currentFilter === 'context') ? `🟡 <span>Próximas (${contextCount})</span>` : '🟡';
+    chipMap.context.innerHTML = (currentFilter === 'context') ? `🟡 <span>${contextText} (${contextCount})</span>` : '🟡';
     chipMap.context.classList.toggle('active', currentFilter === 'context');
   }
   if (chipMap.normal) {
-    chipMap.normal.innerHTML = (currentFilter === 'normal') ? `🟢 <span>Libres (${normalCount})</span>` : '🟢';
+    chipMap.normal.innerHTML = (currentFilter === 'normal') ? `🟢 <span>${normalText} (${normalCount})</span>` : '🟢';
     chipMap.normal.classList.toggle('active', currentFilter === 'normal');
   }
   if (chipMap.completed) {
-    chipMap.completed.innerHTML = (currentFilter === 'completed') ? `✓ <span>Realizadas (${completedNotes.length})</span>` : '✓';
+    chipMap.completed.innerHTML = (currentFilter === 'completed') ? `✓ <span>${doneText} (${completedNotes.length})</span>` : '✓';
     chipMap.completed.classList.toggle('active', currentFilter === 'completed');
   }
 
   const urgentSummary = document.getElementById('urgentSummaryText');
   if (urgentSummary) {
-    urgentSummary.textContent = `${activeNotes.length} actividades • ${urgentCount} urgente`;
+    const format = (urgentCount === 1) ? t('urgent_summary_format') : t('urgent_summary_format_plural');
+    urgentSummary.textContent = format.replace('{total}', activeNotes.length).replace('{urgent}', urgentCount);
   }
+
+  const secUrgent = document.querySelector('#sectionUrgent .section-label span:last-child');
+  const secContext = document.querySelector('#sectionContext .section-label span:last-child');
+  const secNormal = document.querySelector('#sectionNormal .section-label span:last-child');
+  const secCompleted = document.querySelector('#sectionCompleted .section-label span:last-child');
+  if (secUrgent) secUrgent.textContent = t('section_urgent');
+  if (secContext) secContext.textContent = t('section_context');
+  if (secNormal) secNormal.textContent = t('section_normal');
+  if (secCompleted) secCompleted.textContent = t('section_completed');
 
   // Sincronizar automáticamente la lista de actividades en la pantalla de bloqueo y AOD del smartphone
   syncLockScreenWidget();
@@ -373,18 +746,18 @@ function createNoteCardElement(note, isCompletedView) {
   if (!isCompletedView) {
     topActions = `
       <div style="display: flex; gap: 6px;">
-        <button class="btn-card-action" onclick="openEditNoteModal('${note.id}')" title="Editar nota y lista">${ICONS.edit}</button>
-        <button class="btn-card-action" onclick="completeNoteWithDelay('${note.id}')" title="Marcar toda la nota como cumplida">${ICONS.check}</button>
+        <button class="btn-card-action" onclick="openEditNoteModal('${note.id}')" title="${t('card_edit')}">${ICONS.edit}</button>
+        <button class="btn-card-action" onclick="completeNoteWithDelay('${note.id}')" title="${t('card_complete')}">${ICONS.check}</button>
       </div>
     `;
   } else {
-    topActions = `<span class="completed-badge-pill">${ICONS.check} Realizada</span>`;
+    topActions = `<span class="completed-badge-pill">${ICONS.check} ${t('filter_completed')}</span>`;
   }
 
   let colorStrip = '';
   if (!isCompletedView) {
     colorStrip = `
-      <div class="card-color-strip" title="Cambiar color de toda la nota inmediatamente">
+      <div class="card-color-strip" title="Color">
         <span class="card-dot-opt opt-yellow" onclick="changeCardColor('${note.id}', 'yellow')"></span>
         <span class="card-dot-opt opt-green" onclick="changeCardColor('${note.id}', 'green')"></span>
         <span class="card-dot-opt opt-blue" onclick="changeCardColor('${note.id}', 'blue')"></span>
@@ -393,11 +766,11 @@ function createNoteCardElement(note, isCompletedView) {
       </div>
     `;
   } else {
-    colorStrip = `<span class="read-only-notice">Solo lectura y escucha</span>`;
+    colorStrip = `<span class="read-only-notice">${t('card_undo')}</span>`;
   }
 
   const trigIcon = note.triggerType === 'geo' ? ICONS.pin : (note.triggerType === 'time' ? ICONS.clock : ICONS.listIcon);
-  const trigText = note.alertDateTimeStr || note.triggerLabel || 'Sin alarma';
+  const trigText = formatPresetLabel(note.alertDateTimeStr || note.triggerLabel || t('alert_no_alarm'));
 
   card.innerHTML = `
     <div class="postit-top-row">
@@ -516,7 +889,7 @@ function openNewNoteModal() {
   switchAlertTab('time');
   selectNoAlert();
 
-  modalTitle.textContent = 'Nueva Nota';
+  modalTitle.textContent = t('modal_title_new');
 }
 
 function openEditNoteModal(noteId) {
@@ -534,7 +907,7 @@ function openEditNoteModal(noteId) {
 
   notifyModalState(true);
   modal.classList.remove('hidden');
-  modalTitle.textContent = 'Editar Nota';
+  modalTitle.textContent = t('modal_title_edit');
 
   selectColor(note.color || 'yellow');
   selectedTriggerType = note.triggerType || 'none';
@@ -1219,7 +1592,7 @@ function renderTriggerPresets() {
   if (priTimeCont) {
     priTimeCont.innerHTML = primaryTime.map(p => `
       <button type="button" class="preset-btn" onclick="selectTimePresetById('${p.id}')">
-        ${ICONS.clock} <span>${escapeHtml(p.label)}</span>
+        ${ICONS.clock} <span>${escapeHtml(formatPresetLabel(p.label))}</span>
       </button>
     `).join('');
   }
@@ -1227,7 +1600,7 @@ function renderTriggerPresets() {
   if (secTimeCont) {
     secTimeCont.innerHTML = secondaryTime.map(p => `
       <button type="button" class="preset-btn" onclick="selectTimePresetById('${p.id}')">
-        ${ICONS.clock} <span>${escapeHtml(p.label)}</span>
+        ${ICONS.clock} <span>${escapeHtml(formatPresetLabel(p.label))}</span>
       </button>
     `).join('');
     if (btnMoreTime) {
@@ -1246,7 +1619,7 @@ function renderTriggerPresets() {
   if (priGeoCont) {
     priGeoCont.innerHTML = primaryGeo.map(g => `
       <button type="button" class="preset-btn" onclick="selectGeoPresetById('${g.id}')">
-        ${ICONS.pin} <span>${escapeHtml(g.label)}</span>
+        ${ICONS.pin} <span>${escapeHtml(formatPresetLabel(g.label))}</span>
       </button>
     `).join('');
   }
@@ -1254,7 +1627,7 @@ function renderTriggerPresets() {
   if (secGeoCont) {
     secGeoCont.innerHTML = secondaryGeo.map(g => `
       <button type="button" class="preset-btn" onclick="selectGeoPresetById('${g.id}')">
-        ${ICONS.pin} <span>${escapeHtml(g.label)}</span>
+        ${ICONS.pin} <span>${escapeHtml(formatPresetLabel(g.label))}</span>
       </button>
     `).join('');
     if (btnMoreGeo) {
@@ -1296,10 +1669,10 @@ function selectGeoPresetById(id) {
 function selectNoAlert() {
   selectedTriggerType = 'none';
   selectedTargetTimestamp = null;
-  selectedAlertDateTimeStr = 'Sin alarma';
-  selectedTriggerLabel = 'Sin alarma';
+  selectedAlertDateTimeStr = t('alert_no_alarm');
+  selectedTriggerLabel = t('alert_no_alarm');
   const selTrig = document.getElementById('selectedTriggerText');
-  if (selTrig) selTrig.textContent = 'Alerta: Sin alarma';
+  if (selTrig) selTrig.textContent = t('alert_no_alarm');
 
   document.querySelectorAll('#primaryTimePresets .preset-btn, #secondaryTimePresets .preset-btn, #primaryGeoPresets .preset-btn, #secondaryGeoPresets .preset-btn').forEach(b => {
     b.classList.remove('active');
@@ -1397,7 +1770,7 @@ function toggleMoreTimePresets() {
   const sec = document.getElementById('secondaryTimePresets');
   const btn = document.getElementById('btnToggleMoreTime');
   const isHidden = sec.classList.toggle('hidden');
-  btn.innerHTML = isHidden ? '<span>Ver más horarios</span> <span class="arrow-icon">▼</span>' : '<span>Ocultar</span> <span class="arrow-icon">▲</span>';
+  btn.innerHTML = isHidden ? `<span>${t('btn_more_times')}</span> <span class="arrow-icon">▼</span>` : `<span>${t('btn_hide_more')}</span> <span class="arrow-icon">▲</span>`;
   stabilizeAlertTabHeight();
 }
 
@@ -1405,17 +1778,17 @@ function toggleMoreGeoPresets() {
   const sec = document.getElementById('secondaryGeoPresets');
   const btn = document.getElementById('btnToggleMoreGeo');
   const isHidden = sec.classList.toggle('hidden');
-  btn.innerHTML = isHidden ? '<span>Ver más lugares</span> <span class="arrow-icon">▼</span>' : '<span>Ocultar</span> <span class="arrow-icon">▲</span>';
+  btn.innerHTML = isHidden ? `<span>${t('btn_more_places')}</span> <span class="arrow-icon">▼</span>` : `<span>${t('btn_hide_more')}</span> <span class="arrow-icon">▲</span>`;
   stabilizeAlertTabHeight();
 }
 
 function resetModalForm() {
   selectColor('yellow');
   selectedTriggerType = 'none';
-  selectedTriggerLabel = 'Ninguna asignada';
+  selectedTriggerLabel = t('alert_none_assigned');
   selectedTargetTimestamp = null;
   selectedAlertDateTimeStr = null;
-  document.getElementById('selectedTriggerText').textContent = 'Alerta: Ninguna asignada';
+  document.getElementById('selectedTriggerText').textContent = t('alert_none_assigned');
   document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
 }
 
@@ -1912,6 +2285,10 @@ window.handleAndroidBackButton = function() {
   }
   const settingsModal = document.getElementById('settingsModal');
   if (settingsModal && !settingsModal.classList.contains('hidden')) {
+    if (typeof currentSettingsScreen !== 'undefined' && currentSettingsScreen !== 'main') {
+      openSettingsSubscreen('main');
+      return true;
+    }
     closeSettings();
     return true;
   }
@@ -2019,8 +2396,9 @@ function renderSettingsTimePresets() {
 
 function deleteTimePreset(presetId) {
   const p = timePresets.find(t => t.id === presetId);
-  const name = p ? p.label : 'alerta';
-  if (confirm(`¿Eliminar la alerta de tiempo "${name}"?`)) {
+  const name = p ? formatPresetLabel(p.label) : 'alerta';
+  const confirmMsg = currentLanguage === 'en' ? `Delete time alert "${name}"?` : `¿Eliminar la alerta de tiempo "${name}"?`;
+  if (confirm(confirmMsg)) {
     timePresets = timePresets.filter(t => t.id !== presetId);
     localStorage.setItem('posty_time_presets_v2', JSON.stringify(timePresets));
     renderSettingsTimePresets();
@@ -2186,7 +2564,8 @@ function renderSettingsLocations() {
 }
 
 function deleteGeoPreset(placeName) {
-  if (confirm(`¿Eliminar el lugar "${placeName}" de sus alertas?`)) {
+  const confirmMsg = currentLanguage === 'en' ? `Delete place "${placeName}" from your alerts?` : `¿Eliminar el lugar "${placeName}" de sus alertas?`;
+  if (confirm(confirmMsg)) {
     geoPresets = geoPresets.filter(g => (g.place || g.label) !== placeName && g.label !== placeName);
     localStorage.setItem('posty_geo_presets_v2', JSON.stringify(geoPresets));
     localStorage.removeItem(`posty_geo_coords_${placeName}`);
@@ -2451,7 +2830,7 @@ function syncLockScreenWidget(showAlertIfManual = false) {
   }
 
   if (showAlertIfManual) {
-    alert("✓ Widget y Pantalla de Bloqueo sincronizados con éxito.");
+    alert(t('lockscreen_synced_success'));
   }
 }
 
@@ -2463,7 +2842,7 @@ function toggleLockScreenWidget(enabled) {
     if (window.AndroidBridge && window.AndroidBridge.removeLockScreenLiveWidget) {
       window.AndroidBridge.removeLockScreenLiveWidget();
     }
-    alert("Notificación en Pantalla de Bloqueo desactivada.");
+    alert(t('lockscreen_disabled_msg'));
   }
 }
 
@@ -2510,9 +2889,35 @@ function switchSettingsButtonsTab(tab) {
   }
 }
 
+// Configuración: Navegación por Sub-pantallas
+let currentSettingsScreen = 'main';
+
+function openSettingsSubscreen(screen) {
+  currentSettingsScreen = screen;
+  const mainView = document.getElementById('settingsMainView');
+  const lockscreenSub = document.getElementById('settingsSubscreenLockscreen');
+  const backupSub = document.getElementById('settingsSubscreenBackup');
+
+  if (mainView) mainView.classList.toggle('hidden', screen !== 'main');
+  if (lockscreenSub) lockscreenSub.classList.toggle('hidden', screen !== 'lockscreen');
+  if (backupSub) backupSub.classList.toggle('hidden', screen !== 'backup');
+
+  const titleEl = document.getElementById('settingsModalTitle');
+  if (titleEl) {
+    if (screen === 'lockscreen') {
+      titleEl.textContent = t('lockscreen_sub_title');
+    } else if (screen === 'backup') {
+      titleEl.textContent = t('backup_sub_title');
+    } else {
+      titleEl.textContent = t('settings_title');
+    }
+  }
+}
+
 // Configuración & Respaldo
 function openSettings() {
   notifyModalState(true);
+  openSettingsSubscreen('main');
   renderSettingsTimePresets();
   renderSettingsLocations();
   switchSettingsButtonsTab(currentSettingsButtonsTab || 'time');
@@ -2520,11 +2925,17 @@ function openSettings() {
   if (toggle) {
     toggle.checked = localStorage.getItem('posty_lockscreen_widget_enabled') !== 'false';
   }
+  const btnEs = document.getElementById('langBtnEs');
+  const btnEn = document.getElementById('langBtnEn');
+  if (btnEs) btnEs.classList.toggle('active', currentLanguage === 'es');
+  if (btnEn) btnEn.classList.toggle('active', currentLanguage === 'en');
+
   document.getElementById('settingsModal').classList.remove('hidden');
 }
 
 function closeSettings() {
   notifyModalState(false);
+  openSettingsSubscreen('main');
   document.getElementById('settingsModal').classList.add('hidden');
 }
 
@@ -2598,7 +3009,7 @@ function importDataJSON(event) {
       }
 
       if (!importedNotes || !Array.isArray(importedNotes)) {
-        throw new Error('El archivo no contiene un formato de notas válido.');
+        throw new Error(t('invalid_file_format'));
       }
 
       notes = importedNotes;
@@ -2606,10 +3017,10 @@ function importDataJSON(event) {
       renderBoard();
       renderTriggerPresets();
       renderSettingsLocations();
-      alert(`✓ Respaldo restaurado exitosamente: ${notes.length} notas con sus audios y fotos recuperadas.`);
+      alert(t('backup_restored_success').replace('{count}', notes.length));
       closeSettings();
     } catch (err) {
-      alert('Error al restaurar respaldo JSON: ' + (err.message || 'Formato de archivo inválido.'));
+      alert(t('backup_restore_error') + (err.message || 'Error'));
     } finally {
       event.target.value = '';
     }
@@ -2618,7 +3029,7 @@ function importDataJSON(event) {
 }
 
 function resetDemoData(silent = false) {
-  if (silent || confirm('¿Desea restaurar la nota limpia inicial de UnLethe?')) {
+  if (silent || confirm(t('confirm_reset_data'))) {
     initializeDefaultFreshData();
     renderBoard();
     renderTriggerPresets();
