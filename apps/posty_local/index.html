@@ -396,9 +396,14 @@
             <div style="color: var(--text-muted); font-size: 11px;" data-i18n="lockscreen_opt1_desc">
               Mantiene sus tareas activas visibles directamente en la pantalla de bloqueo de su teléfono y Always-On Display de fábrica, sin necesidad de estar enchufado al cargador.
             </div>
-            <button type="button" class="chip-action" onclick="syncLockScreenWidget(true)" style="margin-top: 8px; width: 100%; justify-content: center; font-size: 12px;" data-i18n="btn_sync_lockscreen">
-              📌 Sincronizar tareas en Pantalla de Bloqueo ahora
-            </button>
+            <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">
+              <button type="button" class="chip-action" onclick="syncLockScreenWidget(true)" style="width: 100%; justify-content: center; font-size: 12px;" data-i18n="btn_sync_lockscreen">
+                📌 Sincronizar tareas en Pantalla de Bloqueo ahora
+              </button>
+              <button type="button" class="chip-action" onclick="requestPinLockScreenWidget()" style="width: 100%; justify-content: center; font-size: 12px; background: rgba(2, 132, 199, 0.12); color: #0284C7; border: 1px solid #0284C7;" data-i18n="btn_pin_lockscreen_widget">
+                ✨ Añadir Widget Automáticamente al Bloqueo / Inicio
+              </button>
+            </div>
           </div>
 
           <!-- Opción 2: Protector de Pantalla de Android (Daydream al cargar) -->

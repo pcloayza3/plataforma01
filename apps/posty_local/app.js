@@ -104,6 +104,7 @@ const TRANSLATIONS = {
     lockscreen_opt1_title: "🔒 Mostrar en Bloqueo y Protector actual (AOD)",
     lockscreen_opt1_desc: "Mantiene sus tareas activas visibles directamente en la pantalla de bloqueo de su teléfono y Always-On Display de fábrica, sin necesidad de estar enchufado al cargador.",
     btn_sync_lockscreen: "📌 Sincronizar tareas en Pantalla de Bloqueo ahora",
+    btn_pin_lockscreen_widget: "✨ Añadir Widget Automáticamente al Bloqueo / Inicio",
     lockscreen_opt2_title: "⚡ Protector del Sistema Android (Al Cargar)",
     lockscreen_opt2_desc: "En Android, los protectores de pantalla del sistema se activan automáticamente únicamente cuando el celular está conectado al cargador y la pantalla se apaga sola por inactividad.",
     btn_phone_settings: "⚙️ Ajustes del Celular",
@@ -228,6 +229,7 @@ const TRANSLATIONS = {
     lockscreen_opt1_title: "🔒 Show on Lock Screen and current Screensaver (AOD)",
     lockscreen_opt1_desc: "Keeps your active tasks visible directly on your phone's lock screen and factory Always-On Display without needing to be plugged in.",
     btn_sync_lockscreen: "📌 Sync tasks to Lock Screen now",
+    btn_pin_lockscreen_widget: "✨ Add Widget Automatically to Lock / Home Screen",
     lockscreen_opt2_title: "⚡ Android System Screensaver (When Charging)",
     lockscreen_opt2_desc: "On Android, system screensavers activate automatically only when the phone is connected to the charger and the screen turns off due to inactivity.",
     btn_phone_settings: "⚙️ Phone Settings",
@@ -2852,30 +2854,39 @@ function syncLockScreenWidget(showAlertIfManual = false) {
   }
 
   const activeNotes = (notes || []).filter(n => !n.completed);
-  let title = "UnLethe • Actividades Relevantes";
+  let title = currentLanguage === 'en' ? "UnLethe • Active Notes" : "UnLethe • Actividades Relevantes";
   let summary = "";
   let details = "";
 
   if (activeNotes.length === 0) {
-    summary = "✨ ¡Todas las notas cumplidas!";
-    details = "✨ Todas las notas cumplidas. ¡Disfrute su día!";
+    summary = currentLanguage === 'en' ? "✨ All notes completed!" : "✨ ¡Todas las notas cumplidas!";
+    details = currentLanguage === 'en' ? "✨ All notes completed. Enjoy your day!" : "✨ Todas las notas cumplidas. ¡Disfrute su día!";
   } else {
     const urgentCount = activeNotes.filter(n => n.urgency === 'urgent').length;
     if (urgentCount > 0) {
-      summary = `📌 ${urgentCount} urgente${urgentCount > 1 ? 's' : ''} pendiente${urgentCount > 1 ? 's' : ''}`;
+      if (currentLanguage === 'en') {
+        summary = `📌 ${urgentCount} urgent note${urgentCount > 1 ? 's' : ''} pending`;
+      } else {
+        summary = `📌 ${urgentCount} urgente${urgentCount > 1 ? 's' : ''} pendiente${urgentCount > 1 ? 's' : ''}`;
+      }
     } else {
-      summary = `📝 ${activeNotes.length} actividad${activeNotes.length > 1 ? 'es' : ''} pendiente${activeNotes.length > 1 ? 's' : ''}`;
+      if (currentLanguage === 'en') {
+        summary = `📝 ${activeNotes.length} task${activeNotes.length > 1 ? 's' : ''} pending`;
+      } else {
+        summary = `📝 ${activeNotes.length} actividad${activeNotes.length > 1 ? 'es' : ''} pendiente${activeNotes.length > 1 ? 's' : ''}`;
+      }
     }
 
     const lines = [];
     activeNotes.slice(0, 5).forEach(n => {
       const text = n.lines && n.lines.length > 0 ? n.lines[0].text : (n.text || '');
       const icon = n.urgency === 'urgent' ? '📌' : (n.triggerType === 'geo' ? '📍' : '●');
-      const timeInfo = n.alertDateTimeStr || n.triggerLabel || '';
+      const timeInfo = formatPresetLabel(n.alertDateTimeStr || n.triggerLabel || '');
       lines.push(`${icon} ${text}${timeInfo ? ` (${timeInfo})` : ''}`);
     });
     if (activeNotes.length > 5) {
-      lines.push(`... y ${activeNotes.length - 5} notas más`);
+      const more = activeNotes.length - 5;
+      lines.push(currentLanguage === 'en' ? `... and ${more} more notes` : `... y ${more} notas más`);
     }
     details = lines.join('\n');
   }
@@ -2886,7 +2897,7 @@ function syncLockScreenWidget(showAlertIfManual = false) {
 
   // Sincronizar datos con el Lock Screen Widget nativo (AppWidget / Keyguard)
   let nextAlarmTitle = "UnLethe";
-  let nextAlarmTime = "Sin alarmas pendientes";
+  let nextAlarmTime = currentLanguage === 'en' ? "No pending alarms" : "Sin alarmas pendientes";
   let nextNoteId = "";
 
   if (activeNotes.length > 0) {
@@ -2897,7 +2908,7 @@ function syncLockScreenWidget(showAlertIfManual = false) {
       nextAlarmTitle = (priorityNote.lines && priorityNote.lines.length > 0)
         ? priorityNote.lines[0].text
         : (priorityNote.text || 'Nota');
-      nextAlarmTime = priorityNote.alertDateTimeStr || priorityNote.triggerLabel || 'Pendiente';
+      nextAlarmTime = formatPresetLabel(priorityNote.alertDateTimeStr || priorityNote.triggerLabel) || (currentLanguage === 'en' ? 'Pending' : 'Pendiente');
       nextNoteId = priorityNote.id || '';
     }
   }
@@ -2908,6 +2919,16 @@ function syncLockScreenWidget(showAlertIfManual = false) {
 
   if (showAlertIfManual) {
     alert(t('lockscreen_synced_success'));
+  }
+}
+
+function requestPinLockScreenWidget() {
+  if (window.AndroidBridge && window.AndroidBridge.requestPinLockScreenWidget) {
+    window.AndroidBridge.requestPinLockScreenWidget();
+  } else {
+    alert(currentLanguage === 'en'
+      ? 'To add the widget, touch and hold an empty space on your home screen or lock screen and select UnLethe.'
+      : 'Para agregar el widget, mantenga presionada la pantalla de inicio o bloqueo y elija UnLethe en la lista de widgets.');
   }
 }
 

@@ -6,6 +6,8 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -175,6 +177,12 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                view.evaluateJavascript("if (window.syncLockScreenWidget) { window.syncLockScreenWidget(); }", null);
+            }
+
+            @Override
             public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
                 // Proceder para cargar azulejos de mapas seguros sin interrupción
                 handler.proceed();
@@ -247,6 +255,9 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, needed.toArray(new String[0]), PERMISSION_REQUEST_CODE);
         } else {
             startContinuousLocationUpdates();
+            if (webView != null) {
+                webView.post(() -> webView.evaluateJavascript("if (window.syncLockScreenWidget) { window.syncLockScreenWidget(); }", null));
+            }
         }
     }
 
@@ -255,6 +266,9 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PERMISSION_REQUEST_CODE) {
             startContinuousLocationUpdates();
+            if (webView != null) {
+                webView.post(() -> webView.evaluateJavascript("if (window.syncLockScreenWidget) { window.syncLockScreenWidget(); }", null));
+            }
         }
     }
 
@@ -262,6 +276,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         startContinuousLocationUpdates();
+        if (webView != null) {
+            webView.post(() -> webView.evaluateJavascript("if (window.syncLockScreenWidget) { window.syncLockScreenWidget(); }", null));
+        }
     }
 
     private void startContinuousLocationUpdates() {
@@ -555,18 +572,24 @@ public class MainActivity extends AppCompatActivity {
                     NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                     if (manager == null) return;
 
-                    String channelId = "nota_feliz_lockscreen_feed";
+                    String channelId = "unlethe_lockscreen_active_v2";
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        try {
+                            manager.deleteNotificationChannel("nota_feliz_lockscreen_feed");
+                        } catch (Exception ignored) {}
+
                         NotificationChannel channel = manager.getNotificationChannel(channelId);
                         if (channel == null) {
                             channel = new NotificationChannel(
                                 channelId,
-                                "UnLethe - Pantalla de Bloqueo y AOD",
-                                NotificationManager.IMPORTANCE_LOW
+                                "UnLethe - Bloqueo Activo y AOD",
+                                NotificationManager.IMPORTANCE_DEFAULT
                             );
-                            channel.setDescription("Muestra las notas relevantes de UnLethe en la pantalla de bloqueo y Always On Display");
+                            channel.setDescription("Muestra las notas relevantes de UnLethe directamente en la pantalla de bloqueo activo y Always On Display");
                             channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
                             channel.setShowBadge(true);
+                            channel.enableVibration(false);
+                            channel.setSound(null, null);
                             manager.createNotificationChannel(channel);
                         }
                     }
@@ -587,13 +610,18 @@ public class MainActivity extends AppCompatActivity {
                         .setContentTitle(title)
                         .setContentText(summary)
                         .setStyle(new NotificationCompat.BigTextStyle().bigText(detailsText))
-                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        .setPriority(NotificationCompat.PRIORITY_HIGH)
                         .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                        .setCategory(NotificationCompat.CATEGORY_REMINDER)
+                        .setColor(0xFFFBBF24)
                         .setOngoing(true)
                         .setContentIntent(pendingIntent)
                         .setShowWhen(true);
 
-                    manager.notify(1001, builder.build());
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+                        ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+                        manager.notify(1001, builder.build());
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -608,6 +636,36 @@ public class MainActivity extends AppCompatActivity {
                     NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                     if (manager != null) {
                         manager.cancel(1001);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+
+        // Solicitar al sistema Android la adición automática del Widget al bloqueo / inicio
+        @JavascriptInterface
+        public void requestPinLockScreenWidget() {
+            runOnUiThread(() -> {
+                try {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        AppWidgetManager appWidgetManager = getSystemService(AppWidgetManager.class);
+                        ComponentName provider = new ComponentName(MainActivity.this, LockScreenWidgetProvider.class);
+                        if (appWidgetManager != null && appWidgetManager.isRequestPinAppWidgetSupported()) {
+                            Intent callbackIntent = new Intent(MainActivity.this, MainActivity.class);
+                            callbackIntent.setAction("com.postylocal.app.ACTION_WIDGET_PINNED");
+                            PendingIntent successCallback = PendingIntent.getActivity(
+                                MainActivity.this,
+                                0,
+                                callbackIntent,
+                                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                            );
+                            appWidgetManager.requestPinAppWidget(provider, null, successCallback);
+                        } else {
+                            Toast.makeText(MainActivity.this, "Mantenga presionada la pantalla de inicio o bloqueo para agregar el widget de UnLethe.", Toast.LENGTH_LONG).show();
+                        }
+                    } else {
+                        Toast.makeText(MainActivity.this, "Agregue el widget de UnLethe desde el menú de widgets del teléfono.", Toast.LENGTH_LONG).show();
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
