@@ -513,6 +513,7 @@ function openNewNoteModal() {
   renderModalLines();
   renderPhotoPreview();
   renderTriggerPresets();
+  switchAlertTab('time');
   selectNoAlert();
 
   modalTitle.textContent = 'Nueva Nota';
@@ -546,6 +547,12 @@ function openEditNoteModal(noteId) {
   renderModalLines();
   renderPhotoPreview();
   renderTriggerPresets();
+
+  if (note.triggerType === 'geo') {
+    switchAlertTab('geo');
+  } else {
+    switchAlertTab('time');
+  }
 
   if (!note.triggerType || note.triggerType === 'none') {
     selectNoAlert();
@@ -1281,8 +1288,44 @@ function selectNoAlert() {
   if (btn) btn.classList.add('active');
 }
 
+// Gestión de Pestañas de Alerta (Por tiempo vs Por ubicación sobre el mismo espacio)
+let currentAlertTab = 'time';
+
+function switchAlertTab(tab) {
+  currentAlertTab = tab;
+  const btnTime = document.getElementById('tabBtnTime');
+  const btnGeo = document.getElementById('tabBtnGeo');
+  const paneTime = document.getElementById('alertTabContentTime');
+  const paneGeo = document.getElementById('alertTabContentGeo');
+
+  if (tab === 'time') {
+    if (btnTime) {
+      btnTime.classList.add('active');
+      btnTime.setAttribute('aria-selected', 'true');
+    }
+    if (btnGeo) {
+      btnGeo.classList.remove('active');
+      btnGeo.setAttribute('aria-selected', 'false');
+    }
+    if (paneTime) paneTime.classList.remove('hidden');
+    if (paneGeo) paneGeo.classList.add('hidden');
+  } else {
+    if (btnGeo) {
+      btnGeo.classList.add('active');
+      btnGeo.setAttribute('aria-selected', 'true');
+    }
+    if (btnTime) {
+      btnTime.classList.remove('active');
+      btnTime.setAttribute('aria-selected', 'false');
+    }
+    if (paneGeo) paneGeo.classList.remove('hidden');
+    if (paneTime) paneTime.classList.add('hidden');
+  }
+}
+
 function selectTimePreset(preset) {
   selectedTriggerType = 'time';
+  switchAlertTab('time');
   const calc = calculateAlertDateTime(preset);
   selectedTargetTimestamp = calc.timestamp;
   selectedAlertDateTimeStr = calc.label;
@@ -1306,6 +1349,7 @@ function selectTimePreset(preset) {
 
 function selectGeoPreset(preset) {
   selectedTriggerType = 'geo';
+  switchAlertTab('geo');
   selectedTargetTimestamp = null;
   selectedAlertDateTimeStr = preset.label;
   selectedTriggerLabel = preset.label;

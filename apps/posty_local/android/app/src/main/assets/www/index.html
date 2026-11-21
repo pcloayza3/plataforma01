@@ -156,63 +156,58 @@
         </button>
       </div>
 
-      <!-- Opción de Alerta (Con botón prominente "Sin alerta") -->
-      <div class="no-alert-bar" style="display: flex; align-items: center; justify-content: space-between; margin: 8px 0 4px;">
-        <label class="trigger-label" style="margin-bottom: 0;">¿Cuándo alertar?</label>
-        <button type="button" class="btn-no-alert" id="btnSelectNoAlert" onclick="selectNoAlert()">
-          🚫 Sin alerta (Libre)
+      <!-- Pestañas de Alerta: Dos maneras de alertar sobre el mismo espacio (Por tiempo vs Por ubicación) -->
+      <div class="alert-tabs-container">
+        <div class="alert-tabs-nav" role="tablist">
+          <button type="button" class="alert-tab-btn active" id="tabBtnTime" onclick="switchAlertTab('time')" role="tab" aria-selected="true">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span>Por tiempo</span>
+          </button>
+          <button type="button" class="alert-tab-btn" id="tabBtnGeo" onclick="switchAlertTab('geo')" role="tab" aria-selected="false">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            <span>Por ubicación</span>
+          </button>
+        </div>
+        <button type="button" class="btn-no-alert" id="btnSelectNoAlert" onclick="selectNoAlert()" title="Guardar nota sin alarma programada">
+          🚫 Sin alerta
         </button>
       </div>
 
-      <!-- Sección de Alertas Temporales Rápidas (Dinámicas con Frecuencia de Uso) -->
-      <div class="trigger-group">
-        <div class="trigger-header-row">
-          <label class="trigger-label">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-            ¿Cuándo alertar automáticamente?
-          </label>
-          <button type="button" class="btn-text-action" onclick="openVoicePromptModal('time')">➕ Otro tiempo</button>
-        </div>
-        
-        <!-- Fila Principal (Los más utilizados) -->
-        <div class="trigger-presets" id="primaryTimePresets"></div>
-
-        <!-- Botón para ver más opciones si no hay espacio -->
-        <div class="more-toggle-row">
-          <button type="button" class="btn-toggle-more" id="btnToggleMoreTime" onclick="toggleMoreTimePresets()">
-            <span>Ver más horarios</span> <span class="arrow-icon">▼</span>
-          </button>
+      <!-- Contenedor Compartido de las Pestañas de Alerta -->
+      <div class="alert-tab-body">
+        <!-- Pestaña 1: Alertas por Tiempo (Reloj) -->
+        <div id="alertTabContentTime" class="alert-tab-pane">
+          <div class="trigger-header-row">
+            <label class="trigger-label">Horarios predefinidos:</label>
+            <button type="button" class="btn-text-action" onclick="openVoicePromptModal('time')">➕ Otro tiempo</button>
+          </div>
+          <div class="trigger-presets" id="primaryTimePresets"></div>
+          <div class="more-toggle-row">
+            <button type="button" class="btn-toggle-more" id="btnToggleMoreTime" onclick="toggleMoreTimePresets()">
+              <span>Ver más horarios</span> <span class="arrow-icon">▼</span>
+            </button>
+          </div>
+          <div class="trigger-presets secondary-presets hidden" id="secondaryTimePresets"></div>
         </div>
 
-        <!-- Fila Secundaria Desplegable -->
-        <div class="trigger-presets secondary-presets hidden" id="secondaryTimePresets"></div>
+        <!-- Pestaña 2: Alertas por Ubicación (Marcador / Geocercas) -->
+        <div id="alertTabContentGeo" class="alert-tab-pane hidden">
+          <div class="trigger-header-row">
+            <label class="trigger-label">Lugares georreferenciados:</label>
+            <button type="button" class="btn-text-action" onclick="openVoicePromptModal('geo')">➕ Nuevo lugar</button>
+          </div>
+          <div class="trigger-presets" id="primaryGeoPresets"></div>
+          <div class="more-toggle-row">
+            <button type="button" class="btn-toggle-more" id="btnToggleMoreGeo" onclick="toggleMoreGeoPresets()">
+              <span>Ver más lugares</span> <span class="arrow-icon">▼</span>
+            </button>
+          </div>
+          <div class="trigger-presets secondary-presets hidden" id="secondaryGeoPresets"></div>
+        </div>
       </div>
 
-      <!-- Sección de Alertas por Geofencing (Dinámicas con Frecuencia de Uso) -->
-      <div class="trigger-group">
-        <div class="trigger-header-row">
-          <label class="trigger-label">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-            ¿O alertar por Ubicación (Geocerca local)?
-          </label>
-          <button type="button" class="btn-text-action" onclick="openVoicePromptModal('geo')">➕ Nuevo lugar</button>
-        </div>
-
-        <!-- Fila Principal (Lugares más utilizados) -->
-        <div class="trigger-presets" id="primaryGeoPresets"></div>
-
-        <!-- Botón para ver más lugares si no hay espacio -->
-        <div class="more-toggle-row">
-          <button type="button" class="btn-toggle-more" id="btnToggleMoreGeo" onclick="toggleMoreGeoPresets()">
-            <span>Ver más lugares</span> <span class="arrow-icon">▼</span>
-          </button>
-        </div>
-
-        <!-- Fila Secundaria Desplegable -->
-        <div class="trigger-presets secondary-presets hidden" id="secondaryGeoPresets"></div>
-        
-        <div id="selectedTriggerText" class="selected-trigger-pill">Alerta: Ninguna asignada</div>
-      </div>
+      <!-- Pill Indicador de Alerta Seleccionada -->
+      <div id="selectedTriggerText" class="selected-trigger-pill">Alerta: Ninguna asignada</div>
 
       <!-- Botones de Acción del Modal -->
       <div class="modal-footer">
