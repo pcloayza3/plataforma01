@@ -708,6 +708,50 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
+        // Abrir Ajustes de Pantalla de Bloqueo y AOD de Samsung One UI / Android
+        @JavascriptInterface
+        public void openLockScreenSettings() {
+            runOnUiThread(() -> {
+                boolean opened = false;
+                // 1. Pantalla de bloqueo y AOD de Samsung One UI
+                try {
+                    Intent intent = new Intent();
+                    intent.setClassName("com.android.settings", "com.android.settings.Settings$LockScreenSettingsActivity");
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    opened = true;
+                } catch (Exception ignored) {}
+
+                // 2. Acción estándar de configuración de bloqueo
+                if (!opened) {
+                    try {
+                        Intent intent = new Intent("android.settings.LOCK_SCREEN_SETTINGS");
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                        opened = true;
+                    } catch (Exception ignored) {}
+                }
+
+                // 3. Ajustes de seguridad y bloqueo
+                if (!opened) {
+                    try {
+                        Intent intent = new Intent(Settings.ACTION_SECURITY_SETTINGS);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                        opened = true;
+                    } catch (Exception ignored) {}
+                }
+
+                if (!opened) {
+                    try {
+                        Intent intent = new Intent(Settings.ACTION_SETTINGS);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                    } catch (Exception ignored) {}
+                }
+            });
+        }
+
         // Mantener Pantalla Encendida durante el Modo Reposo OLED
         @JavascriptInterface
         public void setKeepScreenOn(boolean keepOn) {

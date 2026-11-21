@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_mono_container"
+    android:layout_width="48dp"
+    android:layout_height="48dp"
+    android:layout_gravity="center">
+
+    <!-- Ícono monocromático de UnLethe para Always On Display (AOD OLED) -->
+    <ImageView
+        android:id="@+id/widget_mono_icon"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:layout_gravity="center"
+        android:tint="#FFFFFF"
+        android:src="@mipmap/ic_launcher"
+        android:contentDescription="UnLethe AOD Widget" />
+
+    <!-- Badge monocromático de alerta -->
+    <TextView
+        android:id="@+id/widget_mono_count"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_gravity="top|end"
+        android:background="@drawable/widget_badge"
+        android:gravity="center"
+        android:text="1"
+        android:textColor="#FFFFFF"
+        android:textSize="9sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
+</FrameLayout>

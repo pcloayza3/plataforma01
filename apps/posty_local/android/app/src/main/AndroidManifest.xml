@@ -76,6 +76,7 @@
         <!-- Lock Screen Widget & Home Screen Widget (Keyguard / Pantalla de Bloqueo) -->
         <receiver
             android:name=".LockScreenWidgetProvider"
+            android:label="UnLethe"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

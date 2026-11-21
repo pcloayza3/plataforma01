@@ -105,6 +105,7 @@ const TRANSLATIONS = {
     lockscreen_opt1_desc: "Mantiene sus tareas activas visibles directamente en la pantalla de bloqueo de su teléfono y Always-On Display de fábrica, sin necesidad de estar enchufado al cargador.",
     btn_sync_lockscreen: "📌 Sincronizar tareas en Pantalla de Bloqueo ahora",
     btn_pin_lockscreen_widget: "✨ Añadir Widget Automáticamente al Bloqueo / Inicio",
+    btn_open_lockscreen_settings: "📱 Abrir Ajustes de Pantalla de Bloqueo y AOD",
     lockscreen_opt2_title: "⚡ Protector del Sistema Android (Al Cargar)",
     lockscreen_opt2_desc: "En Android, los protectores de pantalla del sistema se activan automáticamente únicamente cuando el celular está conectado al cargador y la pantalla se apaga sola por inactividad.",
     btn_phone_settings: "⚙️ Ajustes del Celular",
@@ -230,6 +231,7 @@ const TRANSLATIONS = {
     lockscreen_opt1_desc: "Keeps your active tasks visible directly on your phone's lock screen and factory Always-On Display without needing to be plugged in.",
     btn_sync_lockscreen: "📌 Sync tasks to Lock Screen now",
     btn_pin_lockscreen_widget: "✨ Add Widget Automatically to Lock / Home Screen",
+    btn_open_lockscreen_settings: "📱 Open Lock Screen & AOD Settings",
     lockscreen_opt2_title: "⚡ Android System Screensaver (When Charging)",
     lockscreen_opt2_desc: "On Android, system screensavers activate automatically only when the phone is connected to the charger and the screen turns off due to inactivity.",
     btn_phone_settings: "⚙️ Phone Settings",
@@ -2918,6 +2920,16 @@ function requestPinLockScreenWidget() {
     alert(currentLanguage === 'en'
       ? 'To add the widget, touch and hold an empty space on your home screen or lock screen and select UnLethe.'
       : 'Para agregar el widget, mantenga presionada la pantalla de inicio o bloqueo y elija UnLethe en la lista de widgets.');
+  }
+}
+
+function openLockScreenSettings() {
+  if (window.AndroidBridge && window.AndroidBridge.openLockScreenSettings) {
+    window.AndroidBridge.openLockScreenSettings();
+  } else {
+    alert(currentLanguage === 'en'
+      ? 'Open your phone Settings > Lock screen and AOD > Edit Lock Screen > Add widgets.'
+      : 'Abra Ajustes de su smartphone > Pantalla de bloqueo y AOD > Editar pantalla de bloqueo > Añadir widgets.');
   }
 }
 
