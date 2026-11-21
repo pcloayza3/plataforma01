@@ -3,13 +3,15 @@
     android:id="@+id/widget_tiny_container"
     android:layout_width="48dp"
     android:layout_height="48dp"
-    android:layout_gravity="center">
+    android:layout_gravity="center"
+    android:background="@drawable/widget_postit_bg"
+    android:padding="4dp">
 
-    <!-- Ícono de la Nota UnLethe en Pantalla de Bloqueo -->
+    <!-- Ícono 3D de la Nota UnLethe en Pantalla de Bloqueo a todo color (sin tintes blancos) -->
     <ImageView
         android:id="@+id/widget_tiny_icon"
-        android:layout_width="38dp"
-        android:layout_height="38dp"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
         android:layout_gravity="center"
         android:src="@mipmap/ic_launcher"
         android:contentDescription="UnLethe Widget" />
@@ -17,14 +19,14 @@
     <!-- Contador / Badge de Notas Urgentes Pendientes -->
     <TextView
         android:id="@+id/widget_tiny_count"
-        android:layout_width="18dp"
-        android:layout_height="18dp"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
         android:layout_gravity="top|end"
         android:background="@drawable/widget_badge"
         android:gravity="center"
         android:text="1"
         android:textColor="#FFFFFF"
-        android:textSize="10sp"
+        android:textSize="9sp"
         android:textStyle="bold"
         android:visibility="gone" />
 

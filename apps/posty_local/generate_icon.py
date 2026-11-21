@@ -43,6 +43,23 @@ def create_transparent_icon(source_path):
     # Imagen RGBA con fondo transparente
     out_img = img.copy()
     out_img.putalpha(smooth_mask)
+
+    # Recorte ajustado (Bounding Box) para que la nota amarilla ocupe el tamaño completo del ícono
+    bbox = smooth_mask.getbbox()
+    if bbox:
+        max_dim = max(bbox[2] - bbox[0], bbox[3] - bbox[1])
+        cx = (bbox[0] + bbox[2]) // 2
+        cy = (bbox[1] + bbox[3]) // 2
+        pad = int(max_dim * 0.03)  # Margen estético mínimo del 3% para respetar curvas y esquinas
+        half = max_dim // 2 + pad
+        crop_box = (
+            max(0, cx - half),
+            max(0, cy - half),
+            min(W, cx + half),
+            min(H, cy + half)
+        )
+        out_img = out_img.crop(crop_box)
+
     return out_img
 
 def build_all_icons():

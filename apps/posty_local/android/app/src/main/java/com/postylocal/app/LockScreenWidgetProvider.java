@@ -41,10 +41,19 @@ public class LockScreenWidgetProvider extends AppWidgetProvider {
             .apply();
 
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+
+        // 1. Actualizar widgets de tarjeta Post-it (LockScreenWidgetProvider)
         ComponentName thisWidget = new ComponentName(context, LockScreenWidgetProvider.class);
         int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
         if (appWidgetIds != null && appWidgetIds.length > 0) {
             updateAllWidgetsFromPrefs(context, appWidgetManager, appWidgetIds);
+        }
+
+        // 2. Actualizar widgets compactos de ícono 1x1 (LockScreenTinyWidgetProvider)
+        ComponentName tinyWidget = new ComponentName(context, LockScreenTinyWidgetProvider.class);
+        int[] tinyWidgetIds = appWidgetManager.getAppWidgetIds(tinyWidget);
+        if (tinyWidgetIds != null && tinyWidgetIds.length > 0) {
+            LockScreenTinyWidgetProvider.updateTinyWidgets(context, appWidgetManager, tinyWidgetIds);
         }
     }
 
@@ -56,19 +65,9 @@ public class LockScreenWidgetProvider extends AppWidgetProvider {
         String noteId = prefs.getString(KEY_NOTE_ID, "");
 
         for (int appWidgetId : appWidgetIds) {
-            Bundle options = null;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                options = appWidgetManager.getAppWidgetOptions(appWidgetId);
-            }
-            int category = -1;
-            int minWidth = 0;
-            if (options != null) {
-                category = options.getInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY, -1);
-                minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0);
-            }
-
             Intent intent = new Intent(context, MainActivity.class);
             intent.setAction("com.postylocal.app.ACTION_OPEN_NOTE");
+            intent.putExtra("open_screensaver", true);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             if (!noteId.isEmpty()) {
                 intent.putExtra("targetNoteId", noteId);
@@ -81,33 +80,24 @@ public class LockScreenWidgetProvider extends AppWidgetProvider {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
             );
 
-            // Si es pantalla de bloqueo (Keyguard) o espacio reducido (< 100dp), usar layout compacto
-            boolean isKeyguard = (category == AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD) || (minWidth > 0 && minWidth < 100);
+            // Renderizar la tarjeta Post-it amarilla oficial idéntica a la Pantalla Feliz
+            RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.lock_screen_widget_small);
+            views.setTextViewText(R.id.widget_small_title, "UnLethe");
+            views.setTextViewText(R.id.widget_small_time, time);
+            
+            String taskText = (title != null && !title.isEmpty() && !title.equals("UnLethe"))
+                ? "📌 " + title
+                : "📌 Sin tareas urgentes";
+            views.setTextViewText(R.id.widget_small_task, taskText);
 
-            RemoteViews views;
-            if (isKeyguard) {
-                views = new RemoteViews(context.getPackageName(), R.layout.lock_screen_widget_tiny);
-                if (count > 0) {
-                    views.setTextViewText(R.id.widget_tiny_count, String.valueOf(count));
-                    views.setViewVisibility(R.id.widget_tiny_count, View.VISIBLE);
-                } else {
-                    views.setViewVisibility(R.id.widget_tiny_count, View.GONE);
-                }
-                views.setOnClickPendingIntent(R.id.widget_tiny_container, pendingIntent);
+            if (count > 0) {
+                views.setTextViewText(R.id.widget_small_badge, String.valueOf(count));
+                views.setViewVisibility(R.id.widget_small_badge, View.VISIBLE);
             } else {
-                views = new RemoteViews(context.getPackageName(), R.layout.lock_screen_widget_layout);
-                views.setTextViewText(R.id.widget_alarm_title, title);
-                views.setTextViewText(R.id.widget_alarm_time, time);
-
-                if (count > 0) {
-                    views.setTextViewText(R.id.widget_alarm_count, String.valueOf(count));
-                    views.setViewVisibility(R.id.widget_alarm_count, View.VISIBLE);
-                } else {
-                    views.setViewVisibility(R.id.widget_alarm_count, View.GONE);
-                }
-                views.setOnClickPendingIntent(R.id.widget_container, pendingIntent);
+                views.setViewVisibility(R.id.widget_small_badge, View.GONE);
             }
 
+            views.setOnClickPendingIntent(R.id.widget_small_container, pendingIntent);
             appWidgetManager.updateAppWidget(appWidgetId, views);
         }
     }

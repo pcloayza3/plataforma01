@@ -90,6 +90,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Mostrar directamente sobre la pantalla de bloqueo y encender pantalla si se abre desde el widget en bloqueo
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(true);
+            setTurnScreenOn(true);
+        } else {
+            getWindow().addFlags(
+                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
+                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+            );
+        }
+
         setContentView(R.layout.activity_main);
         android.widget.FrameLayout rootLayout = findViewById(R.id.root_layout);
         webView = findViewById(R.id.webview);
@@ -140,6 +151,18 @@ public class MainActivity extends AppCompatActivity {
         if (intent == null) return;
         String targetNoteId = intent.getStringExtra("targetNoteId");
         String speakText = intent.getStringExtra("speakNoteText");
+        boolean openScreensaver = intent.getBooleanExtra("open_screensaver", false);
+
+        android.app.KeyguardManager km = (android.app.KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+        boolean isLocked = (km != null && km.isKeyguardLocked());
+
+        // Si se abre desde el widget o con el teléfono bloqueado, desplegar de inmediato la Pantalla Feliz (Post-it grande)
+        if (openScreensaver || isLocked) {
+            webView.postDelayed(() -> {
+                webView.evaluateJavascript("if (window.openScreensaver) { window.openScreensaver(); }", null);
+            }, 800);
+        }
+
         if (targetNoteId != null && !targetNoteId.isEmpty()) {
             webView.postDelayed(() -> {
                 webView.evaluateJavascript("if (window.openNoteFromNotification) { window.openNoteFromNotification('" + targetNoteId + "'); }", null);
