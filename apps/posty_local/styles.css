@@ -1032,18 +1032,44 @@ body.dark .alert-tab-btn:hover:not(.active) {
 }
 
 .alert-tab-body {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto;
+  align-items: start;
   min-height: 85px;
   margin-bottom: 4px;
+  position: relative;
 }
 
 .alert-tab-pane {
+  grid-area: 1 / 1;
   display: flex;
   flex-direction: column;
   gap: 6px;
   animation: fadeIn 0.15s ease-in;
+  transition: opacity 0.15s ease-in;
 }
 
+/* En el contenedor con stack Grid, el panel inactivo mantiene su altura
+   en el cálculo del contenedor para que la altura de la pestaña más alta
+   se conserve siempre, evitando que el formulario salte o se mueva. */
 .alert-tab-pane.hidden {
+  display: flex !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  user-select: none !important;
+}
+
+/* Pestañas para la Gestión de Botones en Configuración */
+.settings-tab-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeIn 0.15s ease-in;
+}
+
+.settings-tab-pane.hidden {
   display: none !important;
 }
 

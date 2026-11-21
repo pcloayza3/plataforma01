@@ -1261,6 +1261,26 @@ function renderTriggerPresets() {
       btnMoreGeo.style.display = secondaryGeo.length > 0 ? 'inline-flex' : 'none';
     }
   }
+
+  stabilizeAlertTabHeight();
+}
+
+// Estabilizador de altura: mantiene la altura de la pestaña más grande (por tiempo o por ubicación)
+// para evitar saltos o vibraciones visuales en el modal de nota
+function stabilizeAlertTabHeight() {
+  requestAnimationFrame(() => {
+    const paneTime = document.getElementById('alertTabContentTime');
+    const paneGeo = document.getElementById('alertTabContentGeo');
+    const body = document.querySelector('.alert-tab-body');
+    if (!paneTime || !paneGeo || !body) return;
+
+    const hTime = paneTime.scrollHeight || paneTime.offsetHeight || 0;
+    const hGeo = paneGeo.scrollHeight || paneGeo.offsetHeight || 0;
+    const maxH = Math.max(hTime, hGeo);
+    if (maxH > 0) {
+      body.style.minHeight = `${maxH}px`;
+    }
+  });
 }
 
 function selectTimePresetById(id) {
@@ -1321,6 +1341,7 @@ function switchAlertTab(tab) {
     if (paneGeo) paneGeo.classList.remove('hidden');
     if (paneTime) paneTime.classList.add('hidden');
   }
+  stabilizeAlertTabHeight();
 }
 
 function selectTimePreset(preset) {
@@ -1377,6 +1398,7 @@ function toggleMoreTimePresets() {
   const btn = document.getElementById('btnToggleMoreTime');
   const isHidden = sec.classList.toggle('hidden');
   btn.innerHTML = isHidden ? '<span>Ver más horarios</span> <span class="arrow-icon">▼</span>' : '<span>Ocultar</span> <span class="arrow-icon">▲</span>';
+  stabilizeAlertTabHeight();
 }
 
 function toggleMoreGeoPresets() {
@@ -1384,6 +1406,7 @@ function toggleMoreGeoPresets() {
   const btn = document.getElementById('btnToggleMoreGeo');
   const isHidden = sec.classList.toggle('hidden');
   btn.innerHTML = isHidden ? '<span>Ver más lugares</span> <span class="arrow-icon">▼</span>' : '<span>Ocultar</span> <span class="arrow-icon">▲</span>';
+  stabilizeAlertTabHeight();
 }
 
 function resetModalForm() {
@@ -2452,11 +2475,47 @@ function openAndroidDreamSettings() {
   }
 }
 
+// Pestañas de Gestión de Botones en Configuración (Tiempo vs Ubicación)
+let currentSettingsButtonsTab = 'time';
+
+function switchSettingsButtonsTab(tab) {
+  currentSettingsButtonsTab = tab;
+  const btnTime = document.getElementById('settingsTabBtnTime');
+  const btnGeo = document.getElementById('settingsTabBtnGeo');
+  const paneTime = document.getElementById('settingsTabPaneTime');
+  const paneGeo = document.getElementById('settingsTabPaneGeo');
+
+  if (tab === 'time') {
+    if (btnTime) {
+      btnTime.classList.add('active');
+      btnTime.setAttribute('aria-selected', 'true');
+    }
+    if (btnGeo) {
+      btnGeo.classList.remove('active');
+      btnGeo.setAttribute('aria-selected', 'false');
+    }
+    if (paneTime) paneTime.classList.remove('hidden');
+    if (paneGeo) paneGeo.classList.add('hidden');
+  } else {
+    if (btnGeo) {
+      btnGeo.classList.add('active');
+      btnGeo.setAttribute('aria-selected', 'true');
+    }
+    if (btnTime) {
+      btnTime.classList.remove('active');
+      btnTime.setAttribute('aria-selected', 'false');
+    }
+    if (paneGeo) paneGeo.classList.remove('hidden');
+    if (paneTime) paneTime.classList.add('hidden');
+  }
+}
+
 // Configuración & Respaldo
 function openSettings() {
   notifyModalState(true);
   renderSettingsTimePresets();
   renderSettingsLocations();
+  switchSettingsButtonsTab(currentSettingsButtonsTab || 'time');
   const toggle = document.getElementById('lockScreenWidgetToggle');
   if (toggle) {
     toggle.checked = localStorage.getItem('posty_lockscreen_widget_enabled') !== 'false';

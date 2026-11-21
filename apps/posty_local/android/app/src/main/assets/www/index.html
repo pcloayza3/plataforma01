@@ -282,29 +282,43 @@
 
         <hr class="settings-divider">
 
-        <!-- Gestión de Botones: Alertas de Tiempo -->
+        <!-- Gestión de Botones: Alertas de Tiempo y Ubicación en 2 Pestañas -->
         <h4>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-          Gestión de Botones: Alertas de Tiempo
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          Gestión de Botones de Alertas
         </h4>
-        <p class="settings-desc">Horarios predefinidos para asignar alarmas en un solo toque.</p>
-        <div id="settingsTimePresetsList" class="settings-time-presets-list">
-          <!-- Se inyectan dinámicamente los botones de tiempo (+1 hora, Hoy 18:00...) con opción de eliminar -->
-        </div>
-        <button type="button" class="btn-text-action" onclick="openVoicePromptModal('time')" style="margin-top: 8px;">➕ Agregar alerta de tiempo</button>
+        <p class="settings-desc">Personalice los accesos rápidos de alertas para asignar recordatorios en un toque.</p>
 
-        <hr class="settings-divider">
-
-        <!-- Gestión de Botones: Alertas de Ubicación y Geocercas -->
-        <h4>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-          Gestión de Botones: Alertas de Ubicación
-        </h4>
-        <p class="settings-desc">Lugares georreferenciados para alertar por proximidad (elegir en mapa o GPS).</p>
-        <div id="settingsLocationsList" class="settings-locations-list">
-          <!-- Se inyectan dinámicamente con Elegir de mapa y Eliminar (sin botón actualizar) -->
+        <div class="alert-tabs-container" style="margin-bottom: 12px;">
+          <div class="alert-tabs-nav" role="tablist">
+            <button type="button" class="alert-tab-btn active" id="settingsTabBtnTime" onclick="switchSettingsButtonsTab('time')" role="tab" aria-selected="true">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              <span>Alertas de tiempo</span>
+            </button>
+            <button type="button" class="alert-tab-btn" id="settingsTabBtnGeo" onclick="switchSettingsButtonsTab('geo')" role="tab" aria-selected="false">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+              <span>Alertas de ubicación</span>
+            </button>
+          </div>
         </div>
-        <button type="button" class="btn-text-action" onclick="openVoicePromptModal('geo')" style="margin-top: 8px;">➕ Agregar nuevo lugar</button>
+
+        <!-- Pestaña 1: Alertas de Tiempo -->
+        <div id="settingsTabPaneTime" class="settings-tab-pane">
+          <p class="settings-desc" style="margin-top: 0;">Horarios predefinidos (+1 hora, Hoy 18:00, Mañana 09:00...):</p>
+          <div id="settingsTimePresetsList" class="settings-time-presets-list">
+            <!-- Se inyectan dinámicamente los botones de tiempo (+1 hora, Hoy 18:00...) con opción de eliminar -->
+          </div>
+          <button type="button" class="btn-text-action" onclick="openVoicePromptModal('time')" style="margin-top: 8px;">➕ Agregar alerta de tiempo</button>
+        </div>
+
+        <!-- Pestaña 2: Alertas de Ubicación y Geocercas -->
+        <div id="settingsTabPaneGeo" class="settings-tab-pane hidden">
+          <p class="settings-desc" style="margin-top: 0;">Lugares georreferenciados para alertar por proximidad (elegir en mapa o GPS):</p>
+          <div id="settingsLocationsList" class="settings-locations-list">
+            <!-- Se inyectan dinámicamente con Elegir de mapa y Eliminar (sin botón actualizar) -->
+          </div>
+          <button type="button" class="btn-text-action" onclick="openVoicePromptModal('geo')" style="margin-top: 8px;">➕ Agregar nuevo lugar</button>
+        </div>
 
         <hr class="settings-divider">
 
