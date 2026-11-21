@@ -2892,6 +2892,22 @@ function switchSettingsButtonsTab(tab) {
 // Configuración: Navegación por Sub-pantallas
 let currentSettingsScreen = 'main';
 
+function handleSettingsCloseBtn() {
+  if (typeof currentSettingsScreen !== 'undefined' && currentSettingsScreen !== 'main') {
+    openSettingsSubscreen('main');
+    return;
+  }
+  closeSettings();
+}
+
+function handleSettingsFooterBtn() {
+  if (typeof currentSettingsScreen !== 'undefined' && currentSettingsScreen !== 'main') {
+    openSettingsSubscreen('main');
+    return;
+  }
+  closeSettings();
+}
+
 function openSettingsSubscreen(screen) {
   currentSettingsScreen = screen;
   const mainView = document.getElementById('settingsMainView');
@@ -2903,6 +2919,18 @@ function openSettingsSubscreen(screen) {
   if (backupSub) backupSub.classList.toggle('hidden', screen !== 'backup');
 
   const titleEl = document.getElementById('settingsModalTitle');
+  const headerBackBtn = document.getElementById('settingsHeaderBackBtn');
+  const footerBtn = document.getElementById('settingsFooterBtn');
+  const btnLockscreen = document.getElementById('btnNavLockscreen');
+  const btnBackup = document.getElementById('btnNavBackup');
+
+  if (btnLockscreen) btnLockscreen.classList.toggle('active', screen === 'lockscreen');
+  if (btnBackup) btnBackup.classList.toggle('active', screen === 'backup');
+
+  if (headerBackBtn) {
+    headerBackBtn.style.display = (screen !== 'main') ? 'inline-flex' : 'none';
+  }
+
   if (titleEl) {
     if (screen === 'lockscreen') {
       titleEl.textContent = t('lockscreen_sub_title');
@@ -2910,6 +2938,16 @@ function openSettingsSubscreen(screen) {
       titleEl.textContent = t('backup_sub_title');
     } else {
       titleEl.textContent = t('settings_title');
+    }
+  }
+
+  if (footerBtn) {
+    if (screen !== 'main') {
+      footerBtn.textContent = '‹ ' + t('btn_back_to_settings');
+      footerBtn.setAttribute('data-i18n', 'btn_back_to_settings');
+    } else {
+      footerBtn.textContent = t('btn_close');
+      footerBtn.setAttribute('data-i18n', 'btn_close');
     }
   }
 }

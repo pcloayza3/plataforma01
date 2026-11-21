@@ -253,8 +253,13 @@
   <div id="settingsModal" class="modal-backdrop hidden">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 id="settingsModalTitle" data-i18n="settings_title">Configuración de UnLethe</h3>
-        <button class="close-x-btn" onclick="closeSettings()">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button type="button" class="modal-header-back-btn" id="settingsHeaderBackBtn" onclick="openSettingsSubscreen('main')" style="display: none;" title="Volver a Configuración">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <h3 id="settingsModalTitle" data-i18n="settings_title">Configuración de UnLethe</h3>
+        </div>
+        <button class="close-x-btn" onclick="handleSettingsCloseBtn()" title="Cerrar o volver">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
       </div>
@@ -341,7 +346,7 @@
           <hr class="settings-divider">
 
           <!-- Botones de Navegación a Pantallas Secundarias -->
-          <button type="button" class="settings-nav-btn" onclick="openSettingsSubscreen('lockscreen')">
+          <button type="button" class="settings-nav-btn" id="btnNavLockscreen" onclick="openSettingsSubscreen('lockscreen')">
             <div class="settings-nav-left">
               <span class="settings-nav-icon">🔒</span>
               <div class="settings-nav-text">
@@ -352,7 +357,7 @@
             <span class="settings-nav-arrow">›</span>
           </button>
 
-          <button type="button" class="settings-nav-btn" onclick="openSettingsSubscreen('backup')">
+          <button type="button" class="settings-nav-btn" id="btnNavBackup" onclick="openSettingsSubscreen('backup')">
             <div class="settings-nav-left">
               <span class="settings-nav-icon">🛡️</span>
               <div class="settings-nav-text">
@@ -451,7 +456,7 @@
       </div>
 
       <div class="modal-footer">
-        <button class="btn-save" onclick="closeSettings()" data-i18n="btn_close">Cerrar</button>
+        <button class="btn-save" id="settingsFooterBtn" onclick="handleSettingsFooterBtn()" data-i18n="btn_close">Cerrar</button>
       </div>
     </div>
   </div>

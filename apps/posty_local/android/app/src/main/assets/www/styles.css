@@ -1637,6 +1637,32 @@ body.dark .alert-tab-btn:hover:not(.active) {
   background: rgba(2, 132, 199, 0.1);
 }
 
+.modal-header-back-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+
+.modal-header-back-btn:hover {
+  background: rgba(2, 132, 199, 0.1);
+  color: #0284C7;
+  border-color: #0284C7;
+}
+
+.settings-nav-btn.active {
+  border-color: #0284C7;
+  background: rgba(2, 132, 199, 0.08);
+}
+
 .backup-actions {
   display: flex;
   flex-direction: column;
