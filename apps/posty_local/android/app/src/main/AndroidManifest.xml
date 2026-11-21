@@ -75,10 +75,10 @@
             </intent-filter>
         </receiver>
 
-        <!-- Lock Screen Widget 2x1 (Tarjeta Post-it amarilla con tareas) -->
+        <!-- Lock Screen Widget & Home Screen Widget (Keyguard / Pantalla de Bloqueo) -->
         <receiver
             android:name=".LockScreenWidgetProvider"
-            android:label="UnLethe (Nota Post-it)"
+            android:label="UnLethe"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -86,19 +86,6 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/lock_screen_widget_info" />
-        </receiver>
-
-        <!-- Lock Screen Widget 1x1 (Ícono compacto de Post-it con badge) -->
-        <receiver
-            android:name=".LockScreenTinyWidgetProvider"
-            android:label="UnLethe (Ícono Post-it)"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/lock_screen_widget_tiny_info" />
         </receiver>
 
     </application>

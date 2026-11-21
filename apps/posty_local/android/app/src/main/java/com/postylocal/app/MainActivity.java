@@ -547,17 +547,44 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        // Disparar Alarma / Notificación Nativa Inmediata (Geocercas y Alertas en Vivo)
+        // Disparar Alarma Nativa Inmediata con la MISMA intensidad, pipeline de AlarmManager y sonido que la alarma por tiempo
         @JavascriptInterface
         public void triggerNativeNotification(String title, String body, String noteId) {
             runOnUiThread(() -> {
                 try {
+                    AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+                    long now = System.currentTimeMillis();
+                    String actualNoteId = noteId != null ? noteId : "geo_alert_" + now;
+                    String alertTitle = (title != null && !title.isEmpty()) ? title : "UnLethe • Alerta Urgente";
+                    String alertBody = (body != null && !body.isEmpty()) ? body : "Tiene una nota urgente pendiente.";
+
                     Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
                     intent.setAction("com.postylocal.app.ACTION_NOTE_ALARM");
-                    intent.putExtra("noteId", noteId != null ? noteId : "geo_alert_" + System.currentTimeMillis());
-                    intent.putExtra("title", title);
-                    intent.putExtra("body", body);
-                    sendBroadcast(intent);
+                    intent.putExtra("noteId", actualNoteId);
+                    intent.putExtra("title", alertTitle);
+                    intent.putExtra("body", alertBody);
+
+                    int reqCode = Math.abs(actualNoteId.hashCode());
+                    PendingIntent pi = PendingIntent.getBroadcast(
+                        MainActivity.this, reqCode, intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                    );
+
+                    // Disparar a través de AlarmManager con RTC_WAKEUP exactamente igual que la alarma por tiempo
+                    if (am != null) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, now + 50, pi);
+                        } else {
+                            am.setExact(AlarmManager.RTC_WAKEUP, now + 50, pi);
+                        }
+                    } else {
+                        sendBroadcast(intent);
+                    }
+
+                    // Reproducir pronunciación por voz TTS si la app está en primer plano
+                    if (textToSpeech != null && alertBody != null && !alertBody.isEmpty()) {
+                        textToSpeech.speak(alertBody, TextToSpeech.QUEUE_FLUSH, null, "AlertTTS");
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

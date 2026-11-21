@@ -3,12 +3,10 @@ package com.postylocal.app;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
-import android.appwidget.AppWidgetProviderInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.RemoteViews;
@@ -41,19 +39,10 @@ public class LockScreenWidgetProvider extends AppWidgetProvider {
             .apply();
 
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-
-        // 1. Actualizar widgets de tarjeta Post-it (LockScreenWidgetProvider)
         ComponentName thisWidget = new ComponentName(context, LockScreenWidgetProvider.class);
         int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
         if (appWidgetIds != null && appWidgetIds.length > 0) {
             updateAllWidgetsFromPrefs(context, appWidgetManager, appWidgetIds);
-        }
-
-        // 2. Actualizar widgets compactos de ícono 1x1 (LockScreenTinyWidgetProvider)
-        ComponentName tinyWidget = new ComponentName(context, LockScreenTinyWidgetProvider.class);
-        int[] tinyWidgetIds = appWidgetManager.getAppWidgetIds(tinyWidget);
-        if (tinyWidgetIds != null && tinyWidgetIds.length > 0) {
-            LockScreenTinyWidgetProvider.updateTinyWidgets(context, appWidgetManager, tinyWidgetIds);
         }
     }
 
@@ -80,24 +69,17 @@ public class LockScreenWidgetProvider extends AppWidgetProvider {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
             );
 
-            // Renderizar la tarjeta Post-it amarilla oficial idéntica a la Pantalla Feliz
-            RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.lock_screen_widget_small);
-            views.setTextViewText(R.id.widget_small_title, "UnLethe");
-            views.setTextViewText(R.id.widget_small_time, time);
-            
-            String taskText = (title != null && !title.isEmpty() && !title.equals("UnLethe"))
-                ? "📌 " + title
-                : "📌 Sin tareas urgentes";
-            views.setTextViewText(R.id.widget_small_task, taskText);
+            // Renderizar el widget post-it amarillo oficial para Pantalla de Bloqueo y AOD
+            RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.lock_screen_widget_tiny);
 
             if (count > 0) {
-                views.setTextViewText(R.id.widget_small_badge, String.valueOf(count));
-                views.setViewVisibility(R.id.widget_small_badge, View.VISIBLE);
+                views.setTextViewText(R.id.widget_tiny_count, String.valueOf(count));
+                views.setViewVisibility(R.id.widget_tiny_count, View.VISIBLE);
             } else {
-                views.setViewVisibility(R.id.widget_small_badge, View.GONE);
+                views.setViewVisibility(R.id.widget_tiny_count, View.GONE);
             }
 
-            views.setOnClickPendingIntent(R.id.widget_small_container, pendingIntent);
+            views.setOnClickPendingIntent(R.id.widget_tiny_container, pendingIntent);
             appWidgetManager.updateAppWidget(appWidgetId, views);
         }
     }
