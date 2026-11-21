@@ -163,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
         settings.setBlockNetworkImage(false);
         settings.setBlockNetworkLoads(false);
         // User agent estándar para evitar bloqueos por parte de servidores de mapas (Google, CartoDB)
-        settings.setUserAgentString("Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36 NotaFelizApp/1.0");
+        settings.setUserAgentString("Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36 UnLetheApp/1.0");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         }
@@ -337,7 +337,7 @@ public class MainActivity extends AppCompatActivity {
                     Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
                     intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
                     intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "es-ES");
-                    intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Dicte su nota para Nota Feliz...");
+                    intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Dicte su nota para UnLethe...");
                     speechResultLauncher.launch(intent);
                 } catch (Exception e) {
                     webView.evaluateJavascript("alert('El servicio de voz del celular no está disponible.');", null);
@@ -561,10 +561,10 @@ public class MainActivity extends AppCompatActivity {
                         if (channel == null) {
                             channel = new NotificationChannel(
                                 channelId,
-                                "Nota Feliz - Pantalla de Bloqueo y AOD",
+                                "UnLethe - Pantalla de Bloqueo y AOD",
                                 NotificationManager.IMPORTANCE_LOW
                             );
-                            channel.setDescription("Muestra las notas relevantes en la pantalla de bloqueo y Always On Display");
+                            channel.setDescription("Muestra las notas relevantes de UnLethe en la pantalla de bloqueo y Always On Display");
                             channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
                             channel.setShowBadge(true);
                             manager.createNotificationChannel(channel);

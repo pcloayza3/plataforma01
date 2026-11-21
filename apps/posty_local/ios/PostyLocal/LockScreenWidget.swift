@@ -12,7 +12,7 @@ struct PostyWidgetProvider: TimelineProvider {
     let appGroupId = "group.com.postylocal.app"
 
     func placeholder(in context: Context) -> PostyAlarmEntry {
-        PostyAlarmEntry(date: Date(), title: "Nota Feliz", time: "18:00", count: 1)
+        PostyAlarmEntry(date: Date(), title: "UnLethe", time: "18:00", count: 1)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (PostyAlarmEntry) -> Void) {
@@ -27,7 +27,7 @@ struct PostyWidgetProvider: TimelineProvider {
 
     private func getCurrentData() -> PostyAlarmEntry {
         let sharedDefaults = UserDefaults(suiteName: appGroupId)
-        let title = sharedDefaults?.string(forKey: "widget_title") ?? "Nota Feliz"
+        let title = sharedDefaults?.string(forKey: "widget_title") ?? "UnLethe"
         let time = sharedDefaults?.string(forKey: "widget_time") ?? "Sin avisos"
         let count = sharedDefaults?.integer(forKey: "widget_count") ?? 0
         return PostyAlarmEntry(date: Date(), title: title, time: time, count: count)
@@ -84,7 +84,7 @@ struct PostyLockScreenWidget: Widget {
         StaticConfiguration(kind: kind, provider: PostyWidgetProvider()) { entry in
             LockScreenWidgetEntryView(entry: entry)
         }
-        .configurationDisplayName("Nota Feliz - Próxima Alarma")
+        .configurationDisplayName("UnLethe - Próxima Alarma")
         .description("Muestra la próxima alarma o nota urgente en la pantalla de bloqueo.")
         .supportedFamilies([.accessoryRectangular, .systemSmall])
     }

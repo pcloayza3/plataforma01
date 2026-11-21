@@ -11,13 +11,13 @@
     android:paddingTop="10dp"
     android:paddingBottom="10dp">
 
-    <!-- Ícono de Nota Feliz -->
+    <!-- Ícono de UnLethe -->
     <ImageView
         android:id="@+id/widget_icon"
         android:layout_width="28dp"
         android:layout_height="28dp"
         android:src="@mipmap/ic_launcher"
-        android:contentDescription="Nota Feliz" />
+        android:contentDescription="UnLethe" />
 
     <!-- Columna de Título y Horario -->
     <LinearLayout
@@ -32,7 +32,7 @@
             android:id="@+id/widget_alarm_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Nota Feliz"
+            android:text="UnLethe"
             android:textColor="#FFFFFF"
             android:textSize="14sp"
             android:textStyle="bold"

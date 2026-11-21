@@ -1,4 +1,4 @@
-/* styles.css • Nota Feliz (PostyLocal) UI Minimalist Mobile */
+/* styles.css • UnLethe UI Minimalist Mobile */
 .hidden {
   display: none !important;
 }
@@ -1242,7 +1242,7 @@ body.dark .alert-tab-btn:hover:not(.active) {
 .screensaver-postit {
   width: 100%;
   max-width: 330px;
-  background: #FEF08A; /* Post-it amarillo alegre de Nota Feliz */
+  background: #FEF08A; /* Post-it amarillo alegre de UnLethe */
   color: #1E293B;
   border-radius: 18px;
   padding: 22px 18px;

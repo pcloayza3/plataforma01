@@ -16,7 +16,7 @@ import androidx.core.app.NotificationManagerCompat;
 
 public class AlarmReceiver extends BroadcastReceiver {
     public static final String CHANNEL_ID = "nota_feliz_urgent_alerts";
-    public static final String CHANNEL_NAME = "Alarmas de Nota Feliz";
+    public static final String CHANNEL_NAME = "Alarmas de UnLethe";
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -25,7 +25,7 @@ public class AlarmReceiver extends BroadcastReceiver {
         String body = intent.getStringExtra("body");
 
         if (title == null || title.isEmpty()) {
-            title = "Nota Feliz • Alerta Urgente";
+            title = "UnLethe • Alerta Urgente";
         }
         if (body == null || body.isEmpty()) {
             body = "Tiene una nota urgente pendiente.";

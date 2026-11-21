@@ -42,7 +42,7 @@ public class LockScreenWidgetProvider extends AppWidgetProvider {
 
     public static void updateAllWidgetsFromPrefs(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        String title = prefs.getString(KEY_TITLE, "Nota Feliz");
+        String title = prefs.getString(KEY_TITLE, "UnLethe");
         String time = prefs.getString(KEY_TIME, "Sin alarmas pendientes");
         int count = prefs.getInt(KEY_COUNT, 0);
         String noteId = prefs.getString(KEY_NOTE_ID, "");

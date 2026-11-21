@@ -1,4 +1,4 @@
-// app.js • Nota Feliz (PostyLocal) Interactive Mobile Logic
+// app.js • UnLethe Interactive Mobile Logic
 // Stand-Alone Embebido • Cero Servidores • 100% Local-First
 // Sistema de Íconos Minimalistas 2D Planos y Monocromáticos (Negro en claro / Blanco en oscuro)
 
@@ -42,7 +42,7 @@ function createDefaultInitialNotes() {
       completedAt: null,
       createdAt: Date.now(),
       lines: [
-        { id: 'ml-welcome-1', text: 'Bienvenido a mi nota feliz', completed: false, hasAudio: false, audioDuration: null, audioData: null }
+        { id: 'ml-welcome-1', text: 'Bienvenido a UnLethe', completed: false, hasAudio: false, audioDuration: null, audioData: null }
       ]
     }
   ];
@@ -1658,7 +1658,7 @@ function syncAllAlarmsToNative() {
   notes.forEach(note => {
     if (!note.completed && note.alertTimestamp && note.alertTimestamp > now) {
       const noteText = (note.lines && note.lines.length > 0) ? note.lines.map(l => l.text).join('. ') : (note.text || 'Nota Urgente');
-      window.AndroidBridge.scheduleNativeAlarm(note.id, 'Nota Feliz • Alerta Urgente', noteText, note.alertTimestamp);
+      window.AndroidBridge.scheduleNativeAlarm(note.id, 'UnLethe • Alerta Urgente', noteText, note.alertTimestamp);
     }
   });
 }
@@ -1938,7 +1938,7 @@ function triggerPushBanner(title, body, noteId = null) {
 
   if ('Notification' in window && Notification.permission === 'granted') {
     try {
-      new Notification(title || 'Nota Feliz', {
+      new Notification(title || 'UnLethe', {
         body: body || 'Tiene una nota pendiente.',
         icon: 'icon.png'
       });
@@ -2296,7 +2296,7 @@ function startClockUpdater() {
     const hrs = String(now.getHours()).padStart(2, '0');
     const mins = String(now.getMinutes()).padStart(2, '0');
     if (aod) aod.textContent = `${hrs}:${mins}`;
-    if (aodDate) aodDate.textContent = `${capitalized} • Nota Feliz`;
+    if (aodDate) aodDate.textContent = `${capitalized} • UnLethe`;
   };
   update();
   setInterval(update, 10000);
@@ -2373,7 +2373,7 @@ function syncLockScreenWidget(showAlertIfManual = false) {
   }
 
   const activeNotes = (notes || []).filter(n => !n.completed);
-  let title = "Nota Feliz • Actividades Relevantes";
+  let title = "UnLethe • Actividades Relevantes";
   let summary = "";
   let details = "";
 
@@ -2406,7 +2406,7 @@ function syncLockScreenWidget(showAlertIfManual = false) {
   }
 
   // Sincronizar datos con el Lock Screen Widget nativo (AppWidget / Keyguard)
-  let nextAlarmTitle = "Nota Feliz";
+  let nextAlarmTitle = "UnLethe";
   let nextAlarmTime = "Sin alarmas pendientes";
   let nextNoteId = "";
 
@@ -2478,10 +2478,10 @@ function exportDataJSON() {
   const HH = String(d.getHours()).padStart(2, '0');
   const mm = String(d.getMinutes()).padStart(2, '0');
   const SS = String(d.getSeconds()).padStart(2, '0');
-  const filename = `NotaFeliz${YYYY}${MM}${DD}${HH}${mm}${SS}.JSON`;
+  const filename = `UnLethe${YYYY}${MM}${DD}${HH}${mm}${SS}.JSON`;
 
   const exportPayload = {
-    appName: 'Nota Feliz',
+    appName: 'UnLethe',
     version: '2.0',
     exportDate: d.toISOString(),
     totalNotes: notes.length,
@@ -2559,7 +2559,7 @@ function importDataJSON(event) {
 }
 
 function resetDemoData(silent = false) {
-  if (silent || confirm('¿Desea restaurar la nota limpia inicial de Nota Feliz?')) {
+  if (silent || confirm('¿Desea restaurar la nota limpia inicial de UnLethe?')) {
     initializeDefaultFreshData();
     renderBoard();
     renderTriggerPresets();
