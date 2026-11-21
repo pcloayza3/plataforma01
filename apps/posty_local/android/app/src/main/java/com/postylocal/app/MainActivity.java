@@ -524,6 +524,23 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        // Disparar Alarma / Notificación Nativa Inmediata (Geocercas y Alertas en Vivo)
+        @JavascriptInterface
+        public void triggerNativeNotification(String title, String body, String noteId) {
+            runOnUiThread(() -> {
+                try {
+                    Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
+                    intent.setAction("com.postylocal.app.ACTION_NOTE_ALARM");
+                    intent.putExtra("noteId", noteId != null ? noteId : "geo_alert_" + System.currentTimeMillis());
+                    intent.putExtra("title", title);
+                    intent.putExtra("body", body);
+                    sendBroadcast(intent);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+
         // Guardar Respaldo JSON en la Carpeta Descargas del Smartphone
         @JavascriptInterface
         public void saveJsonExport(String filename, String jsonContent) {

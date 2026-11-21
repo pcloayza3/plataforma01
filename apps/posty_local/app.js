@@ -2161,11 +2161,7 @@ window.openNoteFromNotification = function(targetNoteId) {
   playBellChime(noteText);
 };
 
-// Motor Geofence: Distancia Haversine y Máquina de Estados para Entradas y Salidas
-let lastGeofenceEditTimestamp = 0;
-const GEOFENCE_HYSTERESIS_METERS = 15; // Margen para evitar falsos disparos por oscilación o jitter de GPS
-const GEOFENCE_ALERT_COOLDOWN_MS = 180000; // 3 minutos de enfriamiento mínimo antes de repetir misma alerta
-
+// Motor Geofence: Distancia Haversine y Máquina de Estados por Transición de Cambio
 function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
   const R = 6371000;
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -2178,42 +2174,64 @@ function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
-// Calibrar el estado geodésico de las notas sin disparar alertas al editar o cambiar valores de geocercas
+function getCoordsForPlace(place) {
+  if (!place) return null;
+  const p = place.trim();
+  let saved = localStorage.getItem(`posty_geo_coords_${p}`);
+  if (!saved) {
+    if (p.toLowerCase() === 'home' || p.toLowerCase() === 'casa') {
+      saved = localStorage.getItem('posty_geo_coords_Casa') || localStorage.getItem('posty_geo_coords_Home');
+    } else if (p.toLowerCase() === 'work' || p.toLowerCase() === 'trabajo') {
+      saved = localStorage.getItem('posty_geo_coords_Trabajo') || localStorage.getItem('posty_geo_coords_Work');
+    }
+  }
+  let parsed = parseCoordsString(saved);
+  if (!parsed) {
+    if (p.toLowerCase().includes('casa') || p.toLowerCase().includes('home')) {
+      parsed = { lat: -17.783300, lng: -63.182100, radius: 50 };
+    } else if (p.toLowerCase().includes('trabajo') || p.toLowerCase().includes('work')) {
+      parsed = { lat: -17.778609, lng: -63.175607, radius: 50 };
+    }
+  }
+  return parsed;
+}
+
+function getNoteGeoPlaceAndTransition(note) {
+  let place = note.geoPlace;
+  if (!place && note.triggerLabel) {
+    place = note.triggerLabel
+      .replace(/^Al\s+(llegar\s+a|salir\s+de)\s+/i, '')
+      .replace(/^(Leaving|Arriving\s+at)\s+/i, '')
+      .trim();
+  }
+  
+  let transition = note.geoTransition;
+  if (!transition) {
+    const lbl = (note.triggerLabel || '').toLowerCase();
+    if (lbl.includes('salir') || lbl.startsWith('leaving')) {
+      transition = 'EXIT';
+    } else {
+      transition = 'ENTER';
+    }
+  }
+  return { place, transition };
+}
+
+// Calibrar la posición base de las notas sin disparar alertas al editar o crear geocercas
 function calibrateNotesGeofenceState(placeName = null) {
-  lastGeofenceEditTimestamp = Date.now();
   if (currentUserLat === null || currentUserLng === null) return;
 
   notes.forEach(note => {
     if (note.completed || note.triggerType !== 'geo') return;
-    let place = note.geoPlace;
-    if (!place && note.triggerLabel) {
-      place = note.triggerLabel.replace(/^Al\s+(llegar\s+a|salir\s+de)\s+/i, '').trim();
-    }
+    const { place } = getNoteGeoPlaceAndTransition(note);
     if (placeName && place !== placeName) return;
     if (!place) return;
 
-    const savedCoord = localStorage.getItem(`posty_geo_coords_${place}`);
-    let coords = parseCoordsString(savedCoord);
-    if (!coords) {
-      if (place.toLowerCase().includes('casa')) coords = { lat: -17.783300, lng: -63.182100, radius: 50 };
-      else if (place.toLowerCase().includes('super')) coords = { lat: -17.781200, lng: -63.180400, radius: 50 };
-      else if (place.toLowerCase().includes('trabajo')) coords = { lat: -17.778609, lng: -63.175607, radius: 50 };
-      else return;
-    }
+    const coords = getCoordsForPlace(place);
+    if (!coords) return;
 
     const dist = getDistanceFromLatLonInMeters(currentUserLat, currentUserLng, coords.lat, coords.lng);
-    const isInside = dist <= coords.radius;
-    const transition = note.geoTransition || (note.triggerLabel && note.triggerLabel.toLowerCase().includes('salir') ? 'EXIT' : 'ENTER');
-
-    note.lastInsideState = isInside;
-    if (transition === 'ENTER') {
-      // Si el usuario ya está adentro al guardar, no debe sonar; se arma para cuando salga y vuelva a entrar
-      note.geofenceState = isInside ? 'INSIDE_WAITING_EXIT' : 'ARMED_OUTSIDE';
-    } else {
-      // Si el usuario está adentro, queda armado para sonar al salir
-      // Si está afuera, espera a que primero entre para luego poder salir
-      note.geofenceState = isInside ? 'ARMED_INSIDE' : 'OUTSIDE_WAITING_ENTER';
-    }
+    note.lastInsideState = (dist <= coords.radius);
   });
   saveToStorage();
 }
@@ -2221,91 +2239,55 @@ function calibrateNotesGeofenceState(placeName = null) {
 function checkGeofenceAlerts(userLat, userLng) {
   if (userLat === null || userLng === null || isNaN(userLat) || isNaN(userLng)) return;
 
-  // Supresión estricta durante y 15 segundos después de editar o cambiar valores de geocerca
-  if (Date.now() - lastGeofenceEditTimestamp < 15000) {
-    return;
-  }
-
-  const now = Date.now();
   let stateChanged = false;
 
   notes.forEach(note => {
+    // Las alertas de ubicación operan sobre notas activas no completadas
     if (note.completed || note.triggerType !== 'geo') return;
 
-    let place = note.geoPlace;
-    if (!place && note.triggerLabel) {
-      place = note.triggerLabel.replace(/^Al\s+(llegar\s+a|salir\s+de)\s+/i, '').trim();
-    }
+    const { place, transition } = getNoteGeoPlaceAndTransition(note);
     if (!place) return;
 
-    // Obtener coordenadas del lugar
-    const savedCoord = localStorage.getItem(`posty_geo_coords_${place}`);
-    let placeCoords = parseCoordsString(savedCoord);
-    if (!placeCoords) {
-      if (place.toLowerCase().includes('casa')) placeCoords = { lat: -17.783300, lng: -63.182100, radius: 50 };
-      else if (place.toLowerCase().includes('super')) placeCoords = { lat: -17.781200, lng: -63.180400, radius: 50 };
-      else if (place.toLowerCase().includes('trabajo')) placeCoords = { lat: -17.778609, lng: -63.175607, radius: 50 };
-      else return;
-    }
+    const placeCoords = getCoordsForPlace(place);
+    if (!placeCoords) return;
 
     const dist = getDistanceFromLatLonInMeters(userLat, userLng, placeCoords.lat, placeCoords.lng);
     const isInside = dist <= placeCoords.radius;
-    const isOutside = dist > (placeCoords.radius + GEOFENCE_HYSTERESIS_METERS);
-    const transition = note.geoTransition || (note.triggerLabel && note.triggerLabel.toLowerCase().includes('salir') ? 'EXIT' : 'ENTER');
 
-    // Inicialización / Calibración si no cuenta con estado asignado
-    if (!note.geofenceState) {
+    // Primer registro de posición para esta nota (línea base): no suena ni antes ni después
+    if (note.lastInsideState === null || note.lastInsideState === undefined) {
       note.lastInsideState = isInside;
-      if (transition === 'ENTER') {
-        note.geofenceState = isInside ? 'INSIDE_WAITING_EXIT' : 'ARMED_OUTSIDE';
-      } else {
-        note.geofenceState = isInside ? 'ARMED_INSIDE' : 'OUTSIDE_WAITING_ENTER';
-      }
       stateChanged = true;
       return;
     }
 
-    // Regla ENTER: Disparar ÚNICAMENTE si estaba ARMED_OUTSIDE y ahora cruza al interior (isInside)
-    if (transition === 'ENTER') {
-      if (note.geofenceState === 'ARMED_OUTSIDE' && isInside) {
-        const canAlert = !note.lastAlertedTimestamp || (now - note.lastAlertedTimestamp > GEOFENCE_ALERT_COOLDOWN_MS);
-        if (canAlert) {
-          note.lastAlertedTimestamp = now;
-          note.alreadyAlertedToday = true;
-          note.geofenceState = 'INSIDE_WAITING_EXIT';
-          note.lastInsideState = true;
-          stateChanged = true;
+    const wasInside = note.lastInsideState;
 
-          const noteText = (note.lines && note.lines.length > 0) ? note.lines.map(l => l.text).join('. ') : (note.text || 'Llegó a ' + place);
-          triggerPushBanner(`📍 ${note.triggerLabel || 'Al llegar a ' + place}`, noteText, note.id);
-        }
-      } else if (isOutside && note.geofenceState !== 'ARMED_OUTSIDE') {
-        // Rearmar cuando el usuario se aleja de la geocerca
-        note.geofenceState = 'ARMED_OUTSIDE';
-        note.lastInsideState = false;
-        stateChanged = true;
+    // Regla de Oro: Se activa ÚNICAMENTE en el cambio de estado (transición)
+    if (wasInside !== isInside) {
+      note.lastInsideState = isInside;
+      stateChanged = true;
+
+      // Regla 1: "Al Salir de": Estaba adentro de la geocerca y sale de ella
+      if (transition === 'EXIT' && wasInside && !isInside) {
+        const noteText = (note.lines && note.lines.length > 0)
+          ? note.lines.map(l => l.text).join('. ')
+          : (note.text || (currentLanguage === 'en' ? 'Left ' + formatPresetLabel(place) : 'Salió de ' + place));
+        const alertTitle = currentLanguage === 'en'
+          ? `🚪 Leaving ${formatPresetLabel(place)}`
+          : `🚪 Al salir de ${place}`;
+        triggerPushBanner(alertTitle, noteText, note.id);
       }
-    }
 
-    // Regla EXIT: Disparar ÚNICAMENTE si estaba ARMED_INSIDE y ahora cruza al exterior (isOutside con histeresis)
-    if (transition === 'EXIT') {
-      if (note.geofenceState === 'ARMED_INSIDE' && isOutside) {
-        const canAlert = !note.lastAlertedTimestamp || (now - note.lastAlertedTimestamp > GEOFENCE_ALERT_COOLDOWN_MS);
-        if (canAlert) {
-          note.lastAlertedTimestamp = now;
-          note.alreadyAlertedToday = true;
-          note.geofenceState = 'OUTSIDE_WAITING_ENTER';
-          note.lastInsideState = false;
-          stateChanged = true;
-
-          const noteText = (note.lines && note.lines.length > 0) ? note.lines.map(l => l.text).join('. ') : (note.text || 'Salió de ' + place);
-          triggerPushBanner(`🚪 ${note.triggerLabel || 'Al salir de ' + place}`, noteText, note.id);
-        }
-      } else if (isInside && note.geofenceState !== 'ARMED_INSIDE') {
-        // Rearmar cuando el usuario vuelve a entrar a la geocerca
-        note.geofenceState = 'ARMED_INSIDE';
-        note.lastInsideState = true;
-        stateChanged = true;
+      // Regla 2: "Al llegar a": Estaba afuera de la geocerca e ingresa a ella
+      if (transition === 'ENTER' && !wasInside && isInside) {
+        const noteText = (note.lines && note.lines.length > 0)
+          ? note.lines.map(l => l.text).join('. ')
+          : (note.text || (currentLanguage === 'en' ? 'Arrived at ' + formatPresetLabel(place) : 'Llegó a ' + place));
+        const alertTitle = currentLanguage === 'en'
+          ? `📍 Arriving at ${formatPresetLabel(place)}`
+          : `📍 Al llegar a ${place}`;
+        triggerPushBanner(alertTitle, noteText, note.id);
       }
     }
   });
@@ -2413,6 +2395,13 @@ function triggerPushBanner(title, body, noteId = null) {
         window.openNoteFromNotification(noteId);
       }
     };
+  }
+
+  // Notificación nativa del smartphone (sonido, vibración y aviso en bloqueo)
+  if (window.AndroidBridge && window.AndroidBridge.triggerNativeNotification) {
+    try {
+      window.AndroidBridge.triggerNativeNotification(title, body, noteId);
+    } catch (e) {}
   }
 
   if ('Notification' in window && Notification.permission === 'granted') {

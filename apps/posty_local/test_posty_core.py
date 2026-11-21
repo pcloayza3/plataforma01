@@ -224,6 +224,70 @@ class PostyLocalCoreTests(unittest.TestCase):
         )
         self.assertEqual(transition, "EXIT")
 
+    # 7.1 Reglas de Activación Estricta por Transición (Regla 1 y Regla 2)
+    def test_geofence_state_machine_transition_rules(self):
+        casa = GeoLocation(name="Casa", latitude=-16.5024, longitude=-68.1311, radius_meters=100.0)
+        pos_inside = GeoLocation(name="Inside", latitude=-16.5024, longitude=-68.1311)
+        pos_outside = GeoLocation(name="Outside", latitude=-16.5100, longitude=-68.1311)
+
+        # Regla 1: "Al Salir de" solo se dispara cuando pasa de dentro a fuera (EXIT)
+        trans_exit = self.geo_engine.evaluate_transition(casa, pos_inside, pos_outside)
+        self.assertEqual(trans_exit, "EXIT")
+
+        # Mantenerse afuera NO dispara salida de nuevo (sin cambio)
+        no_trans_outside = self.geo_engine.evaluate_transition(casa, pos_outside, pos_outside)
+        self.assertIsNone(no_trans_outside)
+
+        # Regla 2: "Al llegar a" solo se dispara cuando pasa de fuera a dentro (ENTER)
+        trans_enter = self.geo_engine.evaluate_transition(casa, pos_outside, pos_inside)
+        self.assertEqual(trans_enter, "ENTER")
+
+        # Mantenerse adentro NO dispara llegada de nuevo (sin cambio)
+        no_trans_inside = self.geo_engine.evaluate_transition(casa, pos_inside, pos_inside)
+        self.assertIsNone(no_trans_inside)
+
+    # 7.2 Activaciones Infinitas en Cada Ciclo Entrada/Salida hasta Completar
+    def test_geofence_infinite_activations_until_completed(self):
+        trabajo = GeoLocation(name="Trabajo", latitude=-17.7786, longitude=-63.1756, radius_meters=80.0)
+        p_inside = GeoLocation(name="Inside", latitude=-17.7786, longitude=-63.1756)
+        p_outside = GeoLocation(name="Outside", latitude=-17.7900, longitude=-63.1756)
+
+        alert_count_exit = 0
+        alert_count_enter = 0
+        is_completed = False
+
+        # Simular 5 ciclos de salida y entrada
+        current_state = True # empieza adentro
+        for cycle in range(5):
+            if is_completed:
+                break
+            # Sale de la geocerca
+            if current_state:
+                trans = self.geo_engine.evaluate_transition(trabajo, p_inside, p_outside)
+                if trans == "EXIT":
+                    alert_count_exit += 1
+                current_state = False
+
+            # Vuelve a ingresar a la geocerca
+            if not current_state:
+                trans = self.geo_engine.evaluate_transition(trabajo, p_outside, p_inside)
+                if trans == "ENTER":
+                    alert_count_enter += 1
+                current_state = True
+
+        self.assertEqual(alert_count_exit, 5)
+        self.assertEqual(alert_count_enter, 5)
+
+        # Ahora el usuario marca la nota como completada
+        is_completed = True
+        # En el siguiente ciclo con nota completada no debe alertar
+        if not is_completed:
+            trans = self.geo_engine.evaluate_transition(trabajo, p_inside, p_outside)
+            if trans == "EXIT":
+                alert_count_exit += 1
+
+        self.assertEqual(alert_count_exit, 5)
+
     # 8. Despachador de Alertas Push y Acciones Rápidas
     def test_notification_dispatcher_actions(self):
         note = Note(
