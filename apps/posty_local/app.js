@@ -340,11 +340,23 @@ function formatPresetLabel(label) {
   if (currentLanguage === 'en') {
     const map = {
       '+1 hora': '+1 hour',
+      '+1 hour': '+1 hour',
       'Hoy 18:00': 'Today 18:00',
+      'Hoy a las 18:00': 'Today at 18:00',
       'Mañana 09:00': 'Tomorrow 09:00',
-      'Al salir de casa': 'Leaving home',
-      'Cerca del súper': 'Near grocery',
-      'En el trabajo': 'At work',
+      'Mañana medio día': 'tomorrow at noon',
+      'Mañana a mediodía': 'tomorrow at noon',
+      'tomorrow at noon': 'tomorrow at noon',
+      'Tomorrow at noon': 'tomorrow at noon',
+      'Al salir de casa': 'Leaving Home',
+      'Al salir de Casa': 'Leaving Home',
+      'Leaving Home': 'Leaving Home',
+      'Al llegar a Trabajo': 'Arriving at Work',
+      'Al llegar al Trabajo': 'Arriving at Work',
+      'Arriving at Work': 'Arriving at Work',
+      'Arraiving at Work': 'Arriving at Work',
+      'Al llegar a Casa': 'Arriving at Home',
+      'Al salir de Trabajo': 'Leaving Work',
       'Casa': 'Home',
       'Supermercado': 'Supermarket',
       'Trabajo': 'Work',
@@ -352,11 +364,78 @@ function formatPresetLabel(label) {
       'Ninguna asignada': 'None assigned'
     };
     if (map[label]) return map[label];
+
     if (label.startsWith('Al llegar a ')) {
-      return 'Arriving at ' + label.replace('Al llegar a ', '');
+      const place = label.substring('Al llegar a '.length).trim();
+      const placeEn = (place === 'Casa' ? 'Home' : (place === 'Trabajo' ? 'Work' : place));
+      return 'Arriving at ' + placeEn;
+    }
+    if (label.startsWith('Al llegar al ')) {
+      const place = label.substring('Al llegar al '.length).trim();
+      const placeEn = (place === 'Casa' ? 'Home' : (place === 'Trabajo' ? 'Work' : place));
+      return 'Arriving at ' + placeEn;
     }
     if (label.startsWith('Al salir de ')) {
-      return 'Leaving ' + label.replace('Al salir de ', '');
+      const place = label.substring('Al salir de '.length).trim();
+      const placeEn = (place === 'Casa' ? 'Home' : (place === 'Trabajo' ? 'Work' : place));
+      return 'Leaving ' + placeEn;
+    }
+    if (label.startsWith('Mañana a mediodía')) {
+      return label.replace('Mañana a mediodía', 'Tomorrow at noon');
+    }
+    if (label.startsWith('Mañana 12:00')) {
+      return label.replace('Mañana 12:00', 'Tomorrow at noon');
+    }
+    if (label.startsWith('Mañana ')) {
+      return label.replace('Mañana ', 'Tomorrow ');
+    }
+    if (label.startsWith('Hoy ')) {
+      return label.replace('Hoy ', 'Today ');
+    }
+  } else {
+    // Modo Español
+    const mapEs = {
+      '+1 hour': '+1 hora',
+      '+1 hora': '+1 hora',
+      'tomorrow at noon': 'Mañana a mediodía',
+      'Tomorrow at noon': 'Mañana a mediodía',
+      'Mañana medio día': 'Mañana a mediodía',
+      'Mañana a mediodía': 'Mañana a mediodía',
+      'Leaving Home': 'Al salir de Casa',
+      'Al salir de Casa': 'Al salir de Casa',
+      'Al salir de casa': 'Al salir de Casa',
+      'Arriving at Work': 'Al llegar a Trabajo',
+      'Arraiving at Work': 'Al llegar a Trabajo',
+      'Al llegar a Trabajo': 'Al llegar a Trabajo',
+      'Home': 'Casa',
+      'Work': 'Trabajo',
+      'Supermarket': 'Supermercado',
+      'No alarm': 'Sin alarma',
+      'None assigned': 'Ninguna asignada'
+    };
+    if (mapEs[label]) return mapEs[label];
+
+    if (label.startsWith('Leaving ')) {
+      const place = label.substring('Leaving '.length).trim();
+      const placeEs = (place === 'Home' ? 'Casa' : (place === 'Work' ? 'Trabajo' : place));
+      return 'Al salir de ' + placeEs;
+    }
+    if (label.startsWith('Arriving at ')) {
+      const place = label.substring('Arriving at '.length).trim();
+      const placeEs = (place === 'Home' ? 'Casa' : (place === 'Work' ? 'Trabajo' : place));
+      return 'Al llegar a ' + placeEs;
+    }
+    if (label.startsWith('Tomorrow at noon')) {
+      return label.replace('Tomorrow at noon', 'Mañana a mediodía');
+    }
+    if (label.startsWith('tomorrow at noon')) {
+      return label.replace('tomorrow at noon', 'Mañana a mediodía');
+    }
+    if (label.startsWith('Tomorrow ')) {
+      return label.replace('Tomorrow ', 'Mañana ');
+    }
+    if (label.startsWith('Today ')) {
+      return label.replace('Today ', 'Hoy ');
     }
   }
   return label;
@@ -407,18 +486,16 @@ function createDefaultInitialNotes() {
 
 const DEFAULT_NOTES = createDefaultInitialNotes();
 
-// Presets dinámicos: Exactamente las 3 opciones requeridas por defecto
+// Presets dinámicos: Exactamente las 2 opciones requeridas por defecto (+1 hora y Mañana a mediodía)
 const DEFAULT_TIME_PRESETS = [
   { id: 't60', label: '+1 hora', minutes: 60, uses: 10 },
-  { id: 't_hoy18', label: 'Hoy a las 18:00', timeStr: '18:00', isToday: true, uses: 8 },
-  { id: 't_manana12', label: 'Mañana medio día', timeStr: '12:00', isTomorrow: true, uses: 6 }
+  { id: 't_manana12', label: 'Mañana a mediodía', timeStr: '12:00', isTomorrow: true, uses: 8 }
 ];
 
-// Georreferencias por defecto: Exactamente las 3 requeridas con opciones Al llegar a / Al salir de
+// Georreferencias por defecto: Casa/Home ("Leaving Home") y Trabajo/Work ("Arriving at Work")
 const DEFAULT_GEO_PRESETS = [
   { id: 'g_casa', label: 'Al salir de Casa', place: 'Casa', transition: 'EXIT', uses: 10 },
-  { id: 'g_super', label: 'Al llegar a Supermercado', place: 'Supermercado', transition: 'ENTER', uses: 8 },
-  { id: 'g_trabajo', label: 'Al llegar a Trabajo', place: 'Trabajo', transition: 'ENTER', uses: 6 }
+  { id: 'g_trabajo', label: 'Al llegar a Trabajo', place: 'Trabajo', transition: 'ENTER', uses: 8 }
 ];
 
 let notes = [];
@@ -454,8 +531,8 @@ let userLocationMarker = null;
 // Reconocimiento de Voz Web (Web Speech API)
 let postyRecognitionInstance = null;
 
-// Versionado de instalación: Al instalarse, se ejecuta de manera 100% automática la restauración de datos iniciales
-const APP_DATA_VERSION = 'v4_geofence_fresh_alerts';
+// Versionado de instalación: Al instalarse o actualizarse presets, se ejecuta de manera 100% automática la restauración
+const APP_DATA_VERSION = 'v5_presets_clean';
 
 function checkInitialInstallation() {
   const currentVer = localStorage.getItem('posty_app_installed_version');
@@ -474,10 +551,10 @@ function initializeDefaultFreshData() {
   localStorage.removeItem('posty_geo_presets_v2');
   localStorage.removeItem('posty_deleted_geo_presets');
 
-  // Coordenadas iniciales para los 3 lugares predeterminados (Santa Cruz de la Sierra)
+  // Coordenadas iniciales para los 2 lugares predeterminados (Casa y Trabajo)
   localStorage.setItem('posty_geo_coords_Casa', 'Lat: -17.783300, Lng: -63.182100 (Radio: 50m GPS)');
-  localStorage.setItem('posty_geo_coords_Supermercado', 'Lat: -17.781200, Lng: -63.180400 (Radio: 50m GPS)');
   localStorage.setItem('posty_geo_coords_Trabajo', 'Lat: -17.778609, Lng: -63.175607 (Radio: 50m GPS)');
+  localStorage.removeItem('posty_geo_coords_Supermercado');
 
   saveToStorage();
 }
@@ -592,7 +669,7 @@ function loadPresets() {
   geoPresets = savedGeo ? JSON.parse(savedGeo) : JSON.parse(JSON.stringify(DEFAULT_GEO_PRESETS));
 
   // Cargar coordenadas de lugares guardadas
-  ['Casa', 'Supermercado', 'Trabajo'].forEach(p => {
+  ['Casa', 'Trabajo'].forEach(p => {
     const savedCoord = localStorage.getItem(`posty_geo_coords_${p}`);
     if (savedCoord) {
       const el = document.getElementById(`coordsText${p}`);
@@ -915,7 +992,7 @@ function openEditNoteModal(noteId) {
   selectedGeoPlace = note.geoPlace || null;
   selectedGeoTransition = note.geoTransition || 'ENTER';
   const selTrig = document.getElementById('selectedTriggerText');
-  if (selTrig) selTrig.textContent = `Alerta: ${selectedTriggerLabel}`;
+  if (selTrig) selTrig.textContent = `${t('alert_prefix')} ${formatPresetLabel(selectedTriggerLabel)}`;
 
   renderModalLines();
   renderPhotoPreview();
@@ -1558,7 +1635,7 @@ function calculateAlertDateTime(preset) {
     const mon = String(target.getMonth() + 1).padStart(2, '0');
     return {
       timestamp: target.getTime(),
-      label: `Mañana ${preset.timeStr} (${day}/${mon})`
+      label: currentLanguage === 'en' ? `Tomorrow at noon (${day}/${mon})` : `Mañana a mediodía (${day}/${mon})`
     };
   }
   if (preset.targetTimestamp) {
@@ -1725,7 +1802,7 @@ function selectTimePreset(preset) {
   selectedAlertDateTimeStr = calc.label;
   selectedTriggerLabel = calc.label;
   const selTrig = document.getElementById('selectedTriggerText');
-  if (selTrig) selTrig.textContent = `Alerta: ${selectedAlertDateTimeStr}`;
+  if (selTrig) selTrig.textContent = `${t('alert_prefix')} ${formatPresetLabel(selectedAlertDateTimeStr)}`;
 
   const btnNoAlert = document.getElementById('btnSelectNoAlert');
   if (btnNoAlert) btnNoAlert.classList.remove('active');
@@ -1734,7 +1811,7 @@ function selectTimePreset(preset) {
   localStorage.setItem('posty_time_presets_v2', JSON.stringify(timePresets));
 
   document.querySelectorAll('#primaryTimePresets .preset-btn, #secondaryTimePresets .preset-btn').forEach(b => {
-    b.classList.toggle('active', b.textContent.includes(preset.label));
+    b.classList.toggle('active', b.textContent.includes(formatPresetLabel(preset.label)));
   });
   document.querySelectorAll('#primaryGeoPresets .preset-btn, #secondaryGeoPresets .preset-btn').forEach(b => {
     b.classList.remove('active');
@@ -1750,7 +1827,7 @@ function selectGeoPreset(preset) {
   selectedGeoPlace = preset.place || preset.label.replace(/^Al\s+(llegar\s+a|salir\s+de)\s+/i, '').trim();
   selectedGeoTransition = preset.transition || (preset.label.toLowerCase().includes('salir') ? 'EXIT' : 'ENTER');
   const selTrig = document.getElementById('selectedTriggerText');
-  if (selTrig) selTrig.textContent = `Alerta: ${preset.label}`;
+  if (selTrig) selTrig.textContent = `${t('alert_prefix')} ${formatPresetLabel(preset.label)}`;
 
   const btnNoAlert = document.getElementById('btnSelectNoAlert');
   if (btnNoAlert) btnNoAlert.classList.remove('active');
@@ -1759,7 +1836,7 @@ function selectGeoPreset(preset) {
   localStorage.setItem('posty_geo_presets_v2', JSON.stringify(geoPresets));
 
   document.querySelectorAll('#primaryGeoPresets .preset-btn, #secondaryGeoPresets .preset-btn').forEach(b => {
-    b.classList.toggle('active', b.textContent.includes(preset.label));
+    b.classList.toggle('active', b.textContent.includes(formatPresetLabel(preset.label)));
   });
   document.querySelectorAll('#primaryTimePresets .preset-btn, #secondaryTimePresets .preset-btn').forEach(b => {
     b.classList.remove('active');
@@ -2502,12 +2579,12 @@ function renderSettingsLocations() {
     }
   });
 
-  // Asegurar los 3 lugares por defecto si no han sido eliminados por el usuario
+  // Asegurar los 2 lugares por defecto si no han sido eliminados por el usuario
   const deletedPlaces = JSON.parse(localStorage.getItem('posty_deleted_geo_presets') || '[]');
-  ['Casa', 'Supermercado', 'Trabajo'].forEach(p => {
+  ['Casa', 'Trabajo'].forEach(p => {
     if (!seen.has(p) && !deletedPlaces.includes(p)) {
       seen.add(p);
-      const label = p === 'Casa' ? 'Al salir de casa' : (p === 'Supermercado' ? 'Cerca del súper' : 'En el trabajo');
+      const label = p === 'Casa' ? 'Al salir de Casa' : 'Al llegar a Trabajo';
       uniquePlaces.push({ place: p, label: label });
     }
   });
@@ -2523,7 +2600,7 @@ function renderSettingsLocations() {
     const savedCoord = localStorage.getItem(`posty_geo_coords_${p}`) || '';
     const coords = parseCoordsString(savedCoord);
     const escapedPlace = escapeHtml(p);
-    const escapedLabel = escapeHtml(item.label);
+    const escapedLabel = escapeHtml(formatPresetLabel(item.label));
     return `
       <div class="location-item-card">
         <!-- Línea 1: Nombre del lugar y a la derecha solo íconos planos (mapa, pin actual, basurero) -->

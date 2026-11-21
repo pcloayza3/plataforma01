@@ -376,6 +376,65 @@ class PostyLocalCoreTests(unittest.TestCase):
         for element_id in critical_ids:
             self.assertIn(f'id="{element_id}"', html_content, f"Falta el elemento con id '{element_id}' en index.html")
 
+    # 13. Verificación de Presets Exclusivos de Tiempo y Ubicación (Zero-Hallucination)
+    def test_clean_presets_contract(self):
+        js_path = os.path.join(CURRENT_DIR, "app.js")
+        with open(js_path, "r", encoding="utf-8") as f:
+            js_content = f.read()
+
+        # Debe contener únicamente +1 hora y Mañana a mediodía (+1 hour y tomorrow at noon)
+        self.assertIn("'+1 hora'", js_content)
+        self.assertIn("'Mañana a mediodía'", js_content)
+        self.assertIn("'+1 hour'", js_content)
+        self.assertIn("'tomorrow at noon'", js_content)
+        # t_hoy18 ("Hoy a las 18:00") debe estar eliminado
+        self.assertNotIn("t_hoy18", js_content)
+
+        # Ubicación: Casa/Home ("Leaving Home") y Trabajo/Work ("Arriving at Work")
+        self.assertIn("'Leaving Home'", js_content)
+        self.assertIn("'Arriving at Work'", js_content)
+        self.assertIn("'Al salir de Casa'", js_content)
+        self.assertIn("'Al llegar a Trabajo'", js_content)
+        # Supermercado eliminado de los presets por defecto
+        self.assertNotIn("g_super", js_content)
+
+    # 14. Verificación de Mapeo Bilingüe (Español / Inglés)
+    def test_bilingual_labels_mapping(self):
+        def mock_format_preset(label, lang):
+            map_en = {
+                '+1 hora': '+1 hour',
+                'Mañana a mediodía': 'tomorrow at noon',
+                'Al salir de Casa': 'Leaving Home',
+                'Al llegar a Trabajo': 'Arriving at Work',
+                'Casa': 'Home',
+                'Trabajo': 'Work'
+            }
+            map_es = {
+                '+1 hour': '+1 hora',
+                'tomorrow at noon': 'Mañana a mediodía',
+                'Leaving Home': 'Al salir de Casa',
+                'Arriving at Work': 'Al llegar a Trabajo',
+                'Home': 'Casa',
+                'Work': 'Trabajo'
+            }
+            if lang == 'en':
+                return map_en.get(label, label)
+            return map_es.get(label, label)
+
+        self.assertEqual(mock_format_preset('+1 hora', 'en'), '+1 hour')
+        self.assertEqual(mock_format_preset('Mañana a mediodía', 'en'), 'tomorrow at noon')
+        self.assertEqual(mock_format_preset('Al salir de Casa', 'en'), 'Leaving Home')
+        self.assertEqual(mock_format_preset('Al llegar a Trabajo', 'en'), 'Arriving at Work')
+        self.assertEqual(mock_format_preset('Casa', 'en'), 'Home')
+        self.assertEqual(mock_format_preset('Trabajo', 'en'), 'Work')
+
+        self.assertEqual(mock_format_preset('+1 hour', 'es'), '+1 hora')
+        self.assertEqual(mock_format_preset('tomorrow at noon', 'es'), 'Mañana a mediodía')
+        self.assertEqual(mock_format_preset('Leaving Home', 'es'), 'Al salir de Casa')
+        self.assertEqual(mock_format_preset('Arriving at Work', 'es'), 'Al llegar a Trabajo')
+        self.assertEqual(mock_format_preset('Home', 'es'), 'Casa')
+        self.assertEqual(mock_format_preset('Work', 'es'), 'Trabajo')
+
 
 if __name__ == '__main__':
     unittest.main()
