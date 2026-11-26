@@ -432,13 +432,14 @@ class PostyLocalCoreTests(unittest.TestCase):
             "secondaryGeoPresets",
             "btnToggleMoreGeo",
             "voicePromptModal",
-            "screensaverOverlay",
-            "aodClock",
-            "aodDate",
             "settingsModal",
         ]
         for element_id in critical_ids:
             self.assertIn(f'id="{element_id}"', html_content, f"Falta el elemento con id '{element_id}' en index.html")
+
+        # Verificar que el protector y bloqueo de pantalla fueron eliminados por solicitud del usuario
+        for removed_id in ["screensaverOverlay", "btnScreensaver", "btnNavLockscreen", "settingsSubscreenLockscreen"]:
+            self.assertNotIn(f'id="{removed_id}"', html_content, f"El elemento '{removed_id}' debió haber sido eliminado de index.html")
 
     # 13. Verificación de Presets Exclusivos de Tiempo y Ubicación (Zero-Hallucination)
     def test_clean_presets_contract(self):

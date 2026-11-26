@@ -3,7 +3,6 @@
 // Sistema de Íconos Minimalistas 2D Planos y Monocromáticos (Negro en claro / Blanco en oscuro)
 
 const ICONS = {
-  screensaver: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`,
   settings: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`,
   close: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
   plus: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
@@ -34,7 +33,6 @@ const TRANSLATIONS = {
     urgent_summary_format_plural: "{total} actividades • {urgent} urgentes",
     no_urgent_summary: "{total} actividades • ninguna urgente",
     all_caught_up: "¡Todo al día! Sin tareas pendientes",
-    btn_screensaver_title: "Protector de pantalla",
     btn_settings_title: "Configuración de UnLethe",
 
     filter_urgent: "Urgente",
@@ -93,23 +91,9 @@ const TRANSLATIONS = {
     settings_geo_desc: "Lugares georreferenciados para alertar por proximidad (elegir en mapa o GPS):",
     btn_add_geo_place: "➕ Agregar nuevo lugar",
 
-    settings_lockscreen_title: "Protector y Bloqueo de Pantalla",
-    settings_lockscreen_desc: "Actividades en vivo, AOD y widget de bloqueo",
     settings_backup_title: "Respaldo y Soberanía Local",
     settings_backup_desc: "Exportar, importar JSON y restaurar notas",
     btn_back_to_settings: "Volver a Configuración",
-
-    lockscreen_sub_title: "Protector y Bloqueo de Pantalla",
-    lockscreen_sub_desc: "Integre sus notas urgentes en su protector actual, pantalla de bloqueo y Always-On Display.",
-    lockscreen_opt1_title: "🔒 Mostrar en Bloqueo y Protector actual (AOD)",
-    lockscreen_opt1_desc: "Mantiene sus tareas activas visibles directamente en la pantalla de bloqueo de su teléfono y Always-On Display de fábrica, sin necesidad de estar enchufado al cargador.",
-    btn_sync_lockscreen: "📌 Sincronizar tareas en Pantalla de Bloqueo ahora",
-    btn_pin_lockscreen_widget: "✨ Añadir Widget Automáticamente al Bloqueo / Inicio",
-    btn_open_lockscreen_settings: "📱 Abrir Ajustes de Pantalla de Bloqueo y AOD",
-    lockscreen_opt2_title: "⚡ Protector del Sistema Android (Al Cargar)",
-    lockscreen_opt2_desc: "En Android, los protectores de pantalla del sistema se activan automáticamente únicamente cuando el celular está conectado al cargador y la pantalla se apaga sola por inactividad.",
-    btn_phone_settings: "⚙️ Ajustes del Celular",
-    btn_oled_mode: "👁️ Modo Reposo OLED",
 
     backup_sub_title: "Respaldo y Soberanía Local",
     backup_sub_desc: "Cree copias de seguridad de sus notas locales o restaure desde un archivo JSON.",
@@ -118,10 +102,6 @@ const TRANSLATIONS = {
     btn_reset_initial: "Restaurar Datos Iniciales",
     privacy_callout: "🛡️ 100% Local-First: Todos los audios, textos, fotos y ubicaciones residen únicamente en este dispositivo.",
     btn_close: "Cerrar",
-
-    screensaver_tasks_header: "📌 Actividades Relevantes:",
-    screensaver_tap_hint: "Toque en cualquier parte para volver",
-    screensaver_empty: "🎉 ¡Todo al día! Sin tareas urgentes pendientes.",
 
     push_app_name: "UnLethe • Recordatorio",
     push_title_default: "⏰ Recordatorio Automático",
@@ -134,8 +114,6 @@ const TRANSLATIONS = {
     backup_restored_success: "✓ Respaldo restaurado exitosamente: {count} notas con sus audios y fotos recuperadas.",
     backup_restore_error: "Error al restaurar respaldo JSON: ",
     invalid_file_format: "El archivo no contiene un formato de notas válido.",
-    lockscreen_synced_success: "✓ Widget y Pantalla de Bloqueo sincronizados con éxito.",
-    lockscreen_disabled_msg: "Notificación en Pantalla de Bloqueo desactivada.",
     dictation_not_available: "Dictado por voz no disponible en este dispositivo.",
     uses_count: "usos",
 
@@ -160,7 +138,6 @@ const TRANSLATIONS = {
     urgent_summary_format_plural: "{total} activities • {urgent} urgent",
     no_urgent_summary: "{total} activities • none urgent",
     all_caught_up: "All caught up! No pending tasks",
-    btn_screensaver_title: "Screensaver",
     btn_settings_title: "UnLethe Settings",
 
     filter_urgent: "Urgent",
@@ -219,23 +196,9 @@ const TRANSLATIONS = {
     settings_geo_desc: "Georeferenced places to alert by proximity (choose on map or GPS):",
     btn_add_geo_place: "➕ Add new place",
 
-    settings_lockscreen_title: "Screensaver & Lock Screen",
-    settings_lockscreen_desc: "Live activities, AOD and lock screen widget",
     settings_backup_title: "Local Backup & Sovereignty",
     settings_backup_desc: "Export, import JSON and restore notes",
     btn_back_to_settings: "Back to Settings",
-
-    lockscreen_sub_title: "Screensaver & Lock Screen",
-    lockscreen_sub_desc: "Integrate your urgent notes with your lock screen and factory Always-On Display.",
-    lockscreen_opt1_title: "🔒 Show on Lock Screen and current Screensaver (AOD)",
-    lockscreen_opt1_desc: "Keeps your active tasks visible directly on your phone's lock screen and factory Always-On Display without needing to be plugged in.",
-    btn_sync_lockscreen: "📌 Sync tasks to Lock Screen now",
-    btn_pin_lockscreen_widget: "✨ Add Widget Automatically to Lock / Home Screen",
-    btn_open_lockscreen_settings: "📱 Open Lock Screen & AOD Settings",
-    lockscreen_opt2_title: "⚡ Android System Screensaver (When Charging)",
-    lockscreen_opt2_desc: "On Android, system screensavers activate automatically only when the phone is connected to the charger and the screen turns off due to inactivity.",
-    btn_phone_settings: "⚙️ Phone Settings",
-    btn_oled_mode: "👁️ OLED Sleep Mode",
 
     backup_sub_title: "Local Backup & Sovereignty",
     backup_sub_desc: "Create local backups of your notes or restore from a JSON file.",
@@ -244,10 +207,6 @@ const TRANSLATIONS = {
     btn_reset_initial: "Restore Initial Data",
     privacy_callout: "🛡️ 100% Local-First: All audios, texts, photos and locations stay strictly on this device.",
     btn_close: "Close",
-
-    screensaver_tasks_header: "📌 Relevant Activities:",
-    screensaver_tap_hint: "Tap anywhere to return",
-    screensaver_empty: "🎉 All caught up! No urgent tasks pending.",
 
     push_app_name: "UnLethe • Reminder",
     push_title_default: "⏰ Automatic Reminder",
@@ -260,8 +219,6 @@ const TRANSLATIONS = {
     backup_restored_success: "✓ Backup successfully restored: {count} notes with audios and photos recovered.",
     backup_restore_error: "Error restoring JSON backup: ",
     invalid_file_format: "File does not contain a valid notes format.",
-    lockscreen_synced_success: "✓ Widget and Lock Screen successfully synchronized.",
-    lockscreen_disabled_msg: "Lock Screen notification disabled.",
     dictation_not_available: "Voice dictation not available on this device.",
     uses_count: "uses",
 
@@ -601,12 +558,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Iniciar monitoreo continuo de geolocalización para alertas de entrada y salida
   startContinuousLocationEngine();
-
-  // Si se abre como protector de pantalla (Daydream en Android: ?screensaver=1)
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('screensaver') === '1') {
-    openScreensaver();
-  }
 });
 
 // 11. GESTIÓN DE TEMAS (OSCURO, CLARO, SISTEMA)
@@ -784,9 +735,6 @@ function renderBoard() {
   if (secContext) secContext.textContent = t('section_context');
   if (secNormal) secNormal.textContent = t('section_normal');
   if (secCompleted) secCompleted.textContent = t('section_completed');
-
-  // Sincronizar automáticamente la lista de actividades en la pantalla de bloqueo y AOD del smartphone
-  syncLockScreenWidget();
 }
 
 // Crear Elemento HTML de Nota
@@ -2331,11 +2279,6 @@ function notifyModalState(isOpen) {
 }
 
 window.handleAndroidBackButton = function() {
-  const screensaver = document.getElementById('screensaverOverlay');
-  if (screensaver && !screensaver.classList.contains('hidden')) {
-    closeScreensaver();
-    return true;
-  }
   const voiceModal = document.getElementById('voicePromptModal');
   if (voiceModal && !voiceModal.classList.contains('hidden')) {
     closeVoicePromptModal();
@@ -2755,202 +2698,16 @@ function saveRealLocationCoordinates(place, lat, lng, accuracy) {
 function startClockUpdater() {
   const update = () => {
     const el = document.getElementById('currentDateDisplay');
-    const aod = document.getElementById('aodClock');
-    const aodDate = document.getElementById('aodDate');
     const now = new Date();
 
     const options = { weekday: 'long', day: 'numeric', month: 'long' };
-    const dateFormatted = now.toLocaleDateString('es-ES', options);
+    const dateFormatted = now.toLocaleDateString(currentLanguage === 'en' ? 'en-US' : 'es-ES', options);
     const capitalized = dateFormatted.charAt(0).toUpperCase() + dateFormatted.slice(1);
 
     if (el) el.textContent = capitalized;
-
-    const hrs = String(now.getHours()).padStart(2, '0');
-    const mins = String(now.getMinutes()).padStart(2, '0');
-    if (aod) aod.textContent = `${hrs}:${mins}`;
-    if (aodDate) aodDate.textContent = `${capitalized} • UnLethe`;
   };
   update();
   setInterval(update, 10000);
-}
-
-// Modo Protector de Pantalla (Pantalla Feliz con Post-it alegre y tareas relevantes)
-function openScreensaver() {
-  notifyModalState(true);
-  if (window.AndroidBridge && window.AndroidBridge.setKeepScreenOn) {
-    window.AndroidBridge.setKeepScreenOn(true);
-  }
-  const overlay = document.getElementById('screensaverOverlay');
-  if (overlay) overlay.classList.remove('hidden');
-
-  if (!notes || notes.length === 0) {
-    loadNotes();
-  }
-
-  const now = new Date();
-  const aod = document.getElementById('aodClock');
-  const aodDate = document.getElementById('aodDate');
-  const hrs = String(now.getHours()).padStart(2, '0');
-  const mins = String(now.getMinutes()).padStart(2, '0');
-  if (aod) aod.textContent = `${hrs}:${mins}`;
-  if (aodDate) {
-    const options = { weekday: 'long', day: 'numeric', month: 'long' };
-    const dateFormatted = now.toLocaleDateString('es-ES', options);
-    aodDate.textContent = dateFormatted.charAt(0).toUpperCase() + dateFormatted.slice(1);
-  }
-
-  // Inyectar dinámicamente las tareas prioritarias en el Post-it Feliz
-  const tasksCont = document.getElementById('screensaverTasksDynamic');
-  if (tasksCont) {
-    const active = (notes || []).filter(n => !n.completed);
-    if (active.length === 0) {
-      tasksCont.innerHTML = `
-        <div style="text-align: center; color: #78350F; font-size: 12px; padding: 10px 0; font-weight: 600;">
-          ✨ ¡Todas las notas cumplidas!
-        </div>
-      `;
-    } else {
-      tasksCont.innerHTML = active.slice(0, 4).map(n => `
-        <div class="postit-task-row">
-          <span style="color: ${n.urgency === 'urgent' ? '#EF4444' : '#F59E0B'}; font-size: 14px; line-height: 1;">●</span>
-          <span style="flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-            ${escapeHtml(n.lines ? n.lines[0].text : n.text)}
-          </span>
-          <span style="font-size: 10px; color: #92400E; font-weight: 700; flex-shrink: 0;">
-            ${escapeHtml(n.alertDateTimeStr || n.triggerLabel || '')}
-          </span>
-        </div>
-      `).join('');
-    }
-  }
-}
-
-function closeScreensaver() {
-  notifyModalState(false);
-  if (window.AndroidBridge && window.AndroidBridge.setKeepScreenOn) {
-    window.AndroidBridge.setKeepScreenOn(false);
-  }
-  const overlay = document.getElementById('screensaverOverlay');
-  if (overlay) overlay.classList.add('hidden');
-}
-
-// Sincronización de tareas relevantes en la Pantalla de Bloqueo y Protector AOD del celular
-function syncLockScreenWidget(showAlertIfManual = false) {
-  const isEnabled = localStorage.getItem('posty_lockscreen_widget_enabled') !== 'false';
-  if (!isEnabled) {
-    if (window.AndroidBridge && window.AndroidBridge.removeLockScreenLiveWidget) {
-      window.AndroidBridge.removeLockScreenLiveWidget();
-    }
-    return;
-  }
-
-  const activeNotes = (notes || []).filter(n => !n.completed);
-  let title = currentLanguage === 'en' ? "UnLethe • Active Notes" : "UnLethe • Actividades Relevantes";
-  let summary = "";
-  let details = "";
-
-  if (activeNotes.length === 0) {
-    summary = currentLanguage === 'en' ? "✨ All notes completed!" : "✨ ¡Todas las notas cumplidas!";
-    details = currentLanguage === 'en' ? "✨ All notes completed. Enjoy your day!" : "✨ Todas las notas cumplidas. ¡Disfrute su día!";
-  } else {
-    const urgentCount = activeNotes.filter(n => n.urgency === 'urgent').length;
-    if (urgentCount > 0) {
-      if (currentLanguage === 'en') {
-        summary = `📌 ${urgentCount} urgent note${urgentCount > 1 ? 's' : ''} pending`;
-      } else {
-        summary = `📌 ${urgentCount} urgente${urgentCount > 1 ? 's' : ''} pendiente${urgentCount > 1 ? 's' : ''}`;
-      }
-    } else {
-      if (currentLanguage === 'en') {
-        summary = `📝 ${activeNotes.length} task${activeNotes.length > 1 ? 's' : ''} pending`;
-      } else {
-        summary = `📝 ${activeNotes.length} actividad${activeNotes.length > 1 ? 'es' : ''} pendiente${activeNotes.length > 1 ? 's' : ''}`;
-      }
-    }
-
-    const lines = [];
-    activeNotes.slice(0, 5).forEach(n => {
-      const text = n.lines && n.lines.length > 0 ? n.lines[0].text : (n.text || '');
-      const icon = n.urgency === 'urgent' ? '📌' : (n.triggerType === 'geo' ? '📍' : '●');
-      const timeInfo = formatPresetLabel(n.alertDateTimeStr || n.triggerLabel || '');
-      lines.push(`${icon} ${text}${timeInfo ? ` (${timeInfo})` : ''}`);
-    });
-    if (activeNotes.length > 5) {
-      const more = activeNotes.length - 5;
-      lines.push(currentLanguage === 'en' ? `... and ${more} more notes` : `... y ${more} notas más`);
-    }
-    details = lines.join('\n');
-  }
-
-  if (window.AndroidBridge && window.AndroidBridge.updateLockScreenLiveWidget) {
-    window.AndroidBridge.updateLockScreenLiveWidget(title, summary, details);
-  }
-
-  // Sincronizar datos con el Lock Screen Widget nativo (AppWidget / Keyguard)
-  let nextAlarmTitle = "UnLethe";
-  let nextAlarmTime = currentLanguage === 'en' ? "No pending alarms" : "Sin alarmas pendientes";
-  let nextNoteId = "";
-
-  if (activeNotes.length > 0) {
-    const priorityNote = activeNotes.find(n => n.urgency === 'urgent') ||
-                         activeNotes.find(n => n.alertDateTimeStr || n.triggerLabel) ||
-                         activeNotes[0];
-    if (priorityNote) {
-      nextAlarmTitle = (priorityNote.lines && priorityNote.lines.length > 0)
-        ? priorityNote.lines[0].text
-        : (priorityNote.text || 'Nota');
-      nextAlarmTime = formatPresetLabel(priorityNote.alertDateTimeStr || priorityNote.triggerLabel) || (currentLanguage === 'en' ? 'Pending' : 'Pendiente');
-      nextNoteId = priorityNote.id || '';
-    }
-  }
-
-  if (window.AndroidBridge && window.AndroidBridge.updateLockScreenWidgetData) {
-    window.AndroidBridge.updateLockScreenWidgetData(nextAlarmTitle, nextAlarmTime, activeNotes.length, nextNoteId);
-  }
-
-  if (showAlertIfManual) {
-    alert(t('lockscreen_synced_success'));
-  }
-}
-
-function requestPinLockScreenWidget() {
-  if (window.AndroidBridge && window.AndroidBridge.requestPinLockScreenWidget) {
-    window.AndroidBridge.requestPinLockScreenWidget();
-  } else {
-    alert(currentLanguage === 'en'
-      ? 'To add the widget, touch and hold an empty space on your home screen or lock screen and select UnLethe.'
-      : 'Para agregar el widget, mantenga presionada la pantalla de inicio o bloqueo y elija UnLethe en la lista de widgets.');
-  }
-}
-
-function openLockScreenSettings() {
-  if (window.AndroidBridge && window.AndroidBridge.openLockScreenSettings) {
-    window.AndroidBridge.openLockScreenSettings();
-  } else {
-    alert(currentLanguage === 'en'
-      ? 'Open your phone Settings > Lock screen and AOD > Edit Lock Screen > Add widgets.'
-      : 'Abra Ajustes de su smartphone > Pantalla de bloqueo y AOD > Editar pantalla de bloqueo > Añadir widgets.');
-  }
-}
-
-function toggleLockScreenWidget(enabled) {
-  localStorage.setItem('posty_lockscreen_widget_enabled', enabled ? 'true' : 'false');
-  if (enabled) {
-    syncLockScreenWidget(true);
-  } else {
-    if (window.AndroidBridge && window.AndroidBridge.removeLockScreenLiveWidget) {
-      window.AndroidBridge.removeLockScreenLiveWidget();
-    }
-    alert(t('lockscreen_disabled_msg'));
-  }
-}
-
-function openAndroidDreamSettings() {
-  if (window.AndroidBridge && window.AndroidBridge.openDreamSettings) {
-    window.AndroidBridge.openDreamSettings();
-  } else {
-    alert("Abra Ajustes de su smartphone > Pantalla > Protector de pantalla.");
-  }
 }
 
 // Pestañas de Gestión de Botones en Configuración (Tiempo vs Ubicación)
@@ -3010,20 +2767,16 @@ function handleSettingsFooterBtn() {
 function openSettingsSubscreen(screen) {
   currentSettingsScreen = screen;
   const mainView = document.getElementById('settingsMainView');
-  const lockscreenSub = document.getElementById('settingsSubscreenLockscreen');
   const backupSub = document.getElementById('settingsSubscreenBackup');
 
   if (mainView) mainView.classList.toggle('hidden', screen !== 'main');
-  if (lockscreenSub) lockscreenSub.classList.toggle('hidden', screen !== 'lockscreen');
   if (backupSub) backupSub.classList.toggle('hidden', screen !== 'backup');
 
   const titleEl = document.getElementById('settingsModalTitle');
   const headerBackBtn = document.getElementById('settingsHeaderBackBtn');
   const footerBtn = document.getElementById('settingsFooterBtn');
-  const btnLockscreen = document.getElementById('btnNavLockscreen');
   const btnBackup = document.getElementById('btnNavBackup');
 
-  if (btnLockscreen) btnLockscreen.classList.toggle('active', screen === 'lockscreen');
   if (btnBackup) btnBackup.classList.toggle('active', screen === 'backup');
 
   if (headerBackBtn) {
@@ -3031,9 +2784,7 @@ function openSettingsSubscreen(screen) {
   }
 
   if (titleEl) {
-    if (screen === 'lockscreen') {
-      titleEl.textContent = t('lockscreen_sub_title');
-    } else if (screen === 'backup') {
+    if (screen === 'backup') {
       titleEl.textContent = t('backup_sub_title');
     } else {
       titleEl.textContent = t('settings_title');
@@ -3058,10 +2809,6 @@ function openSettings() {
   renderSettingsTimePresets();
   renderSettingsLocations();
   switchSettingsButtonsTab(currentSettingsButtonsTab || 'time');
-  const toggle = document.getElementById('lockScreenWidgetToggle');
-  if (toggle) {
-    toggle.checked = localStorage.getItem('posty_lockscreen_widget_enabled') !== 'false';
-  }
   const btnEs = document.getElementById('langBtnEs');
   const btnEn = document.getElementById('langBtnEn');
   if (btnEs) btnEs.classList.toggle('active', currentLanguage === 'es');

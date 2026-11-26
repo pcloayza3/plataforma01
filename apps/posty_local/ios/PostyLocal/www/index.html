@@ -2,10 +2,13 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>PostyLocal • Notas Visuales y Recordatorios Inteligentes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>UnLethe • Notas Visuales y Recordatorios Inteligentes</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="libs/leaflet.css">
   <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="apple-touch-icon" href="icon.png">
   <meta name="theme-color" content="#ffd54f">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,11 +19,11 @@
   <!-- Mockup de Alerta Push Nativa (Notificación del Smartphone) -->
   <div id="pushNotificationBanner" class="push-banner hidden">
     <div class="push-header">
-      <span class="push-app-icon">📝</span>
-      <span class="push-app-name">PostyLocal • Ahora</span>
+      <img src="icon.png" alt="UnLethe" style="width:18px;height:18px;border-radius:4px;object-fit:cover;vertical-align:middle;">
+      <span class="push-app-name">UnLethe • Recordatorio</span>
       <button class="push-close" onclick="dismissPush()">✕</button>
     </div>
-    <div class="push-title" id="pushTitle">⏰ Recordatorio Urgente</div>
+    <div class="push-title" id="pushTitle">⏰ Recordatorio Automático</div>
     <div class="push-body" id="pushBody">Pagar factura de luz antes de las 18:00</div>
     <div class="push-actions">
       <button class="push-btn complete" onclick="completeFromPush()">✓ Completar</button>
@@ -34,23 +37,23 @@
     <!-- Barra Superior / Header -->
     <header class="app-header">
       <div class="header-left">
-        <span class="header-badge">MicroApp 2 • Local-First</span>
+        <span class="header-badge">UnLethe</span>
         <h1 class="header-title" id="currentDateDisplay">Jueves, 15 Octubre</h1>
         <p class="header-subtitle" id="urgentSummaryText">3 actividades pendientes • 1 urgente</p>
       </div>
       <div class="header-actions">
-        <button class="icon-btn" title="Modo Protector de Pantalla (AOD)" onclick="openScreensaver()">🌙</button>
-        <button class="icon-btn" title="Configurar Lugares & Respaldo" onclick="openSettings()">⚙️</button>
+        <button class="icon-btn" onclick="openSettings()" title="Configuración de UnLethe">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </button>
       </div>
     </header>
 
-    <!-- Pestañas de Filtro Rápido -->
-    <nav class="filter-bar">
-      <button class="filter-chip active" id="chipAll" onclick="setFilter('all')">Todas (5)</button>
-      <button class="filter-chip chip-red" id="chipUrgent" onclick="setFilter('urgent')">🔴 Urgente (1)</button>
-      <button class="filter-chip chip-yellow" id="chipContext" onclick="setFilter('context')">🟡 Próximas (2)</button>
-      <button class="filter-chip chip-green" id="chipNormal" onclick="setFilter('normal')">🟢 Libres (2)</button>
-      <button class="filter-chip chip-gray" id="chipDone" onclick="setFilter('completed')">✓ Realizadas (0)</button>
+    <!-- Pestañas de Filtro Rápido (Texto dinámico al presionar, íconos de color para Urgente, Próximas y Libres) -->
+    <nav class="filter-bar" id="filterBar">
+      <button class="filter-chip active" id="chipUrgent" data-filter="urgent">🔴 <span>Urgente (1)</span></button>
+      <button class="filter-chip" id="chipContext" data-filter="context">🟡</button>
+      <button class="filter-chip" id="chipNormal" data-filter="normal">🟢</button>
+      <button class="filter-chip" id="chipDone" data-filter="completed">✓</button>
     </nav>
 
     <!-- Tablero de Post-its Diarios (Semáforo de Urgencia) -->
@@ -94,51 +97,19 @@
 
     </main>
 
-    <!-- Barra Inferior de Captura Rápida (Ergonomía de 1 Toque) -->
+    <!-- Barra Inferior de Captura Rápida (Botón CREAR NOTA prominente sin iconos) -->
     <footer class="bottom-action-bar">
-      <button class="secondary-btn" title="Escribir nota a mano" onclick="openNewNoteModal('manual')">
-        ✏️ <span>Escribir</span>
-      </button>
-
-      <button class="mic-primary-btn" id="micMainBtn" title="Dictar nota por voz" onclick="openNewNoteModal('voice')">
-        <span class="mic-wave-pulse"></span>
-        <span class="mic-icon">🎙️</span>
-        <span class="mic-caption">DICTAR NOTA</span>
-      </button>
-
-      <button class="secondary-btn" title="Simular alarma push" onclick="simulatePushTrigger()">
-        🔔 <span>Simular Push</span>
+      <button class="btn-create-note-main" id="btnCreateNote" onclick="openNewNoteModal()" data-i18n="btn_create_note">
+        CREAR NOTA
       </button>
     </footer>
 
-  </div>
-
-  <!-- MODAL DE CREACIÓN / EDICIÓN (Lista hasta 5 líneas, audio por línea y alertas) -->
+  <!-- MODAL DE CREACIÓN / EDICIÓN (Lista hasta 5 líneas, audio por línea, foto opcional y alertas) -->
   <div id="newNoteModal" class="modal-backdrop hidden">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 id="modalTitle">Nueva Nota Rápida</h3>
+        <h3 id="modalTitle" data-i18n="modal_title_new">Nueva Nota</h3>
         <button class="close-x-btn" onclick="closeModal()">✕</button>
-      </div>
-
-      <!-- Área de Grabación de Voz Interactiva -->
-      <div id="voiceRecordingBox" class="voice-box">
-        <div class="voice-status">
-          <span class="rec-dot"></span>
-          <span id="recordingTimer">0:05</span>
-          <span class="rec-label">Grabando audio...</span>
-        </div>
-        <div class="audio-waves">
-          <div class="bar b1"></div>
-          <div class="bar b2"></div>
-          <div class="bar b3"></div>
-          <div class="bar b4"></div>
-          <div class="bar b5"></div>
-          <div class="bar b6"></div>
-          <div class="bar b7"></div>
-          <div class="bar b8"></div>
-        </div>
-        <p class="voice-hint">Hable con naturalidad (ej: <em>"Comprar leche y pan en 15 minutos"</em>)</p>
       </div>
 
       <!-- Tarjeta Post-it Editable en Lista (Hasta 5 líneas) -->
@@ -148,15 +119,15 @@
         </div>
 
         <div class="add-line-control">
-          <button type="button" class="btn-add-line" id="btnAddLine" onclick="addNewLineToModal()">
+          <button type="button" class="btn-add-line" id="btnAddLine" onclick="addNewLineToModal()" data-i18n="btn_add_line">
             ➕ Aumentar nueva línea de lista (<span id="lineCountDisplay">1/5</span>)
           </button>
         </div>
       </div>
 
       <!-- Selector de Color del Post-it (Cambio Inmediato) -->
-      <div class="color-picker-row">
-        <span class="picker-label">Color:</span>
+      <div class="color-picker-row" id="modalColorPicker">
+        <span class="picker-label" data-i18n="label_color">Color:</span>
         <div class="color-options">
           <button type="button" class="color-opt opt-yellow active" onclick="selectColor('yellow')"></button>
           <button type="button" class="color-opt opt-green" onclick="selectColor('green')"></button>
@@ -166,182 +137,317 @@
         </div>
       </div>
 
-      <!-- Sección de Alertas Temporales Rápidas (Dinámicas con Frecuencia de Uso) -->
-      <div class="trigger-group">
-        <div class="trigger-header-row">
-          <label class="trigger-label">⏰ ¿Cuándo alertar con Push?</label>
-          <button type="button" class="btn-text-action" onclick="openVoicePromptModal('time')">➕ Otro tiempo</button>
-        </div>
-        
-        <!-- Fila Principal (Los más utilizados) -->
-        <div class="trigger-presets" id="primaryTimePresets"></div>
-
-        <!-- Botón para ver más opciones si no hay espacio -->
-        <div class="more-toggle-row">
-          <button type="button" class="btn-toggle-more" id="btnToggleMoreTime" onclick="toggleMoreTimePresets()">
-            <span>Ver más horarios</span> <span class="arrow-icon">▼</span>
+      <!-- Adjuntar Foto Opcional (1 sola foto) -->
+      <div class="photo-attachment-group">
+        <input type="file" id="notePhotoInput" accept="image/*" style="display:none;" onchange="handlePhotoSelected(event)">
+        <div id="photoPreviewBox" class="photo-preview-box hidden">
+          <img id="photoPreviewImg" src="" alt="Foto adjunta" class="photo-preview-thumb">
+          <button type="button" class="btn-remove-photo" onclick="removeAttachedPhoto()" title="Eliminar foto">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            <span data-i18n="btn_remove_photo">Quitar foto</span>
           </button>
         </div>
-
-        <!-- Fila Secundaria Desplegable -->
-        <div class="trigger-presets secondary-presets hidden" id="secondaryTimePresets"></div>
+        <button type="button" class="btn-attach-photo" id="btnAttachPhoto" onclick="document.getElementById('notePhotoInput').click()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+          <span data-i18n="btn_attach_photo">Adjuntar Foto (Opcional)</span>
+        </button>
       </div>
 
-      <!-- Sección de Alertas por Geofencing (Dinámicas con Frecuencia de Uso) -->
-      <div class="trigger-group">
-        <div class="trigger-header-row">
-          <label class="trigger-label">📍 ¿O alertar por Ubicación (Geocerca local)?</label>
-          <button type="button" class="btn-text-action" onclick="openVoicePromptModal('geo')">➕ Nuevo lugar</button>
-        </div>
-
-        <!-- Fila Principal (Lugares más utilizados) -->
-        <div class="trigger-presets" id="primaryGeoPresets"></div>
-
-        <!-- Botón para ver más lugares si no hay espacio -->
-        <div class="more-toggle-row">
-          <button type="button" class="btn-toggle-more" id="btnToggleMoreGeo" onclick="toggleMoreGeoPresets()">
-            <span>Ver más lugares</span> <span class="arrow-icon">▼</span>
+      <!-- Pestañas de Alerta: Dos maneras de alertar sobre el mismo espacio (Por tiempo vs Por ubicación) -->
+      <div class="alert-tabs-container">
+        <div class="alert-tabs-nav" role="tablist">
+          <button type="button" class="alert-tab-btn active" id="tabBtnTime" onclick="switchAlertTab('time')" role="tab" aria-selected="true">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span data-i18n="tab_by_time">Por tiempo</span>
+          </button>
+          <button type="button" class="alert-tab-btn" id="tabBtnGeo" onclick="switchAlertTab('geo')" role="tab" aria-selected="false">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            <span data-i18n="tab_by_geo">Por ubicación</span>
           </button>
         </div>
-
-        <!-- Fila Secundaria Desplegable -->
-        <div class="trigger-presets secondary-presets hidden" id="secondaryGeoPresets"></div>
-        
-        <div id="selectedTriggerText" class="selected-trigger-pill">Alerta: Ninguna asignada</div>
+        <button type="button" class="btn-no-alert" id="btnSelectNoAlert" onclick="selectNoAlert()" title="Guardar nota sin alarma programada" data-i18n="btn_no_alert">
+          🚫 Sin alerta
+        </button>
       </div>
+
+      <!-- Contenedor Compartido de las Pestañas de Alerta -->
+      <div class="alert-tab-body">
+        <!-- Pestaña 1: Alertas por Tiempo (Reloj) -->
+        <div id="alertTabContentTime" class="alert-tab-pane">
+          <div class="trigger-header-row">
+            <label class="trigger-label" data-i18n="label_preset_times">Horarios predefinidos:</label>
+            <button type="button" class="btn-text-action" onclick="openVoicePromptModal('time')" data-i18n="btn_other_time">➕ Otro tiempo</button>
+          </div>
+          <div class="trigger-presets" id="primaryTimePresets"></div>
+          <div class="more-toggle-row">
+            <button type="button" class="btn-toggle-more" id="btnToggleMoreTime" onclick="toggleMoreTimePresets()">
+              <span>Ver más horarios</span> <span class="arrow-icon">▼</span>
+            </button>
+          </div>
+          <div class="trigger-presets secondary-presets hidden" id="secondaryTimePresets"></div>
+        </div>
+
+        <!-- Pestaña 2: Alertas por Ubicación (Marcador / Geocercas) -->
+        <div id="alertTabContentGeo" class="alert-tab-pane hidden">
+          <div class="trigger-header-row">
+            <label class="trigger-label" data-i18n="label_preset_geo">Lugares georreferenciados:</label>
+            <button type="button" class="btn-text-action" onclick="openVoicePromptModal('geo')" data-i18n="btn_new_place">➕ Nuevo lugar</button>
+          </div>
+          <div class="trigger-presets" id="primaryGeoPresets"></div>
+          <div class="more-toggle-row">
+            <button type="button" class="btn-toggle-more" id="btnToggleMoreGeo" onclick="toggleMoreGeoPresets()">
+              <span>Ver más lugares</span> <span class="arrow-icon">▼</span>
+            </button>
+          </div>
+          <div class="trigger-presets secondary-presets hidden" id="secondaryGeoPresets"></div>
+        </div>
+      </div>
+
+      <!-- Pill Indicador de Alerta Seleccionada -->
+      <div id="selectedTriggerText" class="selected-trigger-pill">Alerta: Ninguna asignada</div>
 
       <!-- Botones de Acción del Modal -->
       <div class="modal-footer">
-        <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
-        <button class="btn-save" onclick="saveNoteFromModal()">✓ Guardar Nota</button>
+        <button class="btn-cancel" onclick="closeModal()" data-i18n="btn_cancel">Cancelar</button>
+        <button class="btn-save" onclick="saveNoteFromModal()" data-i18n="btn_save_note">✓ Guardar Nota</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL DE ENTRADA POR VOZ O TEXTO PARA TIEMPO / LUGAR -->
-  <div id="voicePromptModal" class="modal-backdrop hidden">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3 id="voicePromptTitle">Agregar Alerta por Voz</h3>
-        <button class="close-x-btn" onclick="closeVoicePromptModal()">✕</button>
-      </div>
-
-      <div class="voice-box">
-        <button type="button" class="mic-primary-btn" id="btnPromptMic" onclick="triggerVoicePromptDictation()">
-          <span class="mic-icon">🎙️</span>
-          <span id="promptMicCaption">PULSAR PARA HABLAR</span>
-        </button>
-        <p class="voice-hint" id="voicePromptHint">Dicte el tiempo o nombre del lugar</p>
-      </div>
-
-      <div style="display: flex; flex-direction: column; gap: 6px;">
-        <label class="trigger-label" id="voicePromptInputLabel">O escriba directamente:</label>
-        <input type="text" id="voicePromptTextInput" class="custom-input" placeholder="Ej: 45 min o Farmacia">
-      </div>
-
-      <div class="modal-footer">
-        <button class="btn-cancel" onclick="closeVoicePromptModal()">Cancelar</button>
-        <button class="btn-save" onclick="confirmVoicePrompt()">✓ Aceptar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- PANTALLA: MODO PROTECTOR DE PANTALLA (AOD / Screensaver) -->
-  <div id="screensaverOverlay" class="screensaver-view hidden" onclick="closeScreensaver()">
-    <div class="screensaver-content">
-      <div class="aod-clock" id="aodClock">21:45</div>
-      <div class="aod-date" id="aodDate">Jueves, 15 de Octubre • En Casa</div>
-      
-      <div class="aod-divider"></div>
-      
-      <div class="aod-tasks-container">
-        <div class="aod-subtitle">ACTIVIDADES RELEVANTES POR CUMPLIRSE</div>
-        <div class="aod-task red">
-          <span class="aod-icon">🔴</span>
-          <div class="aod-info">
-            <span class="aod-task-title">Pagar factura de luz antes de las 18:00</span>
-            <span class="aod-task-meta">⏰ Vence en 1h 15m • Alarma activa</span>
-          </div>
-        </div>
-
-        <div class="aod-task yellow">
-          <span class="aod-icon">🟡</span>
-          <div class="aod-info">
-            <span class="aod-task-title">Cerrar llave de gas al salir</span>
-            <span class="aod-task-meta">🏠 Geocerca activa: Al salir de casa</span>
-          </div>
-        </div>
-
-        <div class="aod-task yellow">
-          <span class="aod-icon">🟡</span>
-          <div class="aod-info">
-            <span class="aod-task-title">Comprar leche y frutas frescas</span>
-            <span class="aod-task-meta">🛒 Geocerca activa: Cerca del súper (150m)</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="aod-footer-hint">
-        <span>Toque cualquier parte de la pantalla para volver al tablero</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL DE CONFIGURACIÓN & GEOFENCING -->
+  <!-- MODAL DE CONFIGURACIÓN, TEMA & GEOFENCING -->
   <div id="settingsModal" class="modal-backdrop hidden">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>Configuración & Geocercas</h3>
-        <button class="close-x-btn" onclick="closeSettings()">✕</button>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button type="button" class="modal-header-back-btn" id="settingsHeaderBackBtn" onclick="openSettingsSubscreen('main')" style="display: none;" title="Volver a Configuración">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <h3 id="settingsModalTitle" data-i18n="settings_title">Configuración de UnLethe</h3>
+        </div>
+        <button class="close-x-btn" onclick="handleSettingsCloseBtn()" title="Cerrar o volver">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
       </div>
 
       <div class="settings-content">
-        <h4>📍 Mis Lugares de Georreferenciación (Radio 150m)</h4>
-        <p class="settings-desc">Las alertas se activan mediante sensores locales de tu smartphone sin enviar tus coordenadas a ningún servidor.</p>
-
-        <div class="location-item">
-          <div>
-            <strong>🏠 Casa</strong>
-            <div class="coords-text">Lat: -16.5024, Lng: -68.1311 (Guardada)</div>
+        <!-- VISTA PRINCIPAL DE CONFIGURACIÓN -->
+        <div id="settingsMainView">
+          <!-- Tema Visual de Fondo -->
+          <h4>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 0 0 20z"></path></svg>
+            <span data-i18n="settings_theme_title">Tema Visual de Fondo</span>
+          </h4>
+          <div class="theme-selector-row">
+            <button type="button" class="theme-btn" id="themeBtnDark" onclick="setAppTheme('dark')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+              <span data-i18n="theme_dark">Oscuro</span>
+            </button>
+            <button type="button" class="theme-btn" id="themeBtnLight" onclick="setAppTheme('light')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+              <span data-i18n="theme_light">Claro</span>
+            </button>
+            <button type="button" class="theme-btn" id="themeBtnSystem" onclick="setAppTheme('system')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+              <span data-i18n="theme_system">Sistema</span>
+            </button>
           </div>
-          <button class="chip-action" onclick="updateGeoCoord('Casa')">Actualizar Aquí</button>
-        </div>
 
-        <div class="location-item">
-          <div>
-            <strong>🛒 Supermercado</strong>
-            <div class="coords-text">Lat: -16.5089, Lng: -68.1275 (Radio 150m)</div>
+          <hr class="settings-divider">
+
+          <!-- Selector de Lenguaje / Language -->
+          <h4>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+            <span data-i18n="settings_language_title">Idioma / Language</span>
+          </h4>
+          <div class="theme-selector-row">
+            <button type="button" class="theme-btn" id="langBtnEs" onclick="setAppLanguage('es')">
+              🇪🇸 Español
+            </button>
+            <button type="button" class="theme-btn" id="langBtnEn" onclick="setAppLanguage('en')">
+              🇺🇸 English
+            </button>
           </div>
-          <button class="chip-action" onclick="updateGeoCoord('Supermercado')">Actualizar Aquí</button>
-        </div>
 
-        <div class="location-item">
-          <div>
-            <strong>🏢 Trabajo / Oficina</strong>
-            <div class="coords-text">Lat: -16.5140, Lng: -68.1210 (Radio 150m)</div>
+          <hr class="settings-divider">
+
+          <!-- Gestión de Botones: Alertas de Tiempo y Ubicación en 2 Pestañas -->
+          <h4>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <span data-i18n="settings_buttons_title">Gestión de Botones de Alertas</span>
+          </h4>
+          <p class="settings-desc" data-i18n="settings_buttons_desc">Personalice los accesos rápidos de alertas para asignar recordatorios en un toque.</p>
+
+          <div class="alert-tabs-container" style="margin-bottom: 12px;">
+            <div class="alert-tabs-nav" role="tablist">
+              <button type="button" class="alert-tab-btn active" id="settingsTabBtnTime" onclick="switchSettingsButtonsTab('time')" role="tab" aria-selected="true">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                <span data-i18n="settings_tab_time">Alertas de tiempo</span>
+              </button>
+              <button type="button" class="alert-tab-btn" id="settingsTabBtnGeo" onclick="switchSettingsButtonsTab('geo')" role="tab" aria-selected="false">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                <span data-i18n="settings_tab_geo">Alertas de ubicación</span>
+              </button>
+            </div>
           </div>
-          <button class="chip-action" onclick="updateGeoCoord('Trabajo')">Actualizar Aquí</button>
+
+          <!-- Pestaña 1: Alertas de Tiempo -->
+          <div id="settingsTabPaneTime" class="settings-tab-pane">
+            <p class="settings-desc" style="margin-top: 0;" data-i18n="settings_time_desc">Horarios predefinidos (+1 hora, Hoy 18:00, Mañana 09:00...):</p>
+            <div id="settingsTimePresetsList" class="settings-time-presets-list">
+              <!-- Se inyectan dinámicamente los botones de tiempo (+1 hora, Hoy 18:00...) con opción de eliminar -->
+            </div>
+            <button type="button" class="btn-text-action" onclick="openVoicePromptModal('time')" style="margin-top: 8px;" data-i18n="btn_add_time_alert">➕ Agregar alerta de tiempo</button>
+          </div>
+
+          <!-- Pestaña 2: Alertas de Ubicación y Geocercas -->
+          <div id="settingsTabPaneGeo" class="settings-tab-pane hidden">
+            <p class="settings-desc" style="margin-top: 0;" data-i18n="settings_geo_desc">Lugares georreferenciados para alertar por proximidad (elegir en mapa o GPS):</p>
+            <div id="settingsLocationsList" class="settings-locations-list">
+              <!-- Se inyectan dinámicamente con Elegir de mapa y Eliminar (sin botón actualizar) -->
+            </div>
+            <button type="button" class="btn-text-action" onclick="openVoicePromptModal('geo')" style="margin-top: 8px;" data-i18n="btn_add_geo_place">➕ Agregar nuevo lugar</button>
+          </div>
+
+          <hr class="settings-divider">
+
+          <!-- Botones de Navegación a Pantallas Secundarias -->
+          <button type="button" class="settings-nav-btn" id="btnNavBackup" onclick="openSettingsSubscreen('backup')">
+            <div class="settings-nav-left">
+              <span class="settings-nav-icon">🛡️</span>
+              <div class="settings-nav-text">
+                <strong data-i18n="settings_backup_title">Respaldo y Soberanía Local</strong>
+                <span data-i18n="settings_backup_desc">Exportar, importar JSON y restaurar notas</span>
+              </div>
+            </div>
+            <span class="settings-nav-arrow">›</span>
+          </button>
         </div>
 
-        <hr class="settings-divider">
+        <!-- NUEVA PANTALLA: RESPALDO Y SOBERANÍA LOCAL -->
+        <div id="settingsSubscreenBackup" class="settings-subscreen hidden">
+          <div class="settings-subscreen-header">
+            <button type="button" class="settings-back-btn" onclick="openSettingsSubscreen('main')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              <span data-i18n="btn_back_to_settings">Volver a Configuración</span>
+            </button>
+          </div>
 
-        <h4>💾 Respaldo y Soberanía Local</h4>
-        <div class="backup-actions">
-          <button class="backup-btn" onclick="exportDataJSON()">📥 Exportar Notas & Audios (JSON)</button>
-          <button class="backup-btn" onclick="resetDemoData()">🔄 Restaurar Datos de Demostración</button>
-        </div>
+          <h4 style="margin-top: 4px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+            <span data-i18n="backup_sub_title">Respaldo y Soberanía Local</span>
+          </h4>
+          <p class="settings-desc" data-i18n="backup_sub_desc">Cree copias de seguridad de sus notas locales o restaure desde un archivo JSON.</p>
 
-        <div class="privacy-callout">
-          🛡️ <strong>100% Local-First:</strong> Todos los audios, textos y ubicaciones residen en este dispositivo.
+          <input type="file" id="jsonFileInput" accept=".json,application/json" style="display: none;" onchange="importDataJSON(event)">
+          <div class="backup-actions">
+            <button type="button" class="backup-btn" onclick="exportDataJSON()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              <span data-i18n="btn_export_json">Exportar Notas, Audios, Fotos y Videos (JSON)</span>
+            </button>
+            <button type="button" class="backup-btn" onclick="document.getElementById('jsonFileInput').click()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              <span data-i18n="btn_import_json">Restaurar desde archivo JSON</span>
+            </button>
+            <button type="button" class="backup-btn" onclick="resetDemoData()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+              <span data-i18n="btn_reset_initial">Restaurar Datos Iniciales</span>
+            </button>
+          </div>
+
+          <div class="privacy-callout" data-i18n="privacy_callout" style="margin-top: 10px;">
+            🛡️ <strong>100% Local-First:</strong> Todos los audios, textos, fotos y ubicaciones residen únicamente en este dispositivo.
+          </div>
+          <div style="text-align: center; margin-top: 10px; font-size: 11px; color: var(--text-muted);">
+            UnLethe v0.9.0 • 100% Offline
+          </div>
         </div>
       </div>
 
       <div class="modal-footer">
-        <button class="btn-save" onclick="closeSettings()">Entendido</button>
+        <button class="btn-save" id="settingsFooterBtn" onclick="handleSettingsFooterBtn()" data-i18n="btn_close">Cerrar</button>
       </div>
     </div>
   </div>
 
+  <!-- MODAL DE ENTRADA PARA FECHA/HORA O NUEVO LUGAR (Superpuesto a Configuración y Nueva Nota) -->
+  <div id="voicePromptModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="voicePromptTitle" data-i18n="voice_modal_title">Programar Alerta</h3>
+        <button class="close-x-btn" onclick="closeVoicePromptModal()">✕</button>
+      </div>
+
+      <!-- Sección específica para Tiempo (Fecha y Hora Exacta) -->
+      <div id="voicePromptTimeSection">
+        <label class="trigger-label" data-i18n="voice_label_time">Seleccione fecha y hora exacta de la alarma:</label>
+        <input type="datetime-local" id="voicePromptDateTimeInput" class="custom-input" style="font-size: 15px; padding: 10px; margin-top: 6px;">
+        <p class="voice-hint" style="margin-top: 6px;" data-i18n="voice_time_hint">La alarma se guardará con fecha y hora exacta y se mostrará en la nota.</p>
+      </div>
+
+      <!-- Sección específica para Lugar (Opciones Al llegar a / Al salir de y Mapa) -->
+      <div id="voicePromptGeoSection" class="hidden">
+        <div class="geo-transition-selector">
+          <label class="trigger-label" style="display: block; margin-bottom: 6px;" data-i18n="voice_when_trigger">¿Cuándo disparar la alarma?</label>
+          <div style="display: flex; gap: 8px;">
+            <button type="button" class="btn-transition-opt active" id="btnTransitionEnter" onclick="selectGeoTransition('ENTER')">
+              <span data-i18n="voice_transition_enter">🚗 Al llegar a</span>
+            </button>
+            <button type="button" class="btn-transition-opt" id="btnTransitionExit" onclick="selectGeoTransition('EXIT')">
+              <span data-i18n="voice_transition_exit">🚪 Al salir de</span>
+            </button>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 8px; margin-bottom: 4px;">
+          <label class="trigger-label" data-i18n="voice_label_placename">Nombre del lugar:</label>
+          <button type="button" class="btn-voice-mini icon-only" id="btnVoicePromptDictar" title="Dictar por voz">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+          </button>
+        </div>
+        <input type="text" id="voicePromptTextInput" class="custom-input" placeholder="Ej: Gimnasio, Farmacia, Casa..." data-i18n-placeholder="voice_placeholder_geo">
+        <div id="geoFinalTextPreview" style="font-size: 13px; font-weight: 700; color: #0284C7; margin: 6px 0 2px 2px;">
+          Alarma: Al llegar a...
+        </div>
+
+        <div class="geo-optional-box" style="margin-top: 10px; padding: 12px; background: var(--bg-primary); border: 1px solid var(--border-subtle); border-radius: 12px;">
+          <div style="font-size: 12px; font-weight: 700; margin-bottom: 4px;" data-i18n="geo_coverage_title">📍 Área de Cobertura en el Mapa:</div>
+          <div id="newPlaceCoordsStatus" style="font-size: 11px; color: #10B981; margin-bottom: 8px;" data-i18n="geo_coverage_hint">
+            ✓ Geocerca lista en el mapa. Toque el mapa para moverla.
+          </div>
+
+          <!-- Mapa Interactivo Táctil para fijar centro y radio visualmente -->
+          <div class="geo-map-box" id="geoMapBox" style="margin-top: 6px;">
+            <div class="map-type-bar">
+              <button type="button" class="btn-map-type active" id="btnMapGoogle" onclick="switchMapLayer('google')">🗺️ Google Maps</button>
+              <button type="button" class="btn-map-type" id="btnMapSat" onclick="switchMapLayer('satellite')">🛰️ Satélite</button>
+            </div>
+            <div id="geoMapContainer"></div>
+            <div class="geo-slider-box">
+              <div class="geo-slider-header">
+                <span data-i18n="geo_slider_label">🎯 Cobertura Geocerca:</span>
+                <span id="geoRadiusLabel" style="color: #0284C7; font-weight: 700;">50 m</span>
+              </div>
+              <input type="range" id="geoRadiusSlider" class="geo-radius-slider" min="50" max="1000" step="25" value="50" oninput="updateGeoMapRadius(this.value)">
+              <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); margin-top: 2px;">
+                <span>50m</span>
+                <span data-i18n="geo_drag_hint">Arrastre marcador o toque mapa para ubicar centro</span>
+                <span>1000m (1km)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeVoicePromptModal()" data-i18n="btn_cancel">Cancelar</button>
+        <button class="btn-save" onclick="confirmVoicePrompt()" data-i18n="btn_save_alert">✓ Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+  </div> <!-- Fin de .app-viewport -->
+
+  <script src="libs/leaflet.js"></script>
   <script src="app.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

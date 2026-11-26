@@ -6,7 +6,6 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -90,17 +89,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Mostrar directamente sobre la pantalla de bloqueo y encender pantalla si se abre desde el widget en bloqueo
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-            setShowWhenLocked(true);
-            setTurnScreenOn(true);
-        } else {
-            getWindow().addFlags(
-                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
-                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
-            );
-        }
-
         setContentView(R.layout.activity_main);
         android.widget.FrameLayout rootLayout = findViewById(R.id.root_layout);
         webView = findViewById(R.id.webview);
@@ -151,17 +139,6 @@ public class MainActivity extends AppCompatActivity {
         if (intent == null) return;
         String targetNoteId = intent.getStringExtra("targetNoteId");
         String speakText = intent.getStringExtra("speakNoteText");
-        boolean openScreensaver = intent.getBooleanExtra("open_screensaver", false);
-
-        android.app.KeyguardManager km = (android.app.KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-        boolean isLocked = (km != null && km.isKeyguardLocked());
-
-        // Si se abre desde el widget o con el teléfono bloqueado, desplegar de inmediato la Pantalla Feliz (Post-it grande)
-        if (openScreensaver || isLocked) {
-            webView.postDelayed(() -> {
-                webView.evaluateJavascript("if (window.openScreensaver) { window.openScreensaver(); }", null);
-            }, 800);
-        }
 
         if (targetNoteId != null && !targetNoteId.isEmpty()) {
             webView.postDelayed(() -> {
@@ -202,7 +179,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                view.evaluateJavascript("if (window.syncLockScreenWidget) { window.syncLockScreenWidget(); }", null);
             }
 
             @Override
@@ -278,9 +254,6 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, needed.toArray(new String[0]), PERMISSION_REQUEST_CODE);
         } else {
             startContinuousLocationUpdates();
-            if (webView != null) {
-                webView.post(() -> webView.evaluateJavascript("if (window.syncLockScreenWidget) { window.syncLockScreenWidget(); }", null));
-            }
         }
     }
 
@@ -289,9 +262,6 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PERMISSION_REQUEST_CODE) {
             startContinuousLocationUpdates();
-            if (webView != null) {
-                webView.post(() -> webView.evaluateJavascript("if (window.syncLockScreenWidget) { window.syncLockScreenWidget(); }", null));
-            }
         }
     }
 
@@ -299,9 +269,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         startContinuousLocationUpdates();
-        if (webView != null) {
-            webView.post(() -> webView.evaluateJavascript("if (window.syncLockScreenWidget) { window.syncLockScreenWidget(); }", null));
-        }
     }
 
     private void startContinuousLocationUpdates() {
@@ -628,197 +595,6 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, "Error al exportar: " + ex.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }
-            });
-        }
-
-        // Actualizar Actividades Relevantes directamente en Pantalla de Bloqueo y AOD (Protector actual)
-        @JavascriptInterface
-        public void updateLockScreenLiveWidget(String title, String summary, String detailsText) {
-            runOnUiThread(() -> {
-                try {
-                    NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                    if (manager == null) return;
-
-                    String channelId = "unlethe_lockscreen_active_v2";
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        try {
-                            manager.deleteNotificationChannel("nota_feliz_lockscreen_feed");
-                        } catch (Exception ignored) {}
-
-                        NotificationChannel channel = manager.getNotificationChannel(channelId);
-                        if (channel == null) {
-                            channel = new NotificationChannel(
-                                channelId,
-                                "UnLethe - Bloqueo Activo y AOD",
-                                NotificationManager.IMPORTANCE_DEFAULT
-                            );
-                            channel.setDescription("Muestra las notas relevantes de UnLethe directamente en la pantalla de bloqueo activo y Always On Display");
-                            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-                            channel.setShowBadge(true);
-                            channel.enableVibration(false);
-                            channel.setSound(null, null);
-                            manager.createNotificationChannel(channel);
-                        }
-                    }
-
-                    Intent mainIntent = new Intent(MainActivity.this, MainActivity.class);
-                    mainIntent.setAction("com.postylocal.app.ACTION_OPEN_FROM_LOCKSCREEN");
-                    mainIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-
-                    PendingIntent pendingIntent = PendingIntent.getActivity(
-                        MainActivity.this,
-                        1001,
-                        mainIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-                    );
-
-                    NotificationCompat.Builder builder = new NotificationCompat.Builder(MainActivity.this, channelId)
-                        .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle(title)
-                        .setContentText(summary)
-                        .setStyle(new NotificationCompat.BigTextStyle().bigText(detailsText))
-                        .setPriority(NotificationCompat.PRIORITY_HIGH)
-                        .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                        .setCategory(NotificationCompat.CATEGORY_REMINDER)
-                        .setColor(0xFFFBBF24)
-                        .setOngoing(true)
-                        .setContentIntent(pendingIntent)
-                        .setShowWhen(true);
-
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-                        ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-                        manager.notify(1001, builder.build());
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
-        }
-
-        // Remover Widget de Pantalla de Bloqueo si el usuario lo desactiva
-        @JavascriptInterface
-        public void removeLockScreenLiveWidget() {
-            runOnUiThread(() -> {
-                try {
-                    NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                    if (manager != null) {
-                        manager.cancel(1001);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
-        }
-
-        // Solicitar al sistema Android la adición automática del Widget al bloqueo / inicio
-        @JavascriptInterface
-        public void requestPinLockScreenWidget() {
-            runOnUiThread(() -> {
-                try {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        AppWidgetManager appWidgetManager = getSystemService(AppWidgetManager.class);
-                        ComponentName provider = new ComponentName(MainActivity.this, LockScreenWidgetProvider.class);
-                        if (appWidgetManager != null && appWidgetManager.isRequestPinAppWidgetSupported()) {
-                            Intent callbackIntent = new Intent(MainActivity.this, MainActivity.class);
-                            callbackIntent.setAction("com.postylocal.app.ACTION_WIDGET_PINNED");
-                            PendingIntent successCallback = PendingIntent.getActivity(
-                                MainActivity.this,
-                                0,
-                                callbackIntent,
-                                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-                            );
-                            appWidgetManager.requestPinAppWidget(provider, null, successCallback);
-                        } else {
-                            Toast.makeText(MainActivity.this, "Mantenga presionada la pantalla de inicio o bloqueo para agregar el widget de UnLethe.", Toast.LENGTH_LONG).show();
-                        }
-                    } else {
-                        Toast.makeText(MainActivity.this, "Agregue el widget de UnLethe desde el menú de widgets del teléfono.", Toast.LENGTH_LONG).show();
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
-        }
-
-        // Abrir Ajustes de Protector de Pantalla del Sistema Android directamente
-        @JavascriptInterface
-        public void openDreamSettings() {
-            runOnUiThread(() -> {
-                try {
-                    Intent intent = new Intent(Settings.ACTION_DREAM_SETTINGS);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                } catch (Exception e) {
-                    try {
-                        Intent intent = new Intent(Settings.ACTION_DISPLAY_SETTINGS);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                    } catch (Exception ignored) {}
-                }
-            });
-        }
-
-        // Abrir Ajustes de Pantalla de Bloqueo y AOD de Samsung One UI / Android
-        @JavascriptInterface
-        public void openLockScreenSettings() {
-            runOnUiThread(() -> {
-                boolean opened = false;
-                // 1. Pantalla de bloqueo y AOD de Samsung One UI
-                try {
-                    Intent intent = new Intent();
-                    intent.setClassName("com.android.settings", "com.android.settings.Settings$LockScreenSettingsActivity");
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                    opened = true;
-                } catch (Exception ignored) {}
-
-                // 2. Acción estándar de configuración de bloqueo
-                if (!opened) {
-                    try {
-                        Intent intent = new Intent("android.settings.LOCK_SCREEN_SETTINGS");
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                        opened = true;
-                    } catch (Exception ignored) {}
-                }
-
-                // 3. Ajustes de seguridad y bloqueo
-                if (!opened) {
-                    try {
-                        Intent intent = new Intent(Settings.ACTION_SECURITY_SETTINGS);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                        opened = true;
-                    } catch (Exception ignored) {}
-                }
-
-                if (!opened) {
-                    try {
-                        Intent intent = new Intent(Settings.ACTION_SETTINGS);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                    } catch (Exception ignored) {}
-                }
-            });
-        }
-
-        // Mantener Pantalla Encendida durante el Modo Reposo OLED
-        @JavascriptInterface
-        public void setKeepScreenOn(boolean keepOn) {
-            runOnUiThread(() -> {
-                if (keepOn) {
-                    getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                } else {
-                    getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                }
-            });
-        }
-
-        // Actualizar datos del Lock Screen Widget nativo (AppWidget / Keyguard / Pantalla de Bloqueo)
-        @JavascriptInterface
-        public void updateLockScreenWidgetData(String title, String timeStr, int count, String noteId) {
-            runOnUiThread(() -> {
-                LockScreenWidgetProvider.updateAllWidgets(MainActivity.this, title, timeStr, count, noteId);
             });
         }
 

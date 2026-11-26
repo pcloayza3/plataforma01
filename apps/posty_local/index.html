@@ -42,9 +42,6 @@
         <p class="header-subtitle" id="urgentSummaryText">3 actividades pendientes • 1 urgente</p>
       </div>
       <div class="header-actions">
-        <button class="icon-btn" id="btnScreensaver" onclick="openScreensaver()" title="Protector de pantalla">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-        </button>
         <button class="icon-btn" onclick="openSettings()" title="Configuración de UnLethe">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         </button>
@@ -217,38 +214,6 @@
     </div>
   </div>
 
-  <!-- PANTALLA FELIZ: MODO PROTECTOR DE PANTALLA (AOD / Screensaver) -->
-  <div id="screensaverOverlay" class="screensaver-view hidden" onclick="closeScreensaver()">
-    <div class="screensaver-postit">
-      <div class="postit-header">
-        <div class="postit-face-box">
-          <img src="icon.png" alt="UnLethe" style="width:42px;height:42px;border-radius:8px;object-fit:cover;">
-        </div>
-        <div class="postit-title-box">
-          <div class="postit-app-title">UnLethe</div>
-          <div class="postit-date" id="aodDate">Viernes, 24 de Octubre</div>
-        </div>
-      </div>
-
-      <div class="postit-clock" id="aodClock">00:25</div>
-
-      <div class="postit-divider"></div>
-
-      <div class="postit-tasks-box">
-        <div class="postit-tasks-header">
-          <span data-i18n="screensaver_tasks_header">📌 Actividades Relevantes:</span>
-        </div>
-        <div id="screensaverTasksDynamic" class="postit-tasks-list">
-          <!-- Actividades inyectadas en tiempo real -->
-        </div>
-      </div>
-
-      <div class="postit-tap-hint">
-        <span data-i18n="screensaver_tap_hint">Toque en cualquier parte para volver</span>
-      </div>
-    </div>
-  </div>
-
   <!-- MODAL DE CONFIGURACIÓN, TEMA & GEOFENCING -->
   <div id="settingsModal" class="modal-backdrop hidden">
     <div class="modal-card">
@@ -346,17 +311,6 @@
           <hr class="settings-divider">
 
           <!-- Botones de Navegación a Pantallas Secundarias -->
-          <button type="button" class="settings-nav-btn" id="btnNavLockscreen" onclick="openSettingsSubscreen('lockscreen')">
-            <div class="settings-nav-left">
-              <span class="settings-nav-icon">🔒</span>
-              <div class="settings-nav-text">
-                <strong data-i18n="settings_lockscreen_title">Protector y Bloqueo de Pantalla</strong>
-                <span data-i18n="settings_lockscreen_desc">Actividades en vivo, AOD y widget de bloqueo</span>
-              </div>
-            </div>
-            <span class="settings-nav-arrow">›</span>
-          </button>
-
           <button type="button" class="settings-nav-btn" id="btnNavBackup" onclick="openSettingsSubscreen('backup')">
             <div class="settings-nav-left">
               <span class="settings-nav-icon">🛡️</span>
@@ -367,63 +321,6 @@
             </div>
             <span class="settings-nav-arrow">›</span>
           </button>
-        </div>
-
-        <!-- NUEVA PANTALLA: PROTECTOR Y BLOQUEO DE PANTALLA -->
-        <div id="settingsSubscreenLockscreen" class="settings-subscreen hidden">
-          <div class="settings-subscreen-header">
-            <button type="button" class="settings-back-btn" onclick="openSettingsSubscreen('main')">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-              <span data-i18n="btn_back_to_settings">Volver a Configuración</span>
-            </button>
-          </div>
-
-          <h4 style="margin-top: 4px;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-            <span data-i18n="lockscreen_sub_title">Protector y Bloqueo de Pantalla</span>
-          </h4>
-          <p class="settings-desc" data-i18n="lockscreen_sub_desc">Integre sus notas urgentes en su protector actual, pantalla de bloqueo y Always-On Display.</p>
-
-          <!-- Opción 1: En su protector actual y pantalla de bloqueo (Live Widget / Notificación Pública AOD) -->
-          <div style="background: var(--bg-primary); padding: 12px; border-radius: 12px; border: 1px solid var(--border-subtle); margin-top: 6px; font-size: 12px; line-height: 1.5;">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-              <strong style="color: var(--text-primary); font-size: 13px;" data-i18n="lockscreen_opt1_title">🔒 Mostrar en Bloqueo y Protector actual (AOD)</strong>
-              <label class="switch" style="margin: 0;">
-                <input type="checkbox" id="lockScreenWidgetToggle" onchange="toggleLockScreenWidget(this.checked)" checked>
-                <span class="slider-round"></span>
-              </label>
-            </div>
-            <div style="color: var(--text-muted); font-size: 11px;" data-i18n="lockscreen_opt1_desc">
-              Mantiene sus tareas activas visibles directamente en la pantalla de bloqueo de su teléfono y Always-On Display de fábrica, sin necesidad de estar enchufado al cargador.
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">
-              <button type="button" class="chip-action" onclick="syncLockScreenWidget(true)" style="width: 100%; justify-content: center; font-size: 12px;" data-i18n="btn_sync_lockscreen">
-                📌 Sincronizar tareas en Pantalla de Bloqueo ahora
-              </button>
-              <button type="button" class="chip-action" onclick="requestPinLockScreenWidget()" style="width: 100%; justify-content: center; font-size: 12px; background: rgba(2, 132, 199, 0.12); color: #0284C7; border: 1px solid #0284C7;" data-i18n="btn_pin_lockscreen_widget">
-                ✨ Añadir Widget Automáticamente al Bloqueo / Inicio
-              </button>
-              <button type="button" class="chip-action" onclick="openLockScreenSettings()" style="width: 100%; justify-content: center; font-size: 12px; background: rgba(16, 185, 129, 0.12); color: #10B981; border: 1px solid #10B981;" data-i18n="btn_open_lockscreen_settings">
-                📱 Abrir Ajustes de Pantalla de Bloqueo y AOD
-              </button>
-            </div>
-          </div>
-
-          <!-- Opción 2: Protector de Pantalla de Android (Daydream al cargar) -->
-          <div style="background: var(--bg-primary); padding: 12px; border-radius: 12px; border: 1px solid var(--border-subtle); margin-top: 10px; font-size: 12px; line-height: 1.5;">
-            <strong style="color: var(--text-primary); font-size: 13px;" data-i18n="lockscreen_opt2_title">⚡ Protector del Sistema Android (Al Cargar)</strong>
-            <div style="color: var(--text-muted); font-size: 11px; margin-top: 4px;" data-i18n="lockscreen_opt2_desc">
-              En Android, los protectores de pantalla del sistema se activan automáticamente únicamente cuando el celular está conectado al cargador y la pantalla se apaga sola por inactividad.
-            </div>
-            <div style="display: flex; gap: 8px; margin-top: 8px;">
-              <button type="button" class="chip-action" onclick="openAndroidDreamSettings()" style="flex: 1; justify-content: center; font-size: 11px;" data-i18n="btn_phone_settings">
-                ⚙️ Ajustes del Celular
-              </button>
-              <button type="button" class="chip-action" onclick="openScreensaver()" style="flex: 1; justify-content: center; font-size: 11px;" data-i18n="btn_oled_mode">
-                👁️ Modo Reposo OLED
-              </button>
-            </div>
-          </div>
         </div>
 
         <!-- NUEVA PANTALLA: RESPALDO Y SOBERANÍA LOCAL -->
